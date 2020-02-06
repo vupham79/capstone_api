@@ -4,7 +4,7 @@ import express from "express";
 import https from "https";
 import cors from "cors";
 import routes from "./src/routes";
-import passport from "./src/authentication/passport";
+import passport from "./src/utils/passport";
 import { connectDb } from "./src/models";
 require("dotenv").config();
 
