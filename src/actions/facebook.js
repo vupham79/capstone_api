@@ -5,8 +5,8 @@ export async function getFacebookPageInfo() {
     params: {
       fields: "about,category,posts{full_picture,message}",
       access_token:
-        "EAAIwerCGOR8BADemA3Caf1oza4tniFP07eSuG78SYIgsdRp5wJDhfylOf2dY7pXYZCerSgpzjcdVDA42pcSR7FKfhxAigPF0wb6G3qXJOrkDCp6qhEleRkiLhEIGSVHoUGRNiHdpKRbpzeDgrITJF4LtyAZCEKhdSq2GXuSE7vOGEN2RrZBDpsvVWBZBYX4ZD"
+        "EAAMIaToJEsABAMbxhs2cwrKbBeSouKnwoRqNgBBkZAJ8EoYZCx0aOnGS2QBMx25NwFILvHtZAZAaVDXseY0YZAyU1mIbI4rj4rsFjAVr5OI05r09JMK15lprF9PNtGGOqP2GrtYoMggWItXyB3VE4hVANjfkR9h0icXkXieV2yMSWEMqZBLPuWw0OVWAN7wGhVrCcs7ZBrRkwZDZD"
     },
-    url: "HandsSG"
+    url: "1138168126514171"
   });
 }
