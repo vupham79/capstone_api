@@ -9,7 +9,6 @@ export default ({
   params,
   baseURL = process.env.facebookAPI
 }) => {
-  console.log("url:", baseURL + url);
   return axios({
     headers,
     method,
