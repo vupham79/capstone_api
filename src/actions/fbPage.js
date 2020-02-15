@@ -1,38 +1,53 @@
 import axios from "../utils/axios";
+import admin from "firebase-admin";
+import firebase from "../utils/firebase";
+require("dotenv").config();
+
+export async function getFirebaseStorage() {
+  // const image = firebase
+  //   .storage("gs://capstoneproject1-26a40.appspot.com/")
+  //   .ref("Pagevamp.png");
+  // console.log(image);
+  admin.initializeApp({
+    credential: admin.credential.applicationDefault(),
+    databaseURL: "https://<DATABASE_NAME>.firebaseio.com"
+  });
+}
 
 export async function getFacebookPageInfo(
-  url = "HandsSG",
-  access_token = "EAAIwerCGOR8BADemA3Caf1oza4tniFP07eSuG78SYIgsdRp5wJDhfylOf2dY7pXYZCerSgpzjcdVDA42pcSR7FKfhxAigPF0wb6G3qXJOrkDCp6qhEleRkiLhEIGSVHoUGRNiHdpKRbpzeDgrITJF4LtyAZCEKhdSq2GXuSE7vOGEN2RrZBDpsvVWBZBYX4ZD"
+  url = process.env.facebookAPI + "103983364470143",
+  access_token = "EAAMIaToJEsABAFZAWJP6RxmCb1lf5pNJayNF9Iz8cQun0ZA9MIN4YHtieWZAIjSAspxDlkd7YMWm1FEk50zZCBFCoCRdvGUmXy5ITrJhU7YZAiq245t5z4ogfkaOyawdA0L725jaRXDzIKL0vcII6JSAvWnt8YYM8ZBj5Uw2vZBcJUyrb6IM5Kkd4G8QKSIxumjmlExBGJ5rgZDZD"
 ) {
   const data = await axios({
     params: {
-      fields: "about,category,posts{full_picture,message}",
+      fields: "about,category,posts{full_picture,message},events,photos,cover",
+      locale: "en_US ",
       access_token
     },
     url
   });
-  return data;
+  return data.data;
 }
 
 export async function getFacebookPageToken(
-  url = "me/accounts",
-  access_token = "EAAHpaPrJZCCsBANXRdCbo2iZA7WM97x48AubUkON27U5O6YF64AuuIajNcWHzJxuYkrRUijSZCdAVJZCOPxQ4vZCbQSFNkCGsB1CAHZBNUw2L0GMH7zqYyZCOc7JHr5DnnkLmrPPr9UJia5Ls6AA7Y3lGyye03siGlXiZCw1UgrjyqpMDUbhdI4LHWKtGBxKwWY1BUt8j2M7Sg4YlgukpymZA2zOsgwod2woZD"
+  url = process.env.facebookAPI + "me/accounts",
+  access_token = "EAAMIaToJEsABAFZAWJP6RxmCb1lf5pNJayNF9Iz8cQun0ZA9MIN4YHtieWZAIjSAspxDlkd7YMWm1FEk50zZCBFCoCRdvGUmXy5ITrJhU7YZAiq245t5z4ogfkaOyawdA0L725jaRXDzIKL0vcII6JSAvWnt8YYM8ZBj5Uw2vZBcJUyrb6IM5Kkd4G8QKSIxumjmlExBGJ5rgZDZD"
 ) {
   const data = await axios({
     params: {
+      locale: "en_US ",
       access_token
     },
     url
   });
-  return data;
+  return data.data;
 }
 
 export async function getFacebookPages(access_token) {
   const data = await axios({
-    params: {
-      access_token
-    },
-    url: "me?fields=accounts{picture{url},name,category_list}"
+    params: { locale: "en_US ", access_token },
+    url: process.env.facebookAPI + "me?fields=accounts{data}"
+    // "me?fields=accounts{picture{url},name,category_list}"
   });
-  return data;
+  return data.data;
 }
