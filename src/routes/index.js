@@ -16,8 +16,21 @@ import bodyParser from "body-parser";
 import readColor from "./readColor";
 
 export default app => {
+  app.use(bodyParser.json());
   // app.use("/auth/facebook", authRouter);
   // app.use("/page", pageRouter);
+  app.use("/theme", theme);
+  app.use("/image", image);
+  app.use("/video", video);
+  app.use("/user", user);
+  app.use("/suggestedColor", suggestedColor);
+  app.use("/site", site);
+  app.use("/post", post);
+  app.use("/navItem", navItem);
+  app.use("/homePageImage", homePageImage);
+  app.use("/facebook", facebook);
+  app.use("/readColor", readColor);
+
   // app.get("/", (req, res) => {
   //   return res.send("<h1>Logged In</h1>");
   // });
@@ -31,17 +44,4 @@ export default app => {
   //   app.get("/firebase", (req, res) => {
   //     getFirebaseStorage();
   //  });
-
-  app.use(bodyParser.json());
-  app.use("/theme", theme);
-  app.use("/image", image);
-  app.use("/video", video);
-  app.use("/user", user);
-  app.use("/suggestedColor", suggestedColor);
-  app.use("/site", site);
-  app.use("/post", post);
-  app.use("/navItem", navItem);
-  app.use("/homePageImage", homePageImage);
-  app.use("/facebook", facebook);
-  app.use("/readColor", readColor);
 };

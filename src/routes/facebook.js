@@ -25,7 +25,7 @@ router.get("/pageToken", async (req, res) => {
 
 router.get("/page", async (req, res) => {
   const data = await getFacebookPages(
-    "EAAMIaToJEsABAFZAWJP6RxmCb1lf5pNJayNF9Iz8cQun0ZA9MIN4YHtieWZAIjSAspxDlkd7YMWm1FEk50zZCBFCoCRdvGUmXy5ITrJhU7YZAiq245t5z4ogfkaOyawdA0L725jaRXDzIKL0vcII6JSAvWnt8YYM8ZBj5Uw2vZBcJUyrb6IM5Kkd4G8QKSIxumjmlExBGJ5rgZDZD"
+    "EAAMIaToJEsABAJamPcK1HTMjohvIlHBKs7Qm70o0nWjoxr4KJNlvhnKHd3cPVpHDcGcXGSSeslZBCdevMNVH2oV2EB8r745itylZAZCE2q5dhI3KPHWZC7PWhbNfTuvVm5FH0jUOwfKV98ZBOO8SCaGZCQP0fsVwYRtVYyyiw0e3wsConN3uckHxlAHwfYh5cZD"
   );
   if (data) {
     return res.status(200).send(data);
