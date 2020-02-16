@@ -1,18 +1,5 @@
 import axios from "../utils/axios";
-import admin from "firebase-admin";
-import firebase from "../utils/firebase";
-require("dotenv").config();
-
-export async function getFirebaseStorage() {
-  // const image = firebase
-  //   .storage("gs://capstoneproject1-26a40.appspot.com/")
-  //   .ref("Pagevamp.png");
-  // console.log(image);
-  admin.initializeApp({
-    credential: admin.credential.applicationDefault(),
-    databaseURL: "https://<DATABASE_NAME>.firebaseio.com"
-  });
-}
+import bucket, { admin } from "../utils/firebase";
 
 export async function getFacebookPageInfo(
   url = process.env.facebookAPI + "103983364470143",
@@ -50,4 +37,38 @@ export async function getFacebookPages(access_token) {
     // "me?fields=accounts{picture{url},name,category_list}"
   });
   return data.data;
+}
+
+export async function getPageImage(id) {
+  try {
+    const options = {
+      version: "v4",
+      action: "read",
+      expires: Date.now() + 15 * 60 * 1000 // 15 minutes
+    };
+    const data = await bucket.file("Pagevamp.png").getSignedUrl(options);
+    console.log(data);
+  } catch (error) {
+    console.log("error: ", error);
+  }
+}
+
+export async function uploadPageImage(id) {
+  try {
+    bucket.file("new.png").createWriteStream();
+    console.log(data);
+  } catch (error) {
+    console.log("error: ", error);
+  }
+}
+
+export async function downloadPageImage(id) {
+  try {
+    // download
+    const data = await bucket.file("Pagevamp.png").download({
+      destination: "/Users/tiger/Desktop/Semester 9/Pagevamp.png"
+    });
+  } catch (error) {
+    console.log("error: ", error);
+  }
 }
