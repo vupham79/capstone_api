@@ -20,7 +20,7 @@ router.get("/create", async (req, res) => {
 });
 
 router.post("/insert/:id", async (req, res) => {
-  await insertNavItem(req.params.id)
+  await insertNavItem(req.params.id, req.body)
     .then(result => {
       return res.status(200).send(result);
     })
@@ -30,7 +30,7 @@ router.post("/insert/:id", async (req, res) => {
 });
 
 router.patch("/update/:id", async (req, res) => {
-  await editNavItem(req.params.id)
+  await editNavItem(req.params.id, req.body)
     .then(result => {
       return res.status(200).send(result);
     })

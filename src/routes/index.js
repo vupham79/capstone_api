@@ -13,6 +13,7 @@ import homePageImage from "./homePageImage";
 import suggestedColor from "./suggestedColor";
 import facebook from "./facebook";
 import bodyParser from "body-parser";
+import readColor from "./readColor";
 
 export default app => {
   // app.use("/auth/facebook", authRouter);
@@ -42,4 +43,5 @@ export default app => {
   app.use("/navItem", navItem);
   app.use("/homePageImage", homePageImage);
   app.use("/facebook", facebook);
+  app.use("/readColor", readColor);
 };

@@ -21,7 +21,7 @@ router.get("/create", async (req, res) => {
 });
 
 router.post("/insert/:id", async (req, res) => {
-  await insertPost(req.params.id)
+  await insertPost(req.params.id, req.body)
     .then(result => {
       return res.status(200).send(result);
     })
@@ -31,7 +31,7 @@ router.post("/insert/:id", async (req, res) => {
 });
 
 router.patch("/update/:id", async (req, res) => {
-  await editPost(req.params.id)
+  await editPost(req.params.id, req.body)
     .then(result => {
       return res.status(200).send(result);
     })

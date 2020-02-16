@@ -31,10 +31,7 @@ export async function createSite() {
     path: "postId userId navItemId homePageImageId",
     populate: [
       {
-        path: "videoId"
-      },
-      {
-        path: "imageId"
+        path: "videoId imageId"
       }
     ]
   });
@@ -67,10 +64,7 @@ export async function insertSite(id, body) {
     path: "postId userId navItemId homePageImageId",
     populate: [
       {
-        path: "videoId"
-      },
-      {
-        path: "imageId"
+        path: "videoId imageId"
       }
     ]
   });
