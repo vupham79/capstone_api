@@ -1,5 +1,13 @@
 import mongoose from "mongoose";
 import User from "./User";
+import Theme from "./Theme";
+import NavItem from "./NavItem";
+import Image from "./Image";
+import Post from "./Post";
+import Site from "./Site";
+import SuggestedColor from "./SuggestedColor";
+import Video from "./Video";
+import HomePageImage from "./HomePageImage";
 require("dotenv").config();
 
 const connectDb = () => {
@@ -16,4 +24,15 @@ const connectDb = () => {
     });
 };
 
-export { connectDb, User };
+export {
+  connectDb,
+  User,
+  Theme,
+  NavItem,
+  Image,
+  Post,
+  Site,
+  SuggestedColor,
+  Video,
+  HomePageImage
+};

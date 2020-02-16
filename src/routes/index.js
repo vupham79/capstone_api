@@ -12,6 +12,7 @@ import site from "./site";
 import homePageImage from "./homePageImage";
 import suggestedColor from "./suggestedColor";
 import facebook from "./facebook";
+import bodyParser from "body-parser";
 
 export default app => {
   // app.use("/auth/facebook", authRouter);
@@ -29,6 +30,8 @@ export default app => {
   //   app.get("/firebase", (req, res) => {
   //     getFirebaseStorage();
   //  });
+
+  app.use(bodyParser.json());
   app.use("/theme", theme);
   app.use("/image", image);
   app.use("/video", video);

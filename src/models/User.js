@@ -3,9 +3,9 @@ import mongoose from "mongoose";
 const UserSchema = new mongoose.Schema(
   {
     id: {
-      type: Number,
+      type: String,
       required: [true, "Id is required!"],
-      unique: true
+      unique: [true, "Id already existed!"]
     },
     displayName: {
       type: String,

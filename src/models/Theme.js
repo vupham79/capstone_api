@@ -3,9 +3,9 @@ import mongoose, { Schema } from "mongoose";
 const ThemeSchema = new mongoose.Schema(
   {
     id: {
-      type: Number,
+      type: String,
       required: [true, "Id is required!"],
-      unique: true
+      unique: [true, "Id already existed!"]
     },
     name: {
       type: String,

@@ -4,13 +4,13 @@ require("dotenv").config();
 
 export async function createSite() {
   mongoose.connect(process.env.MONGODB_URL_DEV);
-  const PostResult = await Post.findOne({ id: 1 });
-  const UserResult = await User.findOne({ id: 1 });
-  const NavItemResult = await NavItem.findOne({ id: 1 });
-  const HomePageImageResult = await HomePageImage.findOne({ id: 1 });
+  const PostResult = await Post.findOne({ id: "1" });
+  const UserResult = await User.findOne({ id: "1" });
+  const NavItemResult = await NavItem.findOne({ id: "1" });
+  const HomePageImageResult = await HomePageImage.findOne({ id: "1" });
   await Site.create([
     {
-      id: 1,
+      id: "1",
       phone: "0907419552",
       longitude: "106.676089",
       latitude: "106.676089",
@@ -40,23 +40,23 @@ export async function createSite() {
   });
 }
 
-export async function insertSite(id) {
+export async function insertSite(id, body) {
   mongoose.connect(process.env.MONGODB_URL_DEV);
-  const PostResult = await Post.findOne({ id: 1 });
-  const UserResult = await User.findOne({ id: 1 });
-  const NavItemResult = await NavItem.findOne({ id: 1 });
-  const HomePageImageResult = await HomePageImage.findOne({ id: 1 });
+  const PostResult = await Post.findOne({ id: id });
+  const UserResult = await User.findOne({ id: id });
+  const NavItemResult = await NavItem.findOne({ id: id });
+  const HomePageImageResult = await HomePageImage.findOne({ id: id });
   await Site.collection.insertOne({
-    id: Number.parseInt(id),
-    phone: "0908936361",
-    longitude: "10.001",
-    latitude: "10.001",
-    logo: "https://i.ibb.co/gVpcW78/pv-featured-images.jpg",
-    fontTitle: "Times New Roman",
-    fontBody: "Arial",
-    category: "Entertainment",
-    title: "Pianissimo 2",
-    address: "hoangcmse61788@fpt.edu.vn",
+    id: id,
+    phone: body.phone,
+    longitude: body.longitude,
+    latitude: body.latitude,
+    logo: body.logo,
+    fontTitle: body.fontTitle,
+    fontBody: body.fontBody,
+    category: body.category,
+    title: body.title,
+    address: body.address,
     isActivated: true,
     postId: PostResult._id,
     userId: UserResult._id,
@@ -76,38 +76,25 @@ export async function insertSite(id) {
   });
 }
 
-export async function editSite(id) {
+export async function editSite(id, body) {
   mongoose.connect(process.env.MONGODB_URL_DEV);
-  const PostResult = await Post.findOne({ id: 1 });
-  const UserResult = await User.findOne({ id: 1 });
-  const NavItemResult = await NavItem.findOne({ id: 1 });
-  const HomePageImageResult = await HomePageImage.findOne({ id: 1 });
   const SiteResult = await Site.findOne({ id: id });
   await SiteResult.updateOne({
-    id: Number.parseInt(id),
-    phone: "0902347082",
-    longitude: "15.052",
-    latitude: "20.052",
-    logo: "https://i.ibb.co/gVpcW78/pv-featured-images.jpg",
-    fontTitle: "verdana",
-    fontBody: "verdana",
-    category: "Product",
-    title: "Entertainment",
-    address: "hoangcmse61788@gmail.com",
-    isActivated: true,
-    postId: PostResult._id,
-    userId: UserResult._id,
-    navItemId: NavItemResult._id,
-    homePageImageId: HomePageImageResult._id
+    phone: body.phone,
+    longitude: body.longitude,
+    latitude: body.latitude,
+    logo: body.logo,
+    fontTitle: body.fontTitle,
+    fontBody: body.fontBody,
+    category: body.category,
+    title: body.title,
+    address: body.address
   });
   return await Site.find().populate({
     path: "postId userId navItemId homePageImageId",
     populate: [
       {
-        path: "videoId"
-      },
-      {
-        path: "imageId"
+        path: "videoId imageId"
       }
     ]
   });
@@ -115,27 +102,9 @@ export async function editSite(id) {
 
 export async function deleteSite(id) {
   mongoose.connect(process.env.MONGODB_URL_DEV);
-  const PostResult = await Post.findOne({ id: 1 });
-  const UserResult = await User.findOne({ id: 1 });
-  const NavItemResult = await NavItem.findOne({ id: 1 });
-  const HomePageImageResult = await HomePageImage.findOne({ id: 1 });
   const SiteResult = await Site.findOne({ id: id });
   await SiteResult.updateOne({
-    id: Number.parseInt(id),
-    phone: "0902347082",
-    longitude: "15.052",
-    latitude: "20.052",
-    logo: "https://i.ibb.co/gVpcW78/pv-featured-images.jpg",
-    fontTitle: "verdana",
-    fontBody: "verdana",
-    category: "Product",
-    title: "Entertainment",
-    address: "hoangcmse61788@gmail.com",
-    isActivated: false,
-    postId: PostResult._id,
-    userId: UserResult._id,
-    navItemId: NavItemResult._id,
-    homePageImageId: HomePageImageResult._id
+    isActivated: false
   });
   return await Site.find().populate({
     path: "postId userId navItemId homePageImageId",

@@ -3,7 +3,6 @@ import {
   createNavItem,
   insertNavItem,
   editNavItem,
-  deleteNavItem,
   findAllNavItem,
   findOneNavItem
 } from "../actions/navItemDB";
@@ -32,16 +31,6 @@ router.post("/insert/:id", async (req, res) => {
 
 router.patch("/update/:id", async (req, res) => {
   await editNavItem(req.params.id)
-    .then(result => {
-      return res.status(200).send(result);
-    })
-    .catch(error => {
-      return res.status(500).send("Something broke!");
-    });
-});
-
-router.patch("/delete/:id", async (req, res) => {
-  await deleteNavItem(req.params.id)
     .then(result => {
       return res.status(200).send(result);
     })

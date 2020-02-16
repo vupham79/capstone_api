@@ -3,7 +3,6 @@ import {
   createImage,
   insertImage,
   editImage,
-  deleteImage,
   findAllImage,
   findOneImage
 } from "../actions/imageDB";
@@ -32,16 +31,6 @@ router.post("/insert/:id", async (req, res) => {
 
 router.patch("/update/:id", async (req, res) => {
   await editImage(req.params.id)
-    .then(result => {
-      return res.status(200).send(result);
-    })
-    .catch(error => {
-      return res.status(500).send("Something broke!");
-    });
-});
-
-router.patch("/delete/:id", async (req, res) => {
-  await deleteImage(req.params.id)
     .then(result => {
       return res.status(200).send(result);
     })

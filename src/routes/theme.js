@@ -3,7 +3,6 @@ import {
   createTheme,
   insertTheme,
   editTheme,
-  deleteTheme,
   findAllTheme,
   findOneTheme
 } from "../actions/themeDB";
@@ -21,22 +20,23 @@ router.get("/create", async (req, res) => {
 });
 
 router.post("/insert/:id", async (req, res) => {
-  await insertTheme(req.params.id)
+  await insertTheme(req.params.id, req.body)
     .then(result => {
       return res.status(200).send(result);
     })
     .catch(error => {
-      return res.status(500).send("Something broke!");
+      return res.status(500).send(error);
     });
 });
 
 router.patch("/update/:id", async (req, res) => {
-  await editTheme(req.params.id)
+  console.log(req.body);
+  await editTheme(req.params.id, req.body)
     .then(result => {
       return res.status(200).send(result);
     })
     .catch(error => {
-      return res.status(500).send("Something broke!");
+      return res.status(500).send(error);
     });
 });
 

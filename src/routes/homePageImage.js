@@ -3,7 +3,6 @@ import {
   createHomePageImage,
   insertHomePageImage,
   editHomePageImage,
-  deleteHomePageImage,
   findAllHomePageImage,
   findOneHomePageImage
 } from "../actions/homePageImageDB";
@@ -32,16 +31,6 @@ router.post("/insert/:id", async (req, res) => {
 
 router.patch("/update/:id", async (req, res) => {
   await editHomePageImage(req.params.id)
-    .then(result => {
-      return res.status(200).send(result);
-    })
-    .catch(error => {
-      return res.status(500).send("Something broke!");
-    });
-});
-
-router.patch("/delete/:id", async (req, res) => {
-  await deleteHomePageImage(req.params.id)
     .then(result => {
       return res.status(200).send(result);
     })

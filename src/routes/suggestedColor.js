@@ -3,10 +3,9 @@ import {
   createSuggestedColor,
   insertSuggestedColor,
   editSuggestedColor,
-  deleteSuggestedColor,
   findAllSuggestedColor,
   findOneSuggestedColor
-} from "../actions/colorDB";
+} from "../actions/suggestedColorDB";
 
 const router = Router();
 
@@ -32,16 +31,6 @@ router.post("/insert/:id", async (req, res) => {
 
 router.patch("/update/:id", async (req, res) => {
   await editSuggestedColor(req.params.id)
-    .then(result => {
-      return res.status(200).send(result);
-    })
-    .catch(error => {
-      return res.status(500).send("Something broke!");
-    });
-});
-
-router.patch("/delete/:id", async (req, res) => {
-  await deleteSuggestedColor(req.params.id)
     .then(result => {
       return res.status(200).send(result);
     })
