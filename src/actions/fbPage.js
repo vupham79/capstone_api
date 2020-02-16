@@ -1,5 +1,5 @@
 import axios from "../utils/axios";
-import bucket, { admin } from "../utils/firebase";
+import bucket from "../utils/firebase";
 
 export async function getFacebookPageInfo(
   url = process.env.facebookAPI + "103983364470143",
@@ -34,7 +34,16 @@ export async function getFacebookPages(access_token) {
   const data = await axios({
     params: { locale: "en_US ", access_token },
     url: process.env.facebookAPI + "me?fields=accounts{data}"
-    // "me?fields=accounts{picture{url},name,category_list}"
+  });
+  return data.data;
+}
+
+export async function getUserPages(access_token) {
+  const data = await axios({
+    params: { locale: "en_US ", access_token: access_token },
+    url:
+      process.env.facebookAPI +
+      "me?fields=accounts{category,name,id,access_token, picture, link}"
   });
   return data.data;
 }

@@ -14,7 +14,8 @@ const connectDb = () => {
   mongoose
     .connect(process.env.MONGODB_URL_DEV, {
       useNewUrlParser: true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
+      useCreateIndex: true
     })
     .then(() => {
       console.log("Connected to Database");

@@ -1,49 +1,33 @@
-import { User } from '../models'
+import { User } from "../models";
 
-export const login = () => {
+export const login = async ({ accessToken, id, name, email, picture }) => {
   const user = await User.findOne({
-    id: profile.id
-  })
+    id: id
+  });
   if (user) {
-    await User.updateOne(
+    const update = await User.updateOne(
       {
-        id: profile.id
+        id: id
       },
       {
         accessToken: accessToken
-      },
-      function(err, user) {
-        if (err) {
-          done(err);
-        } else {
-          req.user = {
-            ...user,
-            accessToken
-          };
-          done(null, user);
-        }
       }
     );
+    if (update) {
+      return true;
+    }
+    return false;
   } else {
-    await User.create(
-      {
-        id: profile.id,
-        displayName: profile.displayName,
-        email: profile.emails && profile.emails[0].value,
-        accessToken: accessToken,
-        picture: `${process.env.facebookAPI}/${profile.id}/picture?type=large`
-      },
-      function(err, user) {
-        if (err) {
-          done(err);
-        } else {
-          req.user = {
-            ...user,
-            accessToken
-          };
-          done(null, user);
-        }
-      }
-    );
+    const create = await User.create({
+      id: id,
+      displayName: name,
+      email: email,
+      accessToken: accessToken,
+      picture: picture
+    });
+    if (create) {
+      return true;
+    }
+    return false;
   }
-}
+};

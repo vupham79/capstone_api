@@ -1,7 +1,8 @@
 import {
   getFacebookPageInfo,
   getFacebookPageToken,
-  getFacebookPages
+  getFacebookPages,
+  getUserPages
 } from "../actions/fbPage";
 import { Router } from "express";
 
@@ -23,12 +24,10 @@ router.get("/pageToken", async (req, res) => {
   return res.status(500).send("No data found!");
 });
 
-router.get("/page", async (req, res) => {
-  const data = await getFacebookPages(
-    "EAAMIaToJEsABAJamPcK1HTMjohvIlHBKs7Qm70o0nWjoxr4KJNlvhnKHd3cPVpHDcGcXGSSeslZBCdevMNVH2oV2EB8r745itylZAZCE2q5dhI3KPHWZC7PWhbNfTuvVm5FH0jUOwfKV98ZBOO8SCaGZCQP0fsVwYRtVYyyiw0e3wsConN3uckHxlAHwfYh5cZD"
-  );
-  if (data) {
-    return res.status(200).send(data);
+router.get("/pages", async (req, res) => {
+  const data = await getUserPages(req.query.access_token);
+  if (data && data.accounts) {
+    return res.status(200).send(data.accounts.data);
   }
   return res.status(500).send("No data found!");
 });
