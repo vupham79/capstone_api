@@ -6,6 +6,8 @@ import cors from "cors";
 import routes from "./src/routes";
 import passport from "./src/utils/passport";
 import { connectDb } from "./src/models";
+import bodyParser from "body-parser";
+
 require("dotenv").config();
 
 const app = express();
@@ -15,7 +17,7 @@ const certOptions = {
   key: fs.readFileSync(path.resolve("./src/cert/server.key")),
   cert: fs.readFileSync(path.resolve("./src/cert/server.crt"))
 };
-
+app.use(bodyParser.json());
 app.use(cors());
 // passport
 app.use(passport.initialize());
