@@ -1,5 +1,5 @@
 import axios from "../utils/axios";
-import bucket, { admin } from "../utils/firebase/firebase";
+import bucket, { admin } from "../utils/firebase";
 
 export async function getFacebookPageInfo(
   url = process.env.facebookAPI + "103983364470143",
