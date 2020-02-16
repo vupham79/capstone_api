@@ -3,7 +3,6 @@ import { Image } from "../models";
 require("dotenv").config();
 
 export async function createImage() {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   await Image.create([
     {
       id: "1",
@@ -22,7 +21,6 @@ export async function createImage() {
 }
 
 export async function insertImage(id, body) {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   await Image.collection.insertOne({
     id: id,
     url: body.url
@@ -31,7 +29,6 @@ export async function insertImage(id, body) {
 }
 
 export async function editImage(id, body) {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   const ImageResult = await Image.findOne({ id: id });
   await ImageResult.updateOne({
     url: body.url
@@ -40,11 +37,9 @@ export async function editImage(id, body) {
 }
 
 export async function findAllImage() {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   return await Image.find();
 }
 
 export async function findOneImage(id) {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   return await Image.findOne({ id: id });
 }

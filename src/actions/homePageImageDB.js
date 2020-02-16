@@ -3,7 +3,6 @@ import { HomePageImage } from "../models";
 require("dotenv").config();
 
 export async function createHomePageImage() {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   await HomePageImage.create([
     {
       id: "1",
@@ -22,7 +21,6 @@ export async function createHomePageImage() {
 }
 
 export async function insertHomePageImage(id, body) {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   await HomePageImage.collection.insertOne({
     id: id,
     url: body.url
@@ -31,7 +29,6 @@ export async function insertHomePageImage(id, body) {
 }
 
 export async function editHomePageImage(id, body) {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   const HomePageImageResult = await HomePageImage.findOne({ id: id });
   await HomePageImageResult.updateOne({
     url: body.url
@@ -40,11 +37,9 @@ export async function editHomePageImage(id, body) {
 }
 
 export async function findAllHomePageImage() {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   return await HomePageImage.find();
 }
 
 export async function findOneHomePageImage(id) {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   return await HomePageImage.findOne({ id: id });
 }

@@ -3,7 +3,6 @@ import { Site, Post, User, NavItem, HomePageImage } from "../models";
 require("dotenv").config();
 
 export async function createSite() {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   const PostResult = await Post.findOne({ id: "1" });
   const UserResult = await User.findOne({ id: "1" });
   const NavItemResult = await NavItem.findOne({ id: "1" });
@@ -38,7 +37,6 @@ export async function createSite() {
 }
 
 export async function insertSite(id, body) {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   const PostResult = await Post.findOne({ id: id });
   const UserResult = await User.findOne({ id: id });
   const NavItemResult = await NavItem.findOne({ id: id });
@@ -71,7 +69,6 @@ export async function insertSite(id, body) {
 }
 
 export async function editSite(id, body) {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   const SiteResult = await Site.findOne({ id: id });
   await SiteResult.updateOne({
     phone: body.phone,
@@ -95,7 +92,6 @@ export async function editSite(id, body) {
 }
 
 export async function deleteSite(id) {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   const SiteResult = await Site.findOne({ id: id });
   await SiteResult.updateOne({
     isActivated: false
@@ -111,7 +107,6 @@ export async function deleteSite(id) {
 }
 
 export async function findAllSite() {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   return await Site.find().populate({
     path: "postId userId navItemId homePageImageId",
     populate: [
@@ -123,7 +118,6 @@ export async function findAllSite() {
 }
 
 export async function findOneSite(id) {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   return await Site.findOne({ id: id }).populate({
     path: "postId userId navItemId homePageImageId",
     populate: [

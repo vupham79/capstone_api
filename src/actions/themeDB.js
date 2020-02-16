@@ -3,7 +3,6 @@ import { Theme, SuggestedColor, Site } from "../models";
 require("dotenv").config();
 
 export async function createTheme() {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   const SuggestedColorResult = await SuggestedColor.findOne({ id: "1" });
   const SiteResult = await Site.findOne({ id: "1" });
   await Theme.create([
@@ -43,7 +42,6 @@ export async function createTheme() {
 }
 
 export async function insertTheme(id, body) {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   const SuggestedColorResult = await SuggestedColor.findOne({ id: id });
   const SiteResult = await Site.findOne({ id: id });
   await Theme.collection.insertOne({
@@ -65,7 +63,6 @@ export async function insertTheme(id, body) {
 }
 
 export async function editTheme(id, body) {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   const ThemeResult = await Theme.findOne({ id: id });
   await ThemeResult.updateOne({
     name: body.name,
@@ -83,7 +80,6 @@ export async function editTheme(id, body) {
 }
 
 export async function findAllTheme() {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   return await Theme.find().populate({
     path: "suggestedColorId siteId",
     populate: [
@@ -95,7 +91,6 @@ export async function findAllTheme() {
 }
 
 export async function findOneTheme(id) {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   return await Theme.findOne({ id: id }).populate({
     path: "suggestedColorId siteId",
     populate: [

@@ -4,7 +4,6 @@ require("dotenv").config();
 import request from "request";
 
 export async function createUser() {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   await User.create([
     {
       id: "1",
@@ -29,7 +28,6 @@ export async function createUser() {
 }
 
 export async function insertUser(id, body) {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   await User.collection.insertOne({
     id: id,
     displayName: body.displayName,
@@ -42,7 +40,6 @@ export async function insertUser(id, body) {
 }
 
 export async function editUser(id, body) {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   const UserResult = await User.findOne({ id: id });
   await UserResult.updateOne({
     displayName: body.displayName,
@@ -55,11 +52,9 @@ export async function editUser(id, body) {
 }
 
 export async function findAllUser() {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   return await User.find();
 }
 
 export async function findOneUser(id) {
-  mongoose.connect(process.env.MONGODB_URL_DEV);
   return await User.findOne({ id: id });
 }
