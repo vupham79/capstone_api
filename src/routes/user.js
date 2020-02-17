@@ -6,7 +6,6 @@ import {
   findAllUser,
   findOneUser
 } from "../actions/userDB";
-import User from "../models/User";
 
 const router = Router();
 
@@ -54,6 +53,7 @@ router.get("/find/:id", async (req, res) => {
 router.get("/findAll", async (req, res) => {
   await findAllUser()
     .then(result => {
+      console.log("abc");
       return res.status(200).send(result);
     })
     .catch(error => {

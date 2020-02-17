@@ -11,6 +11,7 @@ import facebook from "./facebook";
 import readColor from "./readColor";
 
 export default app => {
+  console.log("abc");
   app.use("/theme", theme);
   app.use("/image", image);
   app.use("/video", video);

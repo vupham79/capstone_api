@@ -4,7 +4,18 @@ import express from "express";
 import cors from "cors";
 import routes from "./src/routes";
 import passport from "./src/utils/passport";
-import { connectDb } from "./src/models";
+import {
+  connectDb,
+  User,
+  Theme,
+  NavItem,
+  Image,
+  Post,
+  Site,
+  SuggestedColor,
+  Video,
+  HomePageImage
+} from "./src/models";
 import bodyParser from "body-parser";
 
 require("dotenv").config();

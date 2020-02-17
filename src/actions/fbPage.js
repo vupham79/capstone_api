@@ -66,7 +66,7 @@ export async function downloadPageImage(id) {
   try {
     // download
     const data = await bucket.file("Pagevamp.png").download({
-      destination: "/Users/tiger/Desktop/Semester 9/Pagevamp.png"
+      destination: "src/assets"
     });
   } catch (error) {
     console.log("error: ", error);
