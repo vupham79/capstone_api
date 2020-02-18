@@ -4,20 +4,22 @@ const UserSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      required: [true, "Id is required!"],
-      unique: [true, "Id already existed!"]
+      required: [true, "Id is required!"]
     },
     picture: {
       type: String
     },
     displayName: {
-      type: String
+      type: String,
+      required: [true, "Display name is required!"]
     },
     email: {
-      type: String
+      type: String,
+      required: [true, "Email is required!"]
     },
     accessToken: {
-      type: String
+      type: String,
+      required: [true, "Access token is required!"]
     }
   },
   {

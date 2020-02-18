@@ -4,8 +4,7 @@ const NavItemSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      required: [true, "Id is required!"],
-      unique: true
+      required: [true, "Id is required!"]
     },
     order: {
       type: Number,

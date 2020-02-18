@@ -4,8 +4,7 @@ const VideoSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      required: [true, "Id is required!"],
-      unique: [true, "Id already existed!"]
+      required: [true, "Id is required!"]
     },
     url: {
       type: String,
