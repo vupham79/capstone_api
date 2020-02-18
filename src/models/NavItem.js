@@ -5,16 +5,16 @@ const NavItemSchema = new mongoose.Schema(
     id: {
       type: String,
       required: [true, "Id is required!"],
-      unique: [true, "Id already existed!"]
+      unique: true
     },
-    order: String,
+    order: {
+      type: Number,
+      required: [true, "Order is required!"],
+      unique: true
+    },
     title: {
       type: String,
       required: [true, "Title is required!"]
-    },
-    url: {
-      type: String,
-      required: [true, "Navigation item url is required!"]
     }
   },
   {

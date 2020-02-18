@@ -20,18 +20,18 @@ export async function createVideo() {
   return await Video.find();
 }
 
-export async function insertVideo(id) {
+export async function insertVideo(id, body) {
   await Video.collection.insertOne({
     id: id,
-    url: "https://www.youtube.com/watch?v=W-fFHeTX70Q"
+    url: body.url
   });
   return await Video.find();
 }
 
-export async function editVideo(id) {
+export async function editVideo(id, body) {
   const VideoResult = await Video.findOne({ id: id });
   await VideoResult.updateOne({
-    url: "https://www.youtube.com/watch?v=t3217H8JppI"
+    url: body.url
   });
   return await Video.find();
 }

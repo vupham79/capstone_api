@@ -16,14 +16,14 @@ export async function createPost() {
   });
 }
 
-export async function insertPost(id, body) {
+export async function insertPost(id, { content }) {
   const VideoResult = await Video.findOne({ id: id });
   const ImageResult = await Image.findOne({ id: id });
   await Post.collection.insertOne({
     id: id,
-    content: body.content,
-    videoId: VideoResult._id,
-    imageId: ImageResult._id
+    content: content,
+    videoId: VideoResult && VideoResult._id,
+    imageId: ImageResult && ImageResult._id
   });
   return await Post.find().populate({
     path: "videoId imageId"

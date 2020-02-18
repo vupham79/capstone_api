@@ -1,5 +1,14 @@
 import axios from "../utils/axios";
-import bucket, { admin } from "../utils/firebase";
+import bucket from "../utils/firebase";
+import { insertTheme } from "../actions/themeDB";
+import { insertSuggestedColor } from "../actions/suggestedColorDB";
+import { insertHomePageImage } from "../actions/homePageImageDB";
+import { insertImage } from "../actions/imageDB";
+import { insertNavItem } from "../actions/navItemDB";
+import { insertPost } from "../actions/postDB";
+import { insertSite } from "../actions/siteDB";
+import { insertUser } from "../actions/userDB";
+import { insertVideo } from "../actions/videoDB";
 
 export async function getFacebookPageInfo(
   url = process.env.facebookAPI + "103983364470143",
@@ -34,7 +43,16 @@ export async function getFacebookPages(access_token) {
   const data = await axios({
     params: { locale: "en_US ", access_token },
     url: process.env.facebookAPI + "me?fields=accounts{data}"
-    // "me?fields=accounts{picture{url},name,category_list}"
+  });
+  return data.data;
+}
+
+export async function getUserPages(access_token) {
+  const data = await axios({
+    params: { locale: "en_US ", access_token: access_token },
+    url:
+      process.env.facebookAPI +
+      "me?fields=accounts{category,name,id,access_token, picture, link}"
   });
   return data.data;
 }
@@ -71,4 +89,17 @@ export async function downloadPageImage(id) {
   } catch (error) {
     console.log("error: ", error);
   }
+}
+
+export async function confirmPage({ access_token, pageId }) {
+  const data = await axios({
+    params: {
+      fields:
+        "about,category,posts{full_picture,message},events,photos,cover,videos{permalink_url},location,single_line_address",
+      locale: "en_US ",
+      access_token
+    },
+    url: process.env.facebookAPI + pageId
+  });
+  return data.data;
 }

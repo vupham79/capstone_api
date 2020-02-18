@@ -9,13 +9,14 @@ import homePageImage from "./homePageImage";
 import suggestedColor from "./suggestedColor";
 import facebook from "./facebook";
 import readColor from "./readColor";
+import auth from "./auth";
 
 export default app => {
-  console.log("abc");
   app.use("/theme", theme);
   app.use("/image", image);
   app.use("/video", video);
   app.use("/user", user);
+  app.use("/auth", auth);
   app.use("/suggestedColor", suggestedColor);
   app.use("/site", site);
   app.use("/post", post);
