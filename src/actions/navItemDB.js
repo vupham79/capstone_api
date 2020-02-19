@@ -25,7 +25,7 @@ export async function editNavItem(id, body) {
   await NavItemResult.updateOne({
     order: body.order,
     title: body.title
-  });
+  }).catch(error => console.log("Update error: " + error));
   return await NavItem.find();
 }
 

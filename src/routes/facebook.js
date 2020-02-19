@@ -7,20 +7,39 @@ import {
   getUserPages,
   confirmPage
 } from "../actions/fbPage";
-import { insertTheme } from "../actions/themeDB";
-import { insertSuggestedColor } from "../actions/suggestedColorDB";
-import { insertHomePageImage } from "../actions/homePageImageDB";
+import { insertTheme, findOneTheme, editTheme } from "../actions/themeDB";
+import {
+  insertSuggestedColor,
+  findOneSuggestedColor,
+  editSuggestedColor
+} from "../actions/suggestedColorDB";
+import {
+  insertHomePageImage,
+  findOneHomePageImage,
+  editHomePageImage
+} from "../actions/homePageImageDB";
 import { insertImage, findOneImage, editImage } from "../actions/imageDB";
 import {
   insertNavItem,
   findOneNavItem,
   editNavItem
 } from "../actions/navItemDB";
+import { insertUser, findOneUser, editUser } from "../actions/userDB";
 import { insertPost, findOnePost, editPost } from "../actions/postDB";
-import { insertSite } from "../actions/siteDB";
-import { insertUser } from "../actions/userDB";
+import { insertSite, findOneSite, editSite } from "../actions/siteDB";
 import { insertVideo, findOneVideo, editVideo } from "../actions/videoDB";
 import { Router } from "express";
+import { Site, Post, User, NavItem, HomePageImage } from "../models";
+import {
+  insertCategory,
+  editCategory,
+  findOneCategory
+} from "../actions/categoryDB";
+import {
+  insertSuggestedTheme,
+  editSuggestedTheme,
+  findOneSuggestedTheme
+} from "../actions/suggestedThemeDB";
 
 const router = Router();
 
@@ -77,61 +96,210 @@ router.post("/confirmPage", async (req, res) => {
     pageId: req.body.pageId,
     access_token: req.body.accessToken
   });
-  console.log(req.body.navItems);
+  console.log(JSON.stringify(req.body.picture));
   if (data) {
-    //kiểm tra coi đúng chưa ?
-    data.posts &&
-      (await data.posts.data.forEach(async image => {
-        if ((await findOneImage(image.id)) === null) {
-          await insertImage(image.id, {
-            url: image.full_picture === null ? "" : image.full_picture
+    const saveImage = new Promise(async function(resolve, reject) {
+      data.posts &&
+        (await data.posts.data.forEach(async image => {
+          if ((await findOneImage(image.id)) === null) {
+            await insertImage(image.id, {
+              url: image.full_picture === null ? "" : image.full_picture
+            });
+          } else {
+            await editImage(image.id, {
+              url: image.full_picture === null ? "" : image.full_picture
+            });
+          }
+        }));
+    });
+    const saveVideo = new Promise(async function(resolve, reject) {
+      data.videos &&
+        (await data.videos.data.forEach(async video => {
+          if ((await findOneVideo(video.id)) === null) {
+            await insertVideo(video.id, {
+              url: video.permalink_url === null ? "" : video.permalink_url
+            });
+          } else {
+            await editVideo(video.id, {
+              url: video.permalink_url === null ? "" : video.permalink_url
+            });
+          }
+        }));
+    });
+    const saveNavItem = new Promise(async function(resolve, reject) {
+      req.body.navItems &&
+        (await req.body.navItems.forEach(async navItem => {
+          const exist = await findOneNavItem(req.body.pageId);
+          if (!exist) {
+            await insertNavItem(req.body.pageId, {
+              order: navItem.order === null ? "" : navItem.order,
+              title: navItem.name === null ? "" : navItem.name
+            });
+          } else {
+            await editNavItem(req.body.pageId, {
+              order: navItem.order === null ? "" : navItem.order,
+              title: navItem.name === null ? "" : navItem.name
+            });
+          }
+        }));
+    });
+    const saveColor = new Promise(async function(resolve, reject) {
+      const colorExist = await findOneSuggestedColor(req.body.pageId);
+      if (!colorExist) {
+        await insertSuggestedColor(req.body.pageId, {
+          color: req.body.color === null ? "" : req.body.color
+        });
+      } else {
+        await editSuggestedColor(req.body.pageId, {
+          color: req.body.color === null ? "" : req.body.color
+        });
+      }
+    });
+    const saveHomePageImage = new Promise(async function(resolve, reject) {
+      const homePageImageExist = await findOneHomePageImage(req.body.pageId);
+      if (!homePageImageExist) {
+        await insertHomePageImage(req.body.pageId, {
+          url: data.cover.source === null ? "" : data.cover.source
+        });
+      } else {
+        await editHomePageImage(req.body.pageId, {
+          url: data.cover.source === null ? "" : data.cover.source
+        });
+      }
+    });
+    const saveUser = new Promise(async function(resolve, reject) {
+      const userExist = await findOneUser(req.body.profile.id);
+      if (!userExist) {
+        await insertUser(req.body.profile.id, {
+          displayName:
+            req.body.profile.name === null ? "" : req.body.profile.name,
+          email: req.body.email === null ? "" : req.body.email,
+          phone: data.phone === null ? "" : data.phone,
+          accessToken:
+            req.body.accessToken === null ? "" : req.body.accessToken,
+          picture: req.body.picture === null ? "" : req.body.picture
+        });
+      } else {
+        await editUser(req.body.profile.id, {
+          isplayName:
+            req.body.profile.name === null ? "" : req.body.profile.name,
+          email: req.body.email === null ? "" : req.body.email,
+          phone: data.phone === null ? "" : data.phone,
+          accessToken:
+            req.body.accessToken === null ? "" : req.body.accessToken,
+          picture: req.body.picture === null ? "" : req.body.picture
+        });
+      }
+    });
+    const saveSuggestedTheme = new Promise(async function(resolve, reject) {
+      const suggestedThemeExist = await findOneSuggestedTheme(req.body.pageId);
+      if (!suggestedThemeExist) {
+        await insertSuggestedTheme(req.body.pageId, {
+          name: req.body.name === null ? "" : req.body.name
+        });
+      } else {
+        await editSuggestedTheme(req.body.pageId, {
+          name: req.body.name === null ? "" : req.body.name
+        });
+      }
+    });
+    Promise.all([
+      saveImage,
+      saveVideo,
+      saveNavItem,
+      saveHomePageImage,
+      saveColor,
+      saveUser,
+      saveSuggestedTheme
+    ]).then(function(response) {});
+    const savePost = new Promise(async function(resolve, reject) {
+      data.posts &&
+        data.posts.data.forEach(async post => {
+          const exist = await findOnePost(post.id);
+          if (!exist) {
+            await insertPost(post.id, {
+              content: post.message === null ? "" : post.message
+            });
+          } else {
+            await editPost(post.id, {
+              content: post.message === null ? "" : post.message
+            });
+          }
+          const saveSite = new Promise(async function(resolve, reject) {
+            const siteExist = await findOneSite(req.body.pageId);
+            if (!siteExist) {
+              await insertSite(req.body.pageId, post.id, req.body.profile.id, {
+                phone: data.phone === null ? "" : data.phone,
+                longitude:
+                  data.location.longitude === null
+                    ? ""
+                    : data.location.longitude,
+                latitude:
+                  data.location.latitude === null ? "" : data.location.latitude,
+                logo: data.logo ? "" : data.logo,
+                fontTitle:
+                  req.body.fontTitle === null ? "" : req.body.fontTitle,
+                fontBody: req.body.fontBody === null ? "" : req.body.fontBody,
+                category: "a",
+                title: req.body.name === null ? "" : req.body.name,
+                address:
+                  data.single_line_address === null
+                    ? ""
+                    : data.single_line_address
+              });
+            } else {
+              await editSite(req.body.pageId, post.id, req.body.profile.id, {
+                phone: data.phone === null ? "" : data.phone,
+                longitude:
+                  data.location.longitude === null
+                    ? ""
+                    : data.location.longitude,
+                latitude:
+                  data.location.latitude === null ? "" : data.location.latitude,
+                logo: data.logo === null ? "" : data.logo,
+                fontTitle:
+                  req.body.fontTitle === null ? "" : req.body.fontTitle,
+                fontBody: req.body.fontBody === null ? "" : req.body.fontBody,
+                category: "a",
+                title: req.body.name === null ? "" : req.body.name,
+                address:
+                  data.single_line_address === null
+                    ? ""
+                    : data.single_line_address
+              });
+            }
           });
-        } else {
-          await editImage(image.id, {
-            url: image.full_picture === null ? "" : image.full_picture
-          });
-        }
-      }));
-    data.videos &&
-      (await data.videos.data.forEach(async video => {
-        if ((await findOneVideo(video.id)) === null) {
-          await insertVideo(video.id, {
-            url: video.permalink_url === null ? "" : video.permalink_url
-          });
-        } else {
-          await editVideo(video.id, {
-            url: video.permalink_url === null ? "" : video.permalink_url
-          });
-        }
-      }));
-    data.posts &&
-      (await data.posts.data.forEach(async post => {
-        const exist = await findOnePost(post.id);
-        if (!exist) {
-          await insertPost(post.id, {
-            content: post.message === null ? "" : post.message
-          });
-        } else {
-          await editPost(post.id, {
-            content: post.message === null ? "" : post.message
-          });
-        }
-      }));
-    req.body.navItems &&
-      (await req.body.navItems.forEach(async navItem => {
-        const exist = await findOneNavItem(req.body.pageId);
-        if (!exist) {
-          await insertNavItem(req.body.pageId, {
-            order: navItem.order === null ? "" : navItem.order,
-            title: navItem.name === null ? "" : navItem.name
-          });
-        } else {
-          await editNavItem(req.body.pageId, {
-            order: navItem.order === null ? "" : navItem.order,
-            title: navItem.name === null ? "" : navItem.name
-          });
-        }
-      }));
+          Promise.all([saveSite]).finally(function(response) {});
+        });
+    });
+    Promise.all([savePost]).finally(async function(response) {});
+    const saveTheme = new Promise(async function(resolve, reject) {
+      const themeExist = await findOneTheme(req.body.pageId);
+      if (!themeExist) {
+        await insertTheme(req.body.pageId, {
+          name: req.body.name === null ? "" : req.body.name,
+          suggested_font: req.body.fontTitle === null ? "" : req.body.fontTitle
+        });
+      } else {
+        await editTheme(req.body.pageId, {
+          name: req.body.name === null ? "" : req.body.name,
+          suggested_font: req.body.fontTitle === null ? "" : req.body.fontTitle
+        });
+      }
+    });
+    const saveCategory = new Promise(async function(resolve, reject) {
+      const categoryExist = await findOneCategory(req.body.pageId);
+      if (!categoryExist) {
+        await insertCategory(req.body.pageId, {
+          name: req.body.name === null ? "" : req.body.name
+        });
+      } else {
+        await editCategory(req.body.pageId, {
+          name: req.body.name === null ? "" : req.body.name
+        });
+      }
+    });
+    Promise.all([saveTheme, saveCategory]).finally(function(response) {});
   }
   return res.status(500).send("No data found!");
 });

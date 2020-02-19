@@ -10,7 +10,6 @@ export async function createTheme() {
       id: "1",
       name: "Splitter",
       suggested_font: "Calibri",
-      code: "abc",
       suggestedColorId: SuggestedColorResult._id,
       siteId: SiteResult._id
     },
@@ -18,7 +17,6 @@ export async function createTheme() {
       id: "2",
       name: "Strut",
       suggested_font: "Times New Roman",
-      code: "abc",
       suggestedColorId: SuggestedColorResult._id,
       siteId: SiteResult._id
     },
@@ -26,7 +24,6 @@ export async function createTheme() {
       id: "3",
       name: "Spruce",
       suggested_font: "Arial",
-      code: "abc",
       suggestedColorId: SuggestedColorResult._id,
       siteId: SiteResult._id
     }
@@ -48,7 +45,6 @@ export async function insertTheme(id, body) {
     id: id,
     name: body.name,
     suggested_font: body.suggested_font,
-    code: body.code,
     suggestedColorId: SuggestedColorResult._id,
     siteId: SiteResult._id
   });
@@ -66,8 +62,7 @@ export async function editTheme(id, body) {
   const ThemeResult = await Theme.findOne({ id: id });
   await ThemeResult.updateOne({
     name: body.name,
-    suggested_font: body.suggested_font,
-    code: body.code
+    suggested_font: body.suggested_font
   });
   return await Theme.findOne({ id: id }).populate({
     path: "suggestedColorId siteId",

@@ -95,7 +95,8 @@ export async function confirmPage({ access_token, pageId }) {
   const data = await axios({
     params: {
       fields:
-        "about,category,posts{full_picture,message},events,photos,cover,videos{permalink_url},location,single_line_address",
+        "about,category,posts{full_picture,message},events,cover,videos{permalink_url},location,single_line_address," +
+        "phone,photos{link,images,album,picture,webp_images}",
       locale: "en_US ",
       access_token
     },

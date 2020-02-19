@@ -4,15 +4,17 @@ const NavItemSchema = new mongoose.Schema(
   {
     id: {
       type: String,
+      default: "",
       required: [true, "Id is required!"]
     },
     order: {
       type: Number,
-      required: [true, "Order is required!"],
-      unique: true
+      default: 0,
+      required: [true, "Order is required!"]
     },
     title: {
       type: String,
+      default: "",
       required: [true, "Title is required!"]
     }
   },

@@ -34,6 +34,7 @@ export async function insertUser(id, body) {
     email: body.email,
     phone: body.phone,
     accessToken: body.accessToken,
+    picture: body.picture,
     isActivated: true
   });
   return await User.find();
@@ -46,6 +47,7 @@ export async function editUser(id, body) {
     email: body.email,
     phone: body.phone,
     accessToken: body.accessToken,
+    picture: body.picture,
     isActivated: true
   });
   return await User.find();

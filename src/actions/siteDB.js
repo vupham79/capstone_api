@@ -36,13 +36,13 @@ export async function createSite() {
   });
 }
 
-export async function insertSite(id, body) {
-  const PostResult = await Post.findOne({ id: id });
-  const UserResult = await User.findOne({ id: id });
-  const NavItemResult = await NavItem.findOne({ id: id });
-  const HomePageImageResult = await HomePageImage.findOne({ id: id });
+export async function insertSite(pageId, postId, userId, body) {
+  const PostResult = await Post.findOne({ id: postId });
+  const UserResult = await User.findOne({ id: userId });
+  const NavItemResult = await NavItem.findOne({ id: pageId });
+  const HomePageImageResult = await HomePageImage.findOne({ id: pageId });
   await Site.collection.insertOne({
-    id: id,
+    id: pageId,
     phone: body.phone,
     longitude: body.longitude,
     latitude: body.latitude,

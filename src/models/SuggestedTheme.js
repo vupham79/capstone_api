@@ -4,10 +4,12 @@ const SuggestedThemeSchema = new mongoose.Schema(
   {
     id: {
       type: String,
+      default: "",
       required: [true, "Id is required!"]
     },
     name: {
       type: String,
+      default: "",
       required: [true, "Name is required!"]
     }
   },
@@ -16,4 +18,4 @@ const SuggestedThemeSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("SuggestedTheme", CategorySchema);
+export default mongoose.model("SuggestedTheme", SuggestedThemeSchema);

@@ -4,11 +4,13 @@ const PostSchema = new mongoose.Schema(
   {
     id: {
       type: String,
+      default: "",
       required: [true, "Id is required!"],
       unique: [true, "Id already existed!"]
     },
     content: {
       type: String,
+      default: "",
       required: [true, "Content is required!"]
     },
     videoId: [{ type: Schema.Types.ObjectId, ref: "Video" }],

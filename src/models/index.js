@@ -8,6 +8,8 @@ import Site from "./Site";
 import SuggestedColor from "./SuggestedColor";
 import Video from "./Video";
 import HomePageImage from "./HomePageImage";
+import Category from "./Category";
+import SuggestedTheme from "./SuggestedTheme";
 require("dotenv").config();
 
 const connectDb = () => {
@@ -35,5 +37,7 @@ export {
   Site,
   SuggestedColor,
   Video,
-  HomePageImage
+  HomePageImage,
+  SuggestedTheme,
+  Category
 };
