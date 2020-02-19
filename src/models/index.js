@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import User from "./User";
 import Theme from "./Theme";
-import NavItem from "./NavItem";
 import Image from "./Image";
 import Post from "./Post";
 import Site from "./Site";
@@ -31,7 +30,6 @@ export {
   connectDb,
   User,
   Theme,
-  NavItem,
   Image,
   Post,
   Site,

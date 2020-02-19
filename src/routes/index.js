@@ -2,7 +2,6 @@ import theme from "./theme";
 import image from "./image";
 import user from "./user";
 import video from "./video";
-import navItem from "./navItem";
 import post from "./post";
 import site from "./site";
 import homePageImage from "./homePageImage";
@@ -20,7 +19,6 @@ export default app => {
   app.use("/suggestedColor", suggestedColor);
   app.use("/site", site);
   app.use("/post", post);
-  app.use("/navItem", navItem);
   app.use("/homePageImage", homePageImage);
   app.use("/facebook", facebook);
   app.use("/readColor", readColor);

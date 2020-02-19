@@ -19,17 +19,12 @@ import {
   editHomePageImage
 } from "../actions/homePageImageDB";
 import { insertImage, findOneImage, editImage } from "../actions/imageDB";
-import {
-  insertNavItem,
-  findOneNavItem,
-  editNavItem
-} from "../actions/navItemDB";
 import { insertUser, findOneUser, editUser } from "../actions/userDB";
 import { insertPost, findOnePost, editPost } from "../actions/postDB";
 import { insertSite, findOneSite, editSite } from "../actions/siteDB";
 import { insertVideo, findOneVideo, editVideo } from "../actions/videoDB";
 import { Router } from "express";
-import { Site, Post, User, NavItem, HomePageImage } from "../models";
+import { Site, Post, User, HomePageImage } from "../models";
 import {
   insertCategory,
   editCategory,
@@ -98,6 +93,15 @@ router.post("/confirmPage", async (req, res) => {
   });
   console.log(JSON.stringify(req.body.picture));
   if (data) {
+    let navItemsList = [];
+    req.body.navItems.forEach(navItem => {
+      navItemsList.push({
+        id: req.body.pageId,
+        order: navItem.order,
+        title: navItem.name
+      });
+    });
+
     const saveImage = new Promise(async function(resolve, reject) {
       data.posts &&
         (await data.posts.data.forEach(async image => {
@@ -122,23 +126,6 @@ router.post("/confirmPage", async (req, res) => {
           } else {
             await editVideo(video.id, {
               url: video.permalink_url === null ? "" : video.permalink_url
-            });
-          }
-        }));
-    });
-    const saveNavItem = new Promise(async function(resolve, reject) {
-      req.body.navItems &&
-        (await req.body.navItems.forEach(async navItem => {
-          const exist = await findOneNavItem(req.body.pageId);
-          if (!exist) {
-            await insertNavItem(req.body.pageId, {
-              order: navItem.order === null ? "" : navItem.order,
-              title: navItem.name === null ? "" : navItem.name
-            });
-          } else {
-            await editNavItem(req.body.pageId, {
-              order: navItem.order === null ? "" : navItem.order,
-              title: navItem.name === null ? "" : navItem.name
             });
           }
         }));
@@ -206,7 +193,6 @@ router.post("/confirmPage", async (req, res) => {
     Promise.all([
       saveImage,
       saveVideo,
-      saveNavItem,
       saveHomePageImage,
       saveColor,
       saveUser,
@@ -245,7 +231,8 @@ router.post("/confirmPage", async (req, res) => {
                 address:
                   data.single_line_address === null
                     ? ""
-                    : data.single_line_address
+                    : data.single_line_address,
+                navItems: navItemsList === null ? [] : navItemsList
               });
             } else {
               await editSite(req.body.pageId, post.id, req.body.profile.id, {
@@ -265,7 +252,8 @@ router.post("/confirmPage", async (req, res) => {
                 address:
                   data.single_line_address === null
                     ? ""
-                    : data.single_line_address
+                    : data.single_line_address,
+                navItems: navItemsList === null ? [] : navItemsList
               });
             }
           });

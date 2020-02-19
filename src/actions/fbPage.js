@@ -4,7 +4,6 @@ import { insertTheme } from "../actions/themeDB";
 import { insertSuggestedColor } from "../actions/suggestedColorDB";
 import { insertHomePageImage } from "../actions/homePageImageDB";
 import { insertImage } from "../actions/imageDB";
-import { insertNavItem } from "../actions/navItemDB";
 import { insertPost } from "../actions/postDB";
 import { insertSite } from "../actions/siteDB";
 import { insertUser } from "../actions/userDB";

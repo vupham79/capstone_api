@@ -32,7 +32,7 @@ export async function createTheme() {
     path: "suggestedColorId siteId",
     populate: [
       {
-        path: "postId userId navItemId homePageImageId"
+        path: "postId userId homePageImageId"
       }
     ]
   });
@@ -52,7 +52,7 @@ export async function insertTheme(id, body) {
     path: "suggestedColorId siteId",
     populate: [
       {
-        path: "postId userId navItemId homePageImageId"
+        path: "postId userId homePageImageId"
       }
     ]
   });
@@ -68,7 +68,7 @@ export async function editTheme(id, body) {
     path: "suggestedColorId siteId",
     populate: [
       {
-        path: "postId userId navItemId homePageImageId"
+        path: "postId userId homePageImageId"
       }
     ]
   });
@@ -79,7 +79,7 @@ export async function findAllTheme() {
     path: "suggestedColorId siteId",
     populate: [
       {
-        path: "postId userId navItemId homePageImageId"
+        path: "postId userId homePageImageId"
       }
     ]
   });
@@ -90,7 +90,7 @@ export async function findOneTheme(id) {
     path: "suggestedColorId siteId",
     populate: [
       {
-        path: "postId userId navItemId homePageImageId"
+        path: "postId userId homePageImageId"
       }
     ]
   });
