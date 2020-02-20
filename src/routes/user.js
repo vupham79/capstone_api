@@ -20,7 +20,6 @@ router.get("/create", async (req, res) => {
 });
 
 router.post("/insert/:id", async (req, res) => {
-  console.log(req.body);
   await insertUser(req.params.id, req.body)
     .then(result => {
       return res.status(200).send(result);
@@ -53,7 +52,6 @@ router.get("/find/:id", async (req, res) => {
 router.get("/findAll", async (req, res) => {
   await findAllUser()
     .then(result => {
-      console.log("abc");
       return res.status(200).send(result);
     })
     .catch(error => {

@@ -227,7 +227,6 @@ router.post("/confirmPage", async (req, res) => {
 
       const siteExist = await findOneSite(req.body.pageId);
       if (!siteExist) {
-        console.log("Not exist");
         await insertSite(req.body.pageId, req.body.profile.id, {
           phone: data.phone === null ? "" : data.phone,
           longitude:
@@ -245,8 +244,6 @@ router.post("/confirmPage", async (req, res) => {
           posts: postsIdList
         });
       } else {
-        console.log(req.body);
-        console.log(data.phone);
         await editSite(req.body.pageId, {
           phone: data.phone === null ? "" : data.phone,
           longitude:

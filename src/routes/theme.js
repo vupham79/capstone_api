@@ -30,7 +30,6 @@ router.post("/insert/:id", async (req, res) => {
 });
 
 router.patch("/update/:id", async (req, res) => {
-  console.log(req.body);
   await editTheme(req.params.id, req.body)
     .then(result => {
       return res.status(200).send(result);

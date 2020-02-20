@@ -97,7 +97,6 @@ export async function insertSite(pageId, userId, body) {
 }
 
 export async function editSite(id, body) {
-  console.log(body);
   const SiteResult = await Site.findOne({ id: id });
   await SiteResult.updateOne({
     phone: body.phone,
@@ -110,7 +109,7 @@ export async function editSite(id, body) {
     title: body.title,
     address: body.address,
     navItems: body.navItems,
-    posts: []
+    posts: body.posts
   });
   return await Site.find().populate({
     path: " posts userId homePageImageId",
