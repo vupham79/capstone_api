@@ -51,13 +51,13 @@ export async function createSite() {
         }
       ],
       isActivated: true,
-      postId: PostResult._id,
+      posts: [PostResult._id],
       userId: UserResult._id,
       homePageImageId: HomePageImageResult._id
     }
   ]);
   return await Site.find().populate({
-    path: "postId userId homePageImageId",
+    path: " posts userId homePageImageId",
     populate: [
       {
         path: "videoId imageId"
@@ -66,8 +66,7 @@ export async function createSite() {
   });
 }
 
-export async function insertSite(pageId, postId, userId, body) {
-  const PostResult = await Post.findOne({ id: postId });
+export async function insertSite(pageId, userId, body) {
   const UserResult = await User.findOne({ id: userId });
   const HomePageImageResult = await HomePageImage.findOne({ id: pageId });
   await Site.collection.insertOne({
@@ -83,12 +82,12 @@ export async function insertSite(pageId, postId, userId, body) {
     address: body.address,
     navItems: body.navItems,
     isActivated: true,
-    postId: PostResult._id,
+    posts: body.posts,
     userId: UserResult._id,
     homePageImageId: HomePageImageResult._id
   });
   return await Site.find().populate({
-    path: "postId userId homePageImageId",
+    path: " posts userId homePageImageId",
     populate: [
       {
         path: "videoId imageId"
@@ -98,6 +97,7 @@ export async function insertSite(pageId, postId, userId, body) {
 }
 
 export async function editSite(id, body) {
+  console.log(body);
   const SiteResult = await Site.findOne({ id: id });
   await SiteResult.updateOne({
     phone: body.phone,
@@ -109,10 +109,11 @@ export async function editSite(id, body) {
     category: body.category,
     title: body.title,
     address: body.address,
-    navItems: body.navItems
+    navItems: body.navItems,
+    posts: []
   });
   return await Site.find().populate({
-    path: "postId userId homePageImageId",
+    path: " posts userId homePageImageId",
     populate: [
       {
         path: "videoId imageId"
@@ -127,7 +128,7 @@ export async function deleteSite(id) {
     isActivated: false
   });
   return await Site.find().populate({
-    path: "postId userId homePageImageId",
+    path: " posts userId homePageImageId",
     populate: [
       {
         path: "videoId imageId"
@@ -138,7 +139,7 @@ export async function deleteSite(id) {
 
 export async function findAllSite() {
   return await Site.find().populate({
-    path: "postId userId homePageImageId",
+    path: " posts userId homePageImageId",
     populate: [
       {
         path: "videoId imageId"
@@ -149,7 +150,7 @@ export async function findAllSite() {
 
 export async function findOneSite(id) {
   return await Site.findOne({ id: id }).populate({
-    path: "postId userId homePageImageId",
+    path: " posts userId homePageImageId",
     populate: [
       {
         path: "videoId imageId"

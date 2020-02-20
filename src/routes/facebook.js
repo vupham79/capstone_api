@@ -20,7 +20,12 @@ import {
 } from "../actions/homePageImageDB";
 import { insertImage, findOneImage, editImage } from "../actions/imageDB";
 import { insertUser, findOneUser, editUser } from "../actions/userDB";
-import { insertPost, findOnePost, editPost } from "../actions/postDB";
+import {
+  insertPost,
+  findOnePost,
+  editPost,
+  findAllPost
+} from "../actions/postDB";
 import { insertSite, findOneSite, editSite } from "../actions/siteDB";
 import { insertVideo, findOneVideo, editVideo } from "../actions/videoDB";
 import { Router } from "express";
@@ -91,17 +96,15 @@ router.post("/confirmPage", async (req, res) => {
     pageId: req.body.pageId,
     access_token: req.body.accessToken
   });
-  console.log(JSON.stringify(req.body.picture));
   if (data) {
     let navItemsList = [];
     req.body.navItems.forEach(navItem => {
       navItemsList.push({
-        id: req.body.pageId,
         order: navItem.order,
-        title: navItem.name
+        title: navItem.name,
+        isActive: true
       });
     });
-
     const saveImage = new Promise(async function(resolve, reject) {
       data.posts &&
         (await data.posts.data.forEach(async image => {
@@ -211,56 +214,59 @@ router.post("/confirmPage", async (req, res) => {
               content: post.message === null ? "" : post.message
             });
           }
-          const saveSite = new Promise(async function(resolve, reject) {
-            const siteExist = await findOneSite(req.body.pageId);
-            if (!siteExist) {
-              await insertSite(req.body.pageId, post.id, req.body.profile.id, {
-                phone: data.phone === null ? "" : data.phone,
-                longitude:
-                  data.location.longitude === null
-                    ? ""
-                    : data.location.longitude,
-                latitude:
-                  data.location.latitude === null ? "" : data.location.latitude,
-                logo: data.logo ? "" : data.logo,
-                fontTitle:
-                  req.body.fontTitle === null ? "" : req.body.fontTitle,
-                fontBody: req.body.fontBody === null ? "" : req.body.fontBody,
-                category: "a",
-                title: req.body.name === null ? "" : req.body.name,
-                address:
-                  data.single_line_address === null
-                    ? ""
-                    : data.single_line_address,
-                navItems: navItemsList === null ? [] : navItemsList
-              });
-            } else {
-              await editSite(req.body.pageId, post.id, req.body.profile.id, {
-                phone: data.phone === null ? "" : data.phone,
-                longitude:
-                  data.location.longitude === null
-                    ? ""
-                    : data.location.longitude,
-                latitude:
-                  data.location.latitude === null ? "" : data.location.latitude,
-                logo: data.logo === null ? "" : data.logo,
-                fontTitle:
-                  req.body.fontTitle === null ? "" : req.body.fontTitle,
-                fontBody: req.body.fontBody === null ? "" : req.body.fontBody,
-                category: "a",
-                title: req.body.name === null ? "" : req.body.name,
-                address:
-                  data.single_line_address === null
-                    ? ""
-                    : data.single_line_address,
-                navItems: navItemsList === null ? [] : navItemsList
-              });
-            }
-          });
-          Promise.all([saveSite]).finally(function(response) {});
         });
     });
     Promise.all([savePost]).finally(async function(response) {});
+
+    const saveSite = new Promise(async function(resolve, reject) {
+      const postsList = await findAllPost();
+      let postsIdList = [];
+      postsList.forEach(post => {
+        postsIdList.push(post._id);
+      });
+
+      const siteExist = await findOneSite(req.body.pageId);
+      if (!siteExist) {
+        console.log("Not exist");
+        await insertSite(req.body.pageId, req.body.profile.id, {
+          phone: data.phone === null ? "" : data.phone,
+          longitude:
+            data.location.longitude === null ? "" : data.location.longitude,
+          latitude:
+            data.location.latitude === null ? "" : data.location.latitude,
+          logo: data.logo ? "" : data.logo,
+          fontTitle: req.body.fontTitle === null ? "" : req.body.fontTitle,
+          fontBody: req.body.fontBody === null ? "" : req.body.fontBody,
+          category: "a",
+          title: req.body.name === null ? "" : req.body.name,
+          address:
+            data.single_line_address === null ? "" : data.single_line_address,
+          navItems: navItemsList === null ? [] : navItemsList,
+          posts: postsIdList
+        });
+      } else {
+        console.log(req.body);
+        console.log(data.phone);
+        await editSite(req.body.pageId, {
+          phone: data.phone === null ? "" : data.phone,
+          longitude:
+            data.location.longitude === null ? "" : data.location.longitude,
+          latitude:
+            data.location.latitude === null ? "" : data.location.latitude,
+          logo: data.logo === null ? "" : data.logo,
+          fontTitle: req.body.fontTitle === null ? "" : req.body.fontTitle,
+          fontBody: req.body.fontBody === null ? "" : req.body.fontBody,
+          category: "a",
+          title: req.body.name === null ? "" : req.body.name,
+          address:
+            data.single_line_address === null ? "" : data.single_line_address,
+          navItems: navItemsList === null ? [] : navItemsList,
+          posts: postsIdList
+        });
+      }
+    });
+    Promise.all([saveSite]).finally(function(response) {});
+
     const saveTheme = new Promise(async function(resolve, reject) {
       const themeExist = await findOneTheme(req.body.pageId);
       if (!themeExist) {

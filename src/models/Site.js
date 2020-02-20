@@ -59,7 +59,7 @@ const SiteSchema = new mongoose.Schema(
       required: [true, "Navigation item is required!"]
     },
     isActivated: Boolean,
-    postId: [{ type: Schema.Types.ObjectId, ref: "Post" }],
+    posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
     userId: [{ type: Schema.Types.ObjectId, ref: "User" }],
     homePageImageId: [{ type: Schema.Types.ObjectId, ref: "HomePageImage" }]
   },
