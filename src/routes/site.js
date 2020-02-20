@@ -5,7 +5,8 @@ import {
   editSite,
   deleteSite,
   findAllSite,
-  findOneSite
+  findOneSite,
+  findAllSiteByUser
 } from "../actions/siteDB";
 
 const router = Router();
@@ -52,6 +53,16 @@ router.patch("/delete/:id", async (req, res) => {
 
 router.get("/find/:id", async (req, res) => {
   await findOneSite(req.params.id)
+    .then(result => {
+      return res.status(200).send(result);
+    })
+    .catch(error => {
+      return res.status(500).send("Something broke!");
+    });
+});
+
+router.get("/findAllByUser/:id", async (req, res) => {
+  await findAllSiteByUser(req.params.id)
     .then(result => {
       return res.status(200).send(result);
     })

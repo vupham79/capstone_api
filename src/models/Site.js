@@ -38,11 +38,6 @@ const SiteSchema = new mongoose.Schema(
       default: "",
       required: [true, "Font body is required!"]
     },
-    category: {
-      type: String,
-      default: "",
-      required: [true, "Category is required!"]
-    },
     title: {
       type: String,
       default: "",
@@ -58,7 +53,7 @@ const SiteSchema = new mongoose.Schema(
       default: [],
       required: [true, "Navigation item is required!"]
     },
-    isActivated: Boolean,
+    isPublish: Boolean,
     posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
     userId: [{ type: Schema.Types.ObjectId, ref: "User" }],
     homePageImageId: [{ type: Schema.Types.ObjectId, ref: "HomePageImage" }]

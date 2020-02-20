@@ -9,7 +9,8 @@ const UserSchema = new mongoose.Schema(
     },
     picture: {
       type: String,
-      default: ""
+      default: "",
+      required: [true, "Picture is required!"]
     },
     displayName: {
       type: String,

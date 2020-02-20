@@ -9,11 +9,6 @@ import {
 } from "../actions/fbPage";
 import { insertTheme, findOneTheme, editTheme } from "../actions/themeDB";
 import {
-  insertSuggestedColor,
-  findOneSuggestedColor,
-  editSuggestedColor
-} from "../actions/suggestedColorDB";
-import {
   insertHomePageImage,
   findOneHomePageImage,
   editHomePageImage
@@ -35,11 +30,6 @@ import {
   editCategory,
   findOneCategory
 } from "../actions/categoryDB";
-import {
-  insertSuggestedTheme,
-  editSuggestedTheme,
-  findOneSuggestedTheme
-} from "../actions/suggestedThemeDB";
 
 const router = Router();
 
@@ -92,6 +82,7 @@ router.get("/pageImage/download/:id", async (req, res) => {
 });
 
 router.post("/confirmPage", async (req, res) => {
+  // console.log(req.body);
   const data = await confirmPage({
     pageId: req.body.pageId,
     access_token: req.body.accessToken
@@ -105,113 +96,69 @@ router.post("/confirmPage", async (req, res) => {
         isActive: true
       });
     });
-    const saveImage = new Promise(async function(resolve, reject) {
+    let categoryList = [];
+    req.body.pages.forEach(page => {
+      categoryList.push({
+        id: req.body.pageId,
+        category: page.category
+      });
+    });
+    const saveImage = new Promise(function(resolve, reject) {
       data.posts &&
-        (await data.posts.data.forEach(async image => {
-          if ((await findOneImage(image.id)) === null) {
-            await insertImage(image.id, {
-              url: image.full_picture === null ? "" : image.full_picture
+        data.posts.data.forEach(async post => {
+          const existImage = await findOneImage(post.id);
+          if (!existImage) {
+            await insertImage(post.id, {
+              url: post.full_picture ? post.full_picture : ""
             });
           } else {
-            await editImage(image.id, {
-              url: image.full_picture === null ? "" : image.full_picture
+            await editImage(post.id, {
+              url: post.full_picture ? post.full_picture : ""
             });
           }
-        }));
+        });
     });
-    const saveVideo = new Promise(async function(resolve, reject) {
+    const saveVideo = new Promise(function(resolve, reject) {
       data.videos &&
-        (await data.videos.data.forEach(async video => {
-          if ((await findOneVideo(video.id)) === null) {
+        data.videos.data.forEach(async video => {
+          const videoExist = await findOneVideo(video.id);
+          if (!videoExist) {
             await insertVideo(video.id, {
-              url: video.permalink_url === null ? "" : video.permalink_url
+              url: video.permalink_url ? video.permalink_url : ""
             });
           } else {
             await editVideo(video.id, {
-              url: video.permalink_url === null ? "" : video.permalink_url
+              url: video.permalink_url ? video.permalink_url : ""
             });
           }
-        }));
-    });
-    const saveColor = new Promise(async function(resolve, reject) {
-      const colorExist = await findOneSuggestedColor(req.body.pageId);
-      if (!colorExist) {
-        await insertSuggestedColor(req.body.pageId, {
-          color: req.body.color === null ? "" : req.body.color
         });
-      } else {
-        await editSuggestedColor(req.body.pageId, {
-          color: req.body.color === null ? "" : req.body.color
-        });
-      }
     });
     const saveHomePageImage = new Promise(async function(resolve, reject) {
       const homePageImageExist = await findOneHomePageImage(req.body.pageId);
       if (!homePageImageExist) {
         await insertHomePageImage(req.body.pageId, {
-          url: data.cover.source === null ? "" : data.cover.source
+          url: data.cover.source ? data.cover.source : ""
         });
       } else {
         await editHomePageImage(req.body.pageId, {
-          url: data.cover.source === null ? "" : data.cover.source
+          url: data.cover.source ? data.cover.source : ""
         });
       }
     });
-    const saveUser = new Promise(async function(resolve, reject) {
-      const userExist = await findOneUser(req.body.profile.id);
-      if (!userExist) {
-        await insertUser(req.body.profile.id, {
-          displayName:
-            req.body.profile.name === null ? "" : req.body.profile.name,
-          email: req.body.email === null ? "" : req.body.email,
-          phone: data.phone === null ? "" : data.phone,
-          accessToken:
-            req.body.accessToken === null ? "" : req.body.accessToken,
-          picture: req.body.picture === null ? "" : req.body.picture
-        });
-      } else {
-        await editUser(req.body.profile.id, {
-          isplayName:
-            req.body.profile.name === null ? "" : req.body.profile.name,
-          email: req.body.email === null ? "" : req.body.email,
-          phone: data.phone === null ? "" : data.phone,
-          accessToken:
-            req.body.accessToken === null ? "" : req.body.accessToken,
-          picture: req.body.picture === null ? "" : req.body.picture
-        });
-      }
-    });
-    const saveSuggestedTheme = new Promise(async function(resolve, reject) {
-      const suggestedThemeExist = await findOneSuggestedTheme(req.body.pageId);
-      if (!suggestedThemeExist) {
-        await insertSuggestedTheme(req.body.pageId, {
-          name: req.body.name === null ? "" : req.body.name
-        });
-      } else {
-        await editSuggestedTheme(req.body.pageId, {
-          name: req.body.name === null ? "" : req.body.name
-        });
-      }
-    });
-    Promise.all([
-      saveImage,
-      saveVideo,
-      saveHomePageImage,
-      saveColor,
-      saveUser,
-      saveSuggestedTheme
-    ]).then(function(response) {});
+    Promise.all([saveImage, saveVideo, saveHomePageImage]).then(function(
+      response
+    ) {});
     const savePost = new Promise(async function(resolve, reject) {
       data.posts &&
         data.posts.data.forEach(async post => {
           const exist = await findOnePost(post.id);
           if (!exist) {
             await insertPost(post.id, {
-              content: post.message === null ? "" : post.message
+              content: post.message ? post.message : ""
             });
           } else {
             await editPost(post.id, {
-              content: post.message === null ? "" : post.message
+              content: post.message ? post.message : ""
             });
           }
         });
@@ -224,41 +171,32 @@ router.post("/confirmPage", async (req, res) => {
       postsList.forEach(post => {
         postsIdList.push(post._id);
       });
-
       const siteExist = await findOneSite(req.body.pageId);
       if (!siteExist) {
         await insertSite(req.body.pageId, req.body.profile.id, {
-          phone: data.phone === null ? "" : data.phone,
-          longitude:
-            data.location.longitude === null ? "" : data.location.longitude,
-          latitude:
-            data.location.latitude === null ? "" : data.location.latitude,
-          logo: data.logo ? "" : data.logo,
-          fontTitle: req.body.fontTitle === null ? "" : req.body.fontTitle,
-          fontBody: req.body.fontBody === null ? "" : req.body.fontBody,
-          category: "a",
-          title: req.body.name === null ? "" : req.body.name,
-          address:
-            data.single_line_address === null ? "" : data.single_line_address,
-          navItems: navItemsList === null ? [] : navItemsList,
-          posts: postsIdList
+          phone: data.phone ? data.phone : "",
+          longitude: data.location.longitude ? data.location.longitude : "",
+          latitude: data.location.latitude ? data.location.latitude : "",
+          logo: data.logo ? data.logo : "",
+          fontTitle: req.body.fontTitle ? req.body.fontTitle : "",
+          fontBody: req.body.fontBody ? req.body.fontBody : "",
+          title: req.body.name ? req.body.name : "",
+          address: data.single_line_address ? data.single_line_address : "",
+          navItems: navItemsList ? navItemsList : [],
+          posts: postsIdList ? postsIdList : []
         });
       } else {
         await editSite(req.body.pageId, {
-          phone: data.phone === null ? "" : data.phone,
-          longitude:
-            data.location.longitude === null ? "" : data.location.longitude,
-          latitude:
-            data.location.latitude === null ? "" : data.location.latitude,
-          logo: data.logo === null ? "" : data.logo,
-          fontTitle: req.body.fontTitle === null ? "" : req.body.fontTitle,
-          fontBody: req.body.fontBody === null ? "" : req.body.fontBody,
-          category: "a",
-          title: req.body.name === null ? "" : req.body.name,
-          address:
-            data.single_line_address === null ? "" : data.single_line_address,
-          navItems: navItemsList === null ? [] : navItemsList,
-          posts: postsIdList
+          phone: data.phone ? data.phone : "",
+          longitude: data.location.longitude ? data.location.longitude : "",
+          latitude: data.location.latitude ? data.location.latitude : "",
+          logo: data.logo ? data.logo : "",
+          fontTitle: req.body.fontTitle ? req.body.fontTitle : "",
+          fontBody: req.body.fontBody ? req.body.fontBody : "",
+          title: req.body.name ? req.body.name : "",
+          address: data.single_line_address ? data.single_line_address : "",
+          navItems: navItemsList ? navItemsList : [],
+          posts: postsIdList ? postsIdList : []
         });
       }
     });
@@ -267,14 +205,23 @@ router.post("/confirmPage", async (req, res) => {
     const saveTheme = new Promise(async function(resolve, reject) {
       const themeExist = await findOneTheme(req.body.pageId);
       if (!themeExist) {
+        console.log("not exist");
+        console.log(req.body.fontTitle);
+        console.log(req.body.color);
+        console.log(categoryList);
         await insertTheme(req.body.pageId, {
-          name: req.body.name === null ? "" : req.body.name,
-          suggested_font: req.body.fontTitle === null ? "" : req.body.fontTitle
+          name: req.body.name ? req.body.name : "",
+          mainFont: req.body.fontTitle ? req.body.fontTitle : "",
+          mainColor: req.body.color ? req.body.color : "",
+          categories: categoryList ? categoryList : []
         });
       } else {
+        console.log("exist");
         await editTheme(req.body.pageId, {
-          name: req.body.name === null ? "" : req.body.name,
-          suggested_font: req.body.fontTitle === null ? "" : req.body.fontTitle
+          name: req.body.name ? req.body.name : "",
+          mainFont: req.body.fontTitle ? req.body.fontTitle : "",
+          mainColor: req.body.color ? req.body.color : "",
+          categories: categoryList ? categoryList : []
         });
       }
     });
@@ -282,15 +229,16 @@ router.post("/confirmPage", async (req, res) => {
       const categoryExist = await findOneCategory(req.body.pageId);
       if (!categoryExist) {
         await insertCategory(req.body.pageId, {
-          name: req.body.name === null ? "" : req.body.name
+          name: req.body.name ? req.body.name : ""
         });
       } else {
         await editCategory(req.body.pageId, {
-          name: req.body.name === null ? "" : req.body.name
+          name: req.body.name ? req.body.name : ""
         });
       }
     });
     Promise.all([saveTheme, saveCategory]).finally(function(response) {});
+    return res.status(200).send(data);
   }
   return res.status(500).send("No data found!");
 });

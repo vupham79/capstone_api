@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Category, SuggestedTheme } from "../models";
+import { Category } from "../models";
 require("dotenv").config();
 
 export async function createCategory() {
@@ -21,11 +21,9 @@ export async function createCategory() {
 }
 
 export async function insertCategory(id, body) {
-  const SuggestedThemeResult = await SuggestedTheme.findOne({ id: id });
   await Category.collection.insertOne({
     id: id,
-    name: body.name,
-    suggestedThemeId: SuggestedThemeResult && SuggestedThemeResult._id
+    name: body.name
   });
   return await Category.find();
 }

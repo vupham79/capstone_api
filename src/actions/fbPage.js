@@ -1,7 +1,6 @@
 import axios from "../utils/axios";
 import bucket from "../utils/firebase";
 import { insertTheme } from "../actions/themeDB";
-import { insertSuggestedColor } from "../actions/suggestedColorDB";
 import { insertHomePageImage } from "../actions/homePageImageDB";
 import { insertImage } from "../actions/imageDB";
 import { insertPost } from "../actions/postDB";

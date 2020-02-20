@@ -15,7 +15,6 @@ export async function createSite() {
       logo: "https://i.ibb.co/gVpcW78/pv-featured-images.jpg",
       fontTitle: "Arial",
       fontBody: "Times New Roman",
-      category: "Product",
       title: "Pianissimo",
       address: "689/7/10 Huong Lo 2",
       navItems: [
@@ -50,7 +49,7 @@ export async function createSite() {
           order: 6
         }
       ],
-      isActivated: true,
+      isPublish: true,
       posts: [PostResult._id],
       userId: UserResult._id,
       homePageImageId: HomePageImageResult._id
@@ -77,11 +76,10 @@ export async function insertSite(pageId, userId, body) {
     logo: body.logo,
     fontTitle: body.fontTitle,
     fontBody: body.fontBody,
-    category: body.category,
     title: body.title,
     address: body.address,
     navItems: body.navItems,
-    isActivated: true,
+    isPublish: true,
     posts: body.posts,
     userId: UserResult._id,
     homePageImageId: HomePageImageResult._id
@@ -105,7 +103,6 @@ export async function editSite(id, body) {
     logo: body.logo,
     fontTitle: body.fontTitle,
     fontBody: body.fontBody,
-    category: body.category,
     title: body.title,
     address: body.address,
     navItems: body.navItems,
@@ -124,7 +121,7 @@ export async function editSite(id, body) {
 export async function deleteSite(id) {
   const SiteResult = await Site.findOne({ id: id });
   await SiteResult.updateOne({
-    isActivated: false
+    isPublish: false
   });
   return await Site.find().populate({
     path: " posts userId homePageImageId",
@@ -156,4 +153,20 @@ export async function findOneSite(id) {
       }
     ]
   });
+}
+
+export async function findAllSiteByUser(id, accessToken) {
+  const user = await User.findOne({ id, accessToken });
+  if (user) {
+    const site = await Site.find({ userId: user.id }).populate({
+      path: " posts userId homePageImageId",
+      populate: [
+        {
+          path: "videoId imageId"
+        }
+      ]
+    });
+    return site;
+  }
+  return false;
 }

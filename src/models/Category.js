@@ -11,8 +11,7 @@ const CategorySchema = new mongoose.Schema(
       type: String,
       default: "",
       required: [true, "Name is required!"]
-    },
-    suggestedThemeId: [{ type: Schema.Types.ObjectId, ref: "SuggestedTheme" }]
+    }
   },
   {
     timestamps: true

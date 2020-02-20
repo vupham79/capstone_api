@@ -12,14 +12,22 @@ const ThemeSchema = new mongoose.Schema(
       default: "",
       required: [true, "Theme name is required!"]
     },
-    suggested_font: {
+    mainFont: {
       type: String,
       default: "",
-      required: [true, "Suggested font is required!"]
+      required: [true, "Main font is required!"]
     },
-    suggestedColorId: [{ type: Schema.Types.ObjectId, ref: "SuggestedColor" }],
-    siteId: [{ type: Schema.Types.ObjectId, ref: "Site" }],
-    suggestedThemeId: [{ type: Schema.Types.ObjectId, ref: "SuggestedTheme" }]
+    mainColor: {
+      type: String,
+      default: "",
+      required: [true, "Main color is required!"]
+    },
+    categories: {
+      type: Array,
+      default: [],
+      required: [true, "Categories are required!"]
+    },
+    siteId: { type: Schema.Types.ObjectId, ref: "Site" }
   },
   {
     timestamps: true
