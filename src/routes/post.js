@@ -7,20 +7,11 @@ import {
   findAllPost,
   findOnePost
 } from "../actions/postDB";
+import { authenticate } from "../actions/middleware";
 
 const router = Router();
 
-router.get("/create", async (req, res) => {
-  await createPost()
-    .then(result => {
-      return res.status(200).send(result);
-    })
-    .catch(error => {
-      return res.status(500).send(error);
-    });
-});
-
-router.post("/insert/:id", async (req, res) => {
+router.post("/insert/:id", authenticate, async (req, res) => {
   await insertPost(req.params.id, req.body)
     .then(result => {
       return res.status(200).send(result);
@@ -30,7 +21,7 @@ router.post("/insert/:id", async (req, res) => {
     });
 });
 
-router.patch("/update/:id", async (req, res) => {
+router.patch("/update/:id", authenticate, async (req, res) => {
   await editPost(req.params.id, req.body)
     .then(result => {
       return res.status(200).send(result);
@@ -40,7 +31,7 @@ router.patch("/update/:id", async (req, res) => {
     });
 });
 
-router.patch("/delete/:id", async (req, res) => {
+router.patch("/delete/:id", authenticate, async (req, res) => {
   await deletePost(req.params.id)
     .then(result => {
       return res.status(200).send(result);

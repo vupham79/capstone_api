@@ -22,12 +22,20 @@ const ThemeSchema = new mongoose.Schema(
       default: "",
       required: [true, "Main color is required!"]
     },
-    categories: {
-      type: Array,
-      default: [],
-      required: [true, "Categories are required!"]
-    },
-    siteId: { type: Schema.Types.ObjectId, ref: "Site" }
+    categories: [
+      {
+        id: {
+          type: String,
+          default: "",
+          required: [true, "Category id are required!"]
+        },
+        name: {
+          type: String,
+          default: "",
+          required: [true, "Category name are required!"]
+        }
+      }
+    ]
   },
   {
     timestamps: true

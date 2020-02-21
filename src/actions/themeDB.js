@@ -30,14 +30,7 @@ export async function createTheme() {
       siteId: SiteResult._id
     }
   ]);
-  return await Theme.find().populate({
-    path: "siteId",
-    populate: [
-      {
-        path: "posts userId homePageImageId"
-      }
-    ]
-  });
+  return await Theme.find();
 }
 
 export async function insertTheme(id, body) {
@@ -79,23 +72,14 @@ export async function editTheme(id, body) {
 }
 
 export async function findAllTheme() {
-  return await Theme.find().populate({
-    path: "siteId",
-    populate: [
-      {
-        path: "posts userId homePageImageId"
-      }
-    ]
-  });
+  return await Theme.find();
+}
+
+export async function findOneThemeByCategory(name) {
+  console.log(name);
+  return await Theme.findOne({ "categories.name": name });
 }
 
 export async function findOneTheme(id) {
-  return await Theme.findOne({ id: id }).populate({
-    path: "siteId",
-    populate: [
-      {
-        path: "posts userId homePageImageId"
-      }
-    ]
-  });
+  return await Theme.findOne({ id: id });
 }

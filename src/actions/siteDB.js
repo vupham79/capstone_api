@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 import { Site, Post, User, HomePageImage } from "../models";
 require("dotenv").config();
 
@@ -107,7 +107,7 @@ export async function editSite(id, body) {
     address: body.address,
     navItems: body.navItems,
     posts: body.posts
-  });
+  }).catch(error => console.log("error 3"));
   return await Site.find().populate({
     path: " posts userId homePageImageId",
     populate: [
@@ -144,6 +144,19 @@ export async function findAllSite() {
   });
 }
 
+export async function findOneSiteByAccessToken(id, body) {
+  return await Site.findOne({ id: id, accessToken: body.accessToken }).populate(
+    {
+      path: " posts userId homePageImageId",
+      populate: [
+        {
+          path: "videoId imageId"
+        }
+      ]
+    }
+  );
+}
+
 export async function findOneSite(id) {
   return await Site.findOne({ id: id }).populate({
     path: " posts userId homePageImageId",
@@ -156,16 +169,23 @@ export async function findOneSite(id) {
 }
 
 export async function findAllSiteByUser(id, accessToken) {
-  const user = await User.findOne({ id, accessToken });
+  const user = await User.findOne({
+    id: id,
+    accessToken: accessToken
+  }).catch(error => console.log("error 1"));
   if (user) {
-    const site = await Site.find({ userId: user.id }).populate({
-      path: " posts userId homePageImageId",
-      populate: [
-        {
-          path: "videoId imageId"
-        }
-      ]
-    });
+    const site = await Site.find({
+      userId: new mongoose.Types.ObjectId(user._id)
+    })
+      .populate({
+        path: "posts userId homePageImageId",
+        populate: [
+          {
+            path: "videoId imageId"
+          }
+        ]
+      })
+      .catch(error => console.log("error 2"));
     return site;
   }
   return false;

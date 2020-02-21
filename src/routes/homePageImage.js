@@ -6,20 +6,11 @@ import {
   findAllHomePageImage,
   findOneHomePageImage
 } from "../actions/homePageImageDB";
+import { authenticate } from "../actions/middleware";
 
 const router = Router();
 
-router.get("/create", async (req, res) => {
-  await createHomePageImage()
-    .then(result => {
-      return res.status(200).send(result);
-    })
-    .catch(error => {
-      return res.status(500).send("Something broke!");
-    });
-});
-
-router.post("/insert/:id", async (req, res) => {
+router.post("/insert/:id", authenticate, async (req, res) => {
   await insertHomePageImage(req.params.id, req.body)
     .then(result => {
       return res.status(200).send(result);
@@ -29,7 +20,7 @@ router.post("/insert/:id", async (req, res) => {
     });
 });
 
-router.patch("/update/:id", async (req, res) => {
+router.patch("/update/:id", authenticate, async (req, res) => {
   await editHomePageImage(req.params.id, req.body)
     .then(result => {
       return res.status(200).send(result);

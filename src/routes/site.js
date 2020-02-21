@@ -61,8 +61,8 @@ router.get("/find/:id", async (req, res) => {
     });
 });
 
-router.get("/findAllByUser/:id", async (req, res) => {
-  await findAllSiteByUser(req.params.id)
+router.get("/findAllByUser", async (req, res) => {
+  await findAllSiteByUser(req.body.userId, req.body.profile.accessToken)
     .then(result => {
       return res.status(200).send(result);
     })

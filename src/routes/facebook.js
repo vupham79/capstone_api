@@ -7,7 +7,12 @@ import {
   getUserPages,
   confirmPage
 } from "../actions/fbPage";
-import { insertTheme, findOneTheme, editTheme } from "../actions/themeDB";
+import {
+  insertTheme,
+  findOneTheme,
+  editTheme,
+  findOneThemeByCategory
+} from "../actions/themeDB";
 import {
   insertHomePageImage,
   findOneHomePageImage,
@@ -21,7 +26,13 @@ import {
   editPost,
   findAllPost
 } from "../actions/postDB";
-import { insertSite, findOneSite, editSite } from "../actions/siteDB";
+import {
+  insertSite,
+  findOneSite,
+  editSite,
+  findOneSiteByAccessToken,
+  findAllSiteByUser
+} from "../actions/siteDB";
 import { insertVideo, findOneVideo, editVideo } from "../actions/videoDB";
 import { Router } from "express";
 import { Site, Post, User, HomePageImage } from "../models";
@@ -30,19 +41,12 @@ import {
   editCategory,
   findOneCategory
 } from "../actions/categoryDB";
+import { authenticate } from "../actions/middleware";
 
 const router = Router();
 
 router.get("/pageInfo", async (req, res) => {
   const data = await getFacebookPageInfo();
-  if (data) {
-    return res.status(200).send(data);
-  }
-  return res.status(500).send("No data found!");
-});
-
-router.get("/pageToken", async (req, res) => {
-  const data = await getFacebookPageToken();
   if (data) {
     return res.status(200).send(data);
   }
@@ -57,32 +61,19 @@ router.get("/pages", async (req, res) => {
   return res.status(500).send("No data found!");
 });
 
-router.get("/pageImage/get/:id", async (req, res) => {
-  const data = await getPageImage(req.params.id);
+//authenticate
+router.get("/getSiteInfo", async (req, res) => {
+  const data = await findOneSiteByAccessToken(
+    req.params.pageId,
+    req.params.accessToken
+  );
   if (data) {
     return res.status(200).send(data);
   }
   return res.status(500).send("No data found!");
 });
 
-router.get("/pageImage/upload/:id", async (req, res) => {
-  const data = await uploadPageImage(req.params.id);
-  if (data) {
-    return res.status(200).send(data);
-  }
-  return res.status(500).send("No data found!");
-});
-
-router.get("/pageImage/download/:id", async (req, res) => {
-  const data = await downloadPageImage(req.params.id);
-  if (data) {
-    return res.status(200).send(data);
-  }
-  return res.status(500).send("No data found!");
-});
-
-router.post("/confirmPage", async (req, res) => {
-  // console.log(req.body);
+router.post("/confirmPage", authenticate, async (req, res) => {
   const data = await confirmPage({
     pageId: req.body.pageId,
     access_token: req.body.accessToken
@@ -173,7 +164,7 @@ router.post("/confirmPage", async (req, res) => {
       });
       const siteExist = await findOneSite(req.body.pageId);
       if (!siteExist) {
-        await insertSite(req.body.pageId, req.body.profile.id, {
+        await insertSite(req.body.pageId, req.body.userId, {
           phone: data.phone ? data.phone : "",
           longitude: data.location.longitude ? data.location.longitude : "",
           latitude: data.location.latitude ? data.location.latitude : "",
@@ -183,7 +174,8 @@ router.post("/confirmPage", async (req, res) => {
           title: req.body.name ? req.body.name : "",
           address: data.single_line_address ? data.single_line_address : "",
           navItems: navItemsList ? navItemsList : [],
-          posts: postsIdList ? postsIdList : []
+          posts: postsIdList ? postsIdList : [],
+          username: req.body.profile.name ? req.body.profile.name : ""
         });
       } else {
         await editSite(req.body.pageId, {
@@ -196,35 +188,34 @@ router.post("/confirmPage", async (req, res) => {
           title: req.body.name ? req.body.name : "",
           address: data.single_line_address ? data.single_line_address : "",
           navItems: navItemsList ? navItemsList : [],
-          posts: postsIdList ? postsIdList : []
+          posts: postsIdList ? postsIdList : [],
+          profile: req.body.profile ? req.body.profile : {}
         });
       }
     });
     Promise.all([saveSite]).finally(function(response) {});
 
-    const saveTheme = new Promise(async function(resolve, reject) {
-      const themeExist = await findOneTheme(req.body.pageId);
-      if (!themeExist) {
-        console.log("not exist");
-        console.log(req.body.fontTitle);
-        console.log(req.body.color);
-        console.log(categoryList);
-        await insertTheme(req.body.pageId, {
-          name: req.body.name ? req.body.name : "",
-          mainFont: req.body.fontTitle ? req.body.fontTitle : "",
-          mainColor: req.body.color ? req.body.color : "",
-          categories: categoryList ? categoryList : []
-        });
-      } else {
-        console.log("exist");
-        await editTheme(req.body.pageId, {
-          name: req.body.name ? req.body.name : "",
-          mainFont: req.body.fontTitle ? req.body.fontTitle : "",
-          mainColor: req.body.color ? req.body.color : "",
-          categories: categoryList ? categoryList : []
-        });
-      }
-    });
+    // const saveTheme = new Promise(async function(resolve, reject) {
+    // const themeExist = await findOneTheme(req.body.pageId);
+    // if (!themeExist) {
+    //   await insertTheme(req.body.pageId, {
+    //     name: req.body.name ? req.body.name : "",
+    //     mainFont: req.body.fontTitle ? req.body.fontTitle : "",
+    //     mainColor: req.body.color ? req.body.color : "",
+    //     categories: categoryList ? categoryList : []
+    //   });
+    // } else {
+    //   await editTheme(req.body.pageId, {
+    //     name: req.body.name ? req.body.name : "",
+    //     mainFont: req.body.fontTitle ? req.body.fontTitle : "",
+    //     mainColor: req.body.color ? req.body.color : "",
+    //     categories: categoryList ? categoryList : []
+    //   });
+    // }
+    // });
+    console.log(categoryList);
+    const theme = await findOneThemeByCategory(categoryList[0].category);
+    console.log(theme);
     const saveCategory = new Promise(async function(resolve, reject) {
       const categoryExist = await findOneCategory(req.body.pageId);
       if (!categoryExist) {
@@ -237,8 +228,14 @@ router.post("/confirmPage", async (req, res) => {
         });
       }
     });
-    Promise.all([saveTheme, saveCategory]).finally(function(response) {});
-    return res.status(200).send(data);
+    Promise.all([saveCategory]).finally(function(response) {});
+    const data2 = await findAllSiteByUser(
+      req.body.userId,
+      req.body.accessToken
+    );
+    // console.log(req.body.userId + "-" + req.body.accessToken);
+    // console.log(data2);
+    return res.status(200).send(data2);
   }
   return res.status(500).send("No data found!");
 });

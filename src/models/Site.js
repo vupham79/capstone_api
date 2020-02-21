@@ -55,8 +55,9 @@ const SiteSchema = new mongoose.Schema(
     },
     isPublish: Boolean,
     posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
-    userId: [{ type: Schema.Types.ObjectId, ref: "User" }],
-    homePageImageId: [{ type: Schema.Types.ObjectId, ref: "HomePageImage" }]
+    userId: { type: Schema.Types.ObjectId, ref: "User" },
+    homePageImageId: [{ type: Schema.Types.ObjectId, ref: "HomePageImage" }],
+    themeId: { type: Schema.Types.ObjectId, ref: "Theme" }
   },
   {
     timestamps: true
