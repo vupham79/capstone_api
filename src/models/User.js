@@ -4,28 +4,23 @@ const UserSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      default: "",
-      required: [true, "Id is required!"]
+      default: ""
     },
     picture: {
       type: String,
-      default: "",
-      required: [true, "Picture is required!"]
+      default: ""
     },
     displayName: {
       type: String,
-      default: "",
-      required: [true, "Display name is required!"]
+      default: ""
     },
     email: {
       type: String,
-      default: "",
-      required: [true, "Email is required!"]
+      default: ""
     },
     accessToken: {
       type: String,
-      default: "",
-      required: [true, "Access token is required!"]
+      default: ""
     }
   },
   {

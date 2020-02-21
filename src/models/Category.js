@@ -4,13 +4,11 @@ const CategorySchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      default: "",
-      required: [true, "Id is required!"]
+      default: ""
     },
     name: {
       type: String,
-      default: "",
-      required: [true, "Name is required!"]
+      default: ""
     }
   },
   {

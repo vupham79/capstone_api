@@ -4,13 +4,11 @@ const HomePageImageSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      default: "",
-      required: [true, "Id is required!"]
+      default: ""
     },
     url: {
       type: String,
-      default: "",
-      required: [true, "Home page url is required!"]
+      default: ""
     }
   },
   {

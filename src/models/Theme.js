@@ -4,35 +4,29 @@ const ThemeSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      default: "",
-      required: [true, "Id is required!"]
+      default: ""
     },
     name: {
       type: String,
-      default: "",
-      required: [true, "Theme name is required!"]
+      default: ""
     },
     mainFont: {
       type: String,
-      default: "",
-      required: [true, "Main font is required!"]
+      default: ""
     },
     mainColor: {
       type: String,
-      default: "",
-      required: [true, "Main color is required!"]
+      default: ""
     },
     categories: [
       {
         id: {
           type: String,
-          default: "",
-          required: [true, "Category id are required!"]
+          default: ""
         },
         name: {
           type: String,
-          default: "",
-          required: [true, "Category name are required!"]
+          default: ""
         }
       }
     ]

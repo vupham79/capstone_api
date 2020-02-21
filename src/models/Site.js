@@ -5,53 +5,43 @@ const SiteSchema = new mongoose.Schema(
     id: {
       type: String,
       default: "",
-      required: [true, "Id is required!"],
       unique: [true, "Id already existed!"]
     },
     phone: {
       type: String,
-      default: "",
-      required: [true, "Phone number required"]
+      default: ""
     },
     longitude: {
       type: String,
-      default: "",
-      required: [true, "Longitude is required!"]
+      default: ""
     },
     latitude: {
       type: String,
-      default: "",
-      required: [true, "Latitude is required!"]
+      default: ""
     },
     logo: {
       type: String,
-      default: "",
-      required: [true, "Logo is required!"]
+      default: ""
     },
     fontTitle: {
       type: String,
-      default: "",
-      required: [true, "Font title is required!"]
+      default: ""
     },
     fontBody: {
       type: String,
-      default: "",
-      required: [true, "Font body is required!"]
+      default: ""
     },
     title: {
       type: String,
-      default: "",
-      required: [true, "Title is required!"]
+      default: ""
     },
     address: {
       type: String,
-      default: "",
-      required: false
+      default: ""
     },
     navItems: {
       type: Array,
-      default: [],
-      required: [true, "Navigation item is required!"]
+      default: []
     },
     isPublish: Boolean,
     posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
