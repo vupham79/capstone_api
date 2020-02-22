@@ -1,22 +1,6 @@
-import {
-  getFacebookPageInfo,
-  getUserPages,
-  getPageData
-} from "../actions/fbPage";
-import { findOneThemeByCategory } from "../actions/themeDB";
-import { insertHomePageImage } from "../actions/homePageImageDB";
-import { insertImage } from "../actions/imageDB";
-import { insertPost } from "../actions/postDB";
-import {
-  insertSite,
-  findOneSite,
-  findOneSiteByAccessToken
-} from "../actions/siteDB";
-import { insertVideo } from "../actions/videoDB";
+import { getFacebookPageInfo, getUserPages } from "../actions/fbPage";
+import { findOneSiteByAccessToken } from "../actions/siteDB";
 import { Router } from "express";
-import { authenticate } from "../actions/middleware";
-import mongoose, { ObjectId } from "mongoose";
-import { Theme } from "../models";
 
 const router = Router();
 
