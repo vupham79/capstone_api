@@ -1,7 +1,5 @@
-import mongoose from "mongoose";
 import { User } from "../models";
 require("dotenv").config();
-import request from "request";
 
 export async function createUser() {
   await User.create([

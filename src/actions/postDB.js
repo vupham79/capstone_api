@@ -1,4 +1,3 @@
-import mongoose, { Schema } from "mongoose";
 import { Post, Video, Image } from "../models";
 require("dotenv").config();
 

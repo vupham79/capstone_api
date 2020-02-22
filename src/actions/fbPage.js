@@ -1,12 +1,5 @@
 import axios from "../utils/axios";
 import bucket from "../utils/firebase";
-import { insertTheme } from "../actions/themeDB";
-import { insertHomePageImage } from "../actions/homePageImageDB";
-import { insertImage } from "../actions/imageDB";
-import { insertPost } from "../actions/postDB";
-import { insertSite } from "../actions/siteDB";
-import { insertUser } from "../actions/userDB";
-import { insertVideo } from "../actions/videoDB";
 
 export async function getFacebookPageInfo(
   url = process.env.facebookAPI + "103983364470143",

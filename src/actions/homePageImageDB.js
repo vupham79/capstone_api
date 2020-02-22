@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { HomePageImage } from "../models";
 require("dotenv").config();
 

@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { Category } from "../models";
 require("dotenv").config();
 

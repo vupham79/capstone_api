@@ -4,15 +4,14 @@ import {
   editSite,
   deleteSite,
   findAllSite,
-  findOneSite,
-  findAllSiteByUser
+  findAllSiteByUser,
+  insertSite,
+  findOneSite
 } from "../actions/siteDB";
-import { insertSite, findOneSite } from "../actions/siteDB";
 import { insertVideo } from "../actions/videoDB";
 import { Router } from "express";
 import { authenticate } from "../actions/middleware";
 import mongoose from "mongoose";
-import { Theme } from "../models";
 import { getPageData } from "../actions/fbPage";
 import { insertHomePageImage } from "../actions/homePageImageDB";
 import { insertImage } from "../actions/imageDB";

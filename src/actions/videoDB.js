@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { Video } from "../models";
 require("dotenv").config();
 
