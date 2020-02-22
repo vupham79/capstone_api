@@ -1,4 +1,4 @@
-import { Post, Video, Image } from "../models";
+import { Image, Post, Video } from "../models";
 require("dotenv").config();
 
 export async function createPost() {

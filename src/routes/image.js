@@ -1,10 +1,10 @@
 import { Router } from "express";
 import {
   createImage,
-  insertImage,
   editImage,
   findAllImage,
-  findOneImage
+  findOneImage,
+  insertImage
 } from "../actions/imageDB";
 
 const router = Router();

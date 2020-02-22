@@ -1,5 +1,5 @@
-import fs from "fs";
 import ColorThief from "color-thief";
+import fs from "fs";
 import onecolor from "onecolor";
 
 function readColor(body) {

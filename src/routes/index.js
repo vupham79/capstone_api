@@ -1,13 +1,13 @@
-import theme from "./theme";
+import auth from "./auth";
+import facebook from "./facebook";
+import homePageImage from "./homePageImage";
 import image from "./image";
+import post from "./post";
+import readColor from "./readColor";
+import site from "./site";
+import theme from "./theme";
 import user from "./user";
 import video from "./video";
-import post from "./post";
-import site from "./site";
-import homePageImage from "./homePageImage";
-import facebook from "./facebook";
-import readColor from "./readColor";
-import auth from "./auth";
 
 export default app => {
   app.use("/theme", theme);

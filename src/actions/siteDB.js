@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Site, Post, User, HomePageImage } from "../models";
+import { HomePageImage, Post, Site, User } from "../models";
 require("dotenv").config();
 
 export async function createSite() {

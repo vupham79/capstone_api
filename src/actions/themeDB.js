@@ -1,4 +1,4 @@
-import { Theme, Site } from "../models";
+import { Theme } from "../models";
 require("dotenv").config();
 
 // export async function insertTheme(id, body) {

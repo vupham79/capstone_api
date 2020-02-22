@@ -1,6 +1,6 @@
+import { Router } from "express";
 import { getFacebookPageInfo, getUserPages } from "../actions/fbPage";
 import { findOneSiteByAccessToken } from "../actions/siteDB";
-import { Router } from "express";
 
 const router = Router();
 

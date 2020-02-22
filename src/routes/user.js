@@ -1,10 +1,10 @@
 import { Router } from "express";
 import {
   createUser,
-  insertUser,
   editUser,
   findAllUser,
-  findOneUser
+  findOneUser,
+  insertUser
 } from "../actions/userDB";
 
 const router = Router();

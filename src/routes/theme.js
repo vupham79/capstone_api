@@ -1,10 +1,10 @@
 import { Router } from "express";
 import {
   createTheme,
-  insertTheme,
   editTheme,
   findAllTheme,
-  findOneTheme
+  findOneTheme,
+  insertTheme
 } from "../actions/themeDB";
 
 const router = Router();

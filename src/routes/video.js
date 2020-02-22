@@ -1,10 +1,10 @@
 import { Router } from "express";
 import {
   createVideo,
-  insertVideo,
   editVideo,
   findAllVideo,
-  findOneVideo
+  findOneVideo,
+  insertVideo
 } from "../actions/videoDB";
 
 const router = Router();

@@ -1,10 +1,9 @@
 import { Router } from "express";
 import {
-  createHomePageImage,
-  insertHomePageImage,
   editHomePageImage,
   findAllHomePageImage,
-  findOneHomePageImage
+  findOneHomePageImage,
+  insertHomePageImage
 } from "../actions/homePageImageDB";
 import { authenticate } from "../actions/middleware";
 

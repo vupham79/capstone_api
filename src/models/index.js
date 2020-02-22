@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
-import User from "./User";
-import Theme from "./Theme";
+import Category from "./Category";
+import HomePageImage from "./HomePageImage";
 import Image from "./Image";
 import Post from "./Post";
 import Site from "./Site";
+import Theme from "./Theme";
+import User from "./User";
 import Video from "./Video";
-import HomePageImage from "./HomePageImage";
-import Category from "./Category";
 require("dotenv").config();
 
 const connectDb = () => {

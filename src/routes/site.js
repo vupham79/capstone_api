@@ -1,23 +1,21 @@
 import { Router } from "express";
-import {
-  createSite,
-  editSite,
-  deleteSite,
-  findAllSite,
-  findAllSiteByUser,
-  insertSite,
-  findOneSite
-} from "../actions/siteDB";
-import { insertVideo } from "../actions/videoDB";
-import { Router } from "express";
-import { authenticate } from "../actions/middleware";
 import mongoose from "mongoose";
 import { getPageData } from "../actions/fbPage";
 import { insertHomePageImage } from "../actions/homePageImageDB";
 import { insertImage } from "../actions/imageDB";
-import { insertPost } from "../actions/postDB";
-import { Site, Theme } from "../models";
 import { authenticate } from "../actions/middleware";
+import { insertPost } from "../actions/postDB";
+import {
+  createSite,
+  deleteSite,
+  editSite,
+  findAllSite,
+  findAllSiteByUser,
+  findOneSite,
+  insertSite
+} from "../actions/siteDB";
+import { insertVideo } from "../actions/videoDB";
+import { Site, Theme } from "../models";
 const router = Router();
 
 router.get("/create", async (req, res) => {

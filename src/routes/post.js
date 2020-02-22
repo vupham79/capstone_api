@@ -1,13 +1,12 @@
 import { Router } from "express";
-import {
-  createPost,
-  insertPost,
-  editPost,
-  deletePost,
-  findAllPost,
-  findOnePost
-} from "../actions/postDB";
 import { authenticate } from "../actions/middleware";
+import {
+  deletePost,
+  editPost,
+  findAllPost,
+  findOnePost,
+  insertPost
+} from "../actions/postDB";
 
 const router = Router();
 
