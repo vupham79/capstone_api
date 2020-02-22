@@ -86,7 +86,7 @@ export async function getPageData({ access_token, pageId }) {
   const data = await axios({
     params: {
       fields:
-        "about,category,posts{full_picture,message},events,cover,videos{permalink_url},location,single_line_address," +
+        "name,about,category,posts{full_picture,message},events,cover,videos{permalink_url},location,single_line_address," +
         "phone,photos{link,images,album,picture,webp_images}",
       locale: "en_US ",
       access_token

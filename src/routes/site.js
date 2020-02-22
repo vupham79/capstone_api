@@ -171,15 +171,19 @@ router.post("/createNewSite", authenticate, async (req, res) => {
           });
         });
       var theme = await Theme.findOne({
-        "categories.name": "theme3"
+        "categories.name": req.body.category
       });
       if (!theme) {
         var theme = await Theme.findOne();
       }
       const insertStatus = await insertSite(req.body.pageId, req.body.userId, {
         phone: data.phone ? data.phone : "",
-        longitude: data.location ? data.location.longitude : "",
-        latitude: data.location ? data.location.latitude : "",
+        longitude:
+          data.location && data.location.longitude
+            ? data.location.longitude
+            : "",
+        latitude:
+          data.location && data.location.latitude ? data.location.latitude : "",
         logo: data.logo ? data.logo : "",
         fontTitle: theme.fontTitle ? theme.fontTitle : "",
         fontBody: theme.fontBody ? theme.fontBody : "",
@@ -188,6 +192,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
         navItems: defaultNavItems ? defaultNavItems : [],
         posts: postsIdList ? postsIdList : [],
         username: req.body.profile.name ? req.body.profile.name : "",
+        url: req.body.pageUrl,
         themeId: new mongoose.Types.ObjectId(theme._id)
       });
       if (insertStatus) {
