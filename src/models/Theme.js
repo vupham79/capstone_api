@@ -10,7 +10,11 @@ const ThemeSchema = new mongoose.Schema(
       type: String,
       default: ""
     },
-    mainFont: {
+    fontTitle: {
+      type: String,
+      default: ""
+    },
+    fontBody: {
       type: String,
       default: ""
     },

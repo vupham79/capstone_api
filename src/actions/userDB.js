@@ -30,11 +30,11 @@ export async function createUser() {
 export async function insertUser(id, body) {
   await User.collection.insertOne({
     id: id,
-    displayName: body.displayName,
-    email: body.email,
-    phone: body.phone,
-    accessToken: body.accessToken,
-    picture: body.picture,
+    displayName: body.displayName ? body.displayName : "",
+    email: body.email ? body.email : "",
+    phone: body.phone ? body.phone : "",
+    accessToken: body.accessToken ? body.accessToken : "",
+    picture: body.picture ? body.picture : "",
     isActivated: true
   });
   return await User.find();
@@ -43,11 +43,11 @@ export async function insertUser(id, body) {
 export async function editUser(id, body) {
   const UserResult = await User.findOne({ id: id });
   await UserResult.updateOne({
-    displayName: body.displayName,
-    email: body.email,
-    phone: body.phone,
-    accessToken: body.accessToken,
-    picture: body.picture,
+    displayName: body.displayName ? body.displayName : "",
+    email: body.email ? body.email : "",
+    phone: body.phone ? body.phone : "",
+    accessToken: body.accessToken ? body.accessToken : "",
+    picture: body.picture ? body.picture : "",
     isActivated: true
   });
   return await User.find();

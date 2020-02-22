@@ -23,7 +23,7 @@ export async function createImage() {
 export async function insertImage(id, body) {
   await Image.collection.insertOne({
     id: id,
-    url: body.url
+    url: body.url ? body.url : ""
   });
   return await Image.find();
 }
@@ -31,7 +31,7 @@ export async function insertImage(id, body) {
 export async function editImage(id, body) {
   const ImageResult = await Image.findOne({ id: id });
   await ImageResult.updateOne({
-    url: body.url
+    url: body.url ? body.url : ""
   });
   return await Image.find();
 }

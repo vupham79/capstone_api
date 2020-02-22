@@ -39,10 +39,22 @@ const SiteSchema = new mongoose.Schema(
       type: String,
       default: ""
     },
-    navItems: {
-      type: Array,
-      default: []
-    },
+    navItems: [
+      {
+        name: {
+          type: String,
+          required: true
+        },
+        order: {
+          type: Number,
+          required: true
+        },
+        isActive: {
+          type: Boolean,
+          default: true
+        }
+      }
+    ],
     isPublish: Boolean,
     posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
     userId: { type: Schema.Types.ObjectId, ref: "User" },

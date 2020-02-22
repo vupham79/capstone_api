@@ -23,7 +23,7 @@ export async function createHomePageImage() {
 export async function insertHomePageImage(id, body) {
   await HomePageImage.collection.insertOne({
     id: id,
-    url: body.url
+    url: body.url ? body.url : ""
   });
   return await HomePageImage.find();
 }
@@ -31,7 +31,7 @@ export async function insertHomePageImage(id, body) {
 export async function editHomePageImage(id, body) {
   const HomePageImageResult = await HomePageImage.findOne({ id: id });
   await HomePageImageResult.updateOne({
-    url: body.url
+    url: body.url ? body.url : ""
   });
   return await HomePageImage.find();
 }

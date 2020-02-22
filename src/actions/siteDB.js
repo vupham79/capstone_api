@@ -1,5 +1,5 @@
 import mongoose, { ObjectId } from "mongoose";
-import { Site, Post, User, HomePageImage } from "../models";
+import { Site, Post, User, HomePageImage, Theme } from "../models";
 require("dotenv").config();
 
 export async function createSite() {
@@ -68,46 +68,40 @@ export async function createSite() {
 export async function insertSite(pageId, userId, body) {
   const UserResult = await User.findOne({ id: userId });
   const HomePageImageResult = await HomePageImage.findOne({ id: pageId });
-  await Site.collection.insertOne({
+  const site = await Site.create({
     id: pageId,
-    phone: body.phone,
-    longitude: body.longitude,
-    latitude: body.latitude,
-    logo: body.logo,
-    fontTitle: body.fontTitle,
-    fontBody: body.fontBody,
-    title: body.title,
-    address: body.address,
-    navItems: body.navItems,
+    phone: body.phone ? body.phone : "",
+    longitude: body.longitude ? body.longitude : "",
+    latitude: body.latitude ? body.latitude : "",
+    logo: body.logo ? body.logo : "",
+    fontTitle: body.fontTitle ? body.fontTitle : "",
+    fontBody: body.fontBody ? body.fontBody : "",
+    title: body.title ? body.title : "",
+    address: body.address ? body.title : "",
+    navItems: body.navItems ? body.navItems : "",
+    posts: body.posts ? body.posts : "",
     isPublish: true,
-    posts: body.posts,
-    userId: UserResult._id,
-    homePageImageId: HomePageImageResult._id
-  });
-  return await Site.find().populate({
-    path: " posts userId homePageImageId",
-    populate: [
-      {
-        path: "videoId imageId"
-      }
-    ]
-  });
+    userId: UserResult && UserResult._id,
+    homePageImageId: HomePageImageResult && HomePageImageResult._id,
+    themeId: body.themeId
+  }).catch(error => console.log("Create site failed!"));
+  return site;
 }
 
 export async function editSite(id, body) {
   const SiteResult = await Site.findOne({ id: id });
   await SiteResult.updateOne({
-    phone: body.phone,
-    longitude: body.longitude,
-    latitude: body.latitude,
-    logo: body.logo,
-    fontTitle: body.fontTitle,
-    fontBody: body.fontBody,
-    title: body.title,
-    address: body.address,
-    navItems: body.navItems,
-    posts: body.posts
-  }).catch(error => console.log("error 3"));
+    phone: body.phone ? body.phone : "",
+    longitude: body.longitude ? body.longitude : "",
+    latitude: body.latitude ? body.latitude : "",
+    logo: body.logo ? body.logo : "",
+    fontTitle: body.fontTitle ? body.fontTitle : "",
+    fontBody: body.fontBody ? body.fontBody : "",
+    title: body.title ? body.title : "",
+    address: body.address ? body.title : "",
+    navItems: body.navItems ? body.navItems : "",
+    posts: body.posts ? body.posts : ""
+  }).catch(error => console.log(""));
   return await Site.find().populate({
     path: " posts userId homePageImageId",
     populate: [
@@ -145,16 +139,17 @@ export async function findAllSite() {
 }
 
 export async function findOneSiteByAccessToken(id, body) {
-  return await Site.findOne({ id: id, accessToken: body.accessToken }).populate(
-    {
-      path: " posts userId homePageImageId",
-      populate: [
-        {
-          path: "videoId imageId"
-        }
-      ]
-    }
-  );
+  return await Site.findOne({
+    id: id,
+    accessToken: body.accessToken ? body.accessToken : ""
+  }).populate({
+    path: " posts userId homePageImageId",
+    populate: [
+      {
+        path: "videoId imageId"
+      }
+    ]
+  });
 }
 
 export async function findOneSite(id) {
@@ -171,8 +166,8 @@ export async function findOneSite(id) {
 export async function findAllSiteByUser(id, accessToken) {
   const user = await User.findOne({
     id: id,
-    accessToken: accessToken
-  }).catch(error => console.log("error 1"));
+    accessToken: accessToken ? accessToken : ""
+  }).catch(error => console.log(""));
   if (user) {
     const site = await Site.find({
       userId: new mongoose.Types.ObjectId(user._id)
@@ -185,7 +180,7 @@ export async function findAllSiteByUser(id, accessToken) {
           }
         ]
       })
-      .catch(error => console.log("error 2"));
+      .catch(error => console.log(""));
     return site;
   }
   return false;

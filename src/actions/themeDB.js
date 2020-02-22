@@ -2,72 +2,24 @@ import mongoose from "mongoose";
 import { Theme, Site } from "../models";
 require("dotenv").config();
 
-export async function createTheme() {
-  const SiteResult = await Site.findOne({ id: "1" });
-  await Theme.create([
-    {
-      id: "1",
-      name: "Splitter",
-      mainFont: "Calibri",
-      mainColor: "red",
-      categories: ["Product"],
-      siteId: SiteResult._id
-    },
-    {
-      id: "2",
-      name: "Strut",
-      mainFont: "Times New Roman",
-      mainColor: "blue",
-      categories: ["Product"],
-      siteId: SiteResult._id
-    },
-    {
-      id: "3",
-      name: "Spruce",
-      mainFont: "Arial",
-      mainColor: "green",
-      categories: ["Product"],
-      siteId: SiteResult._id
-    }
-  ]);
-  return await Theme.find();
-}
-
 export async function insertTheme(id, body) {
   const SiteResult = await Site.findOne({ id: id });
-  await Theme.collection.insertOne({
+  return await Theme.collection.insertOne({
     id: id,
-    name: body.name,
-    mainFont: body.mainFont,
-    mainColor: body.mainColor,
-    categories: body.categories,
-    siteId: SiteResult._id
-  });
-  return await Theme.find().populate({
-    path: "siteId",
-    populate: [
-      {
-        path: "posts userId homePageImageId"
-      }
-    ]
+    name: body.name ? body.name : "",
+    fontTitle: body.fontTitle ? body.fontTitle : "",
+    mainColor: body.color ? body.color : "",
+    categories: body.categories ? body.categories : ""
   });
 }
 
 export async function editTheme(id, body) {
   const ThemeResult = await Theme.findOne({ id: id });
-  await ThemeResult.updateOne({
-    name: body.name,
-    mainFont: body.mainFont,
-    mainColor: body.color,
-    categories: body.categories
-  });
-  return await Theme.findOne({ id: id }).populate({
-    path: "siteId",
-    populate: [
-      {
-        path: "posts userId homePageImageId"
-      }
-    ]
+  return await ThemeResult.updateOne({
+    name: body.name ? body.name : "",
+    fontTitle: body.fontTitle ? body.fontTitle : "",
+    mainColor: body.color ? body.color : "",
+    categories: body.categories ? body.categories : ""
   });
 }
 
@@ -76,8 +28,13 @@ export async function findAllTheme() {
 }
 
 export async function findOneThemeByCategory(name) {
-  console.log(name);
-  return await Theme.findOne({ "categories.name": name });
+  const theme = await Theme.collection.findOne({ "categories.name": name });
+  console.log(name, theme);
+  if (theme) {
+    return theme;
+  } else {
+    return await Theme.findOne();
+  }
 }
 
 export async function findOneTheme(id) {

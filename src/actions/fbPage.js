@@ -89,7 +89,7 @@ export async function downloadPageImage(id) {
   }
 }
 
-export async function confirmPage({ access_token, pageId }) {
+export async function getPageData({ access_token, pageId }) {
   const data = await axios({
     params: {
       fields:

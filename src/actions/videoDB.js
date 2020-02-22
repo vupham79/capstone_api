@@ -23,7 +23,7 @@ export async function createVideo() {
 export async function insertVideo(id, body) {
   await Video.collection.insertOne({
     id: id,
-    url: body.url
+    url: body.url ? body.url : ""
   });
   return await Video.find();
 }
@@ -31,7 +31,7 @@ export async function insertVideo(id, body) {
 export async function editVideo(id, body) {
   const VideoResult = await Video.findOne({ id: id });
   await VideoResult.updateOne({
-    url: body.url
+    url: body.url ? body.url : ""
   });
   return await Video.find();
 }

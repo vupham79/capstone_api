@@ -19,21 +19,19 @@ export async function createPost() {
 export async function insertPost(id, { content }) {
   const VideoResult = await Video.findOne({ id: id });
   const ImageResult = await Image.findOne({ id: id });
-  await Post.collection.insertOne({
+  const post = await Post.create({
     id: id,
-    content: content,
+    content: content ? content : "",
     videoId: VideoResult && VideoResult._id,
     imageId: ImageResult && ImageResult._id
   });
-  return await Post.find().populate({
-    path: "videoId imageId"
-  });
+  return post;
 }
 
 export async function editPost(id, body) {
   const PostResult = await Post.findOne({ id: id });
   await PostResult.updateOne({
-    content: body.content
+    content: body.content ? body.content : ""
   });
   return await Post.find().populate({
     path: "videoId imageId"

@@ -1,0 +1,34 @@
+// theme
+[{
+  "id": "1",
+  "name": "theme2",
+  "fontTitle": "Arial",
+  "fontBody": "Arial",
+  "mainColor":"black",
+  "categories": [
+    {
+      "id": "1",
+      "name":"Art"
+    }
+]    
+},
+{
+  "id": "2",
+  "name": "theme1",
+  "fontTitle": "Arial",
+  "fontBody": "Arial",
+  "mainColor":"black",
+  "categories": [
+    {
+      "id": "1",
+      "name":"Art"
+    }
+]    
+}
+]
+
+// category
+{
+      id: "1",
+      name: "Art"
+    },

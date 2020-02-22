@@ -1,47 +1,22 @@
 import {
   getFacebookPageInfo,
-  getFacebookPageToken,
-  getPageImage,
-  uploadPageImage,
-  downloadPageImage,
   getUserPages,
-  confirmPage
+  getPageData
 } from "../actions/fbPage";
-import {
-  insertTheme,
-  findOneTheme,
-  editTheme,
-  findOneThemeByCategory
-} from "../actions/themeDB";
-import {
-  insertHomePageImage,
-  findOneHomePageImage,
-  editHomePageImage
-} from "../actions/homePageImageDB";
-import { insertImage, findOneImage, editImage } from "../actions/imageDB";
-import { insertUser, findOneUser, editUser } from "../actions/userDB";
-import {
-  insertPost,
-  findOnePost,
-  editPost,
-  findAllPost
-} from "../actions/postDB";
+import { findOneThemeByCategory } from "../actions/themeDB";
+import { insertHomePageImage } from "../actions/homePageImageDB";
+import { insertImage } from "../actions/imageDB";
+import { insertPost } from "../actions/postDB";
 import {
   insertSite,
   findOneSite,
-  editSite,
-  findOneSiteByAccessToken,
-  findAllSiteByUser
+  findOneSiteByAccessToken
 } from "../actions/siteDB";
-import { insertVideo, findOneVideo, editVideo } from "../actions/videoDB";
+import { insertVideo } from "../actions/videoDB";
 import { Router } from "express";
-import { Site, Post, User, HomePageImage } from "../models";
-import {
-  insertCategory,
-  editCategory,
-  findOneCategory
-} from "../actions/categoryDB";
 import { authenticate } from "../actions/middleware";
+import mongoose, { ObjectId } from "mongoose";
+import { Theme } from "../models";
 
 const router = Router();
 
@@ -54,7 +29,9 @@ router.get("/pageInfo", async (req, res) => {
 });
 
 router.get("/pages", async (req, res) => {
-  const data = await getUserPages(req.query.access_token);
+  const data = await getUserPages(
+    req.query.access_token ? req.query.access_token : ""
+  );
   if (data && data.accounts) {
     return res.status(200).send(data.accounts.data);
   }
@@ -64,8 +41,8 @@ router.get("/pages", async (req, res) => {
 //authenticate
 router.get("/getSiteInfo", async (req, res) => {
   const data = await findOneSiteByAccessToken(
-    req.params.pageId,
-    req.params.accessToken
+    req.params.pageId ? req.params.pageId : "",
+    req.params.accessToken ? req.params.accessToken : ""
   );
   if (data) {
     return res.status(200).send(data);
@@ -74,168 +51,105 @@ router.get("/getSiteInfo", async (req, res) => {
 });
 
 router.post("/confirmPage", authenticate, async (req, res) => {
-  const data = await confirmPage({
-    pageId: req.body.pageId,
-    access_token: req.body.accessToken
+  const data = await getPageData({
+    pageId: req.body.pageId ? req.body.pageId : "",
+    access_token: req.body.accessToken ? req.body.accessToken : ""
   });
   if (data) {
-    let navItemsList = [];
-    req.body.navItems.forEach(navItem => {
-      navItemsList.push({
-        order: navItem.order,
-        title: navItem.name,
-        isActive: true
-      });
-    });
-    let categoryList = [];
-    req.body.pages.forEach(page => {
-      categoryList.push({
-        id: req.body.pageId,
-        category: page.category
-      });
-    });
-    const saveImage = new Promise(function(resolve, reject) {
-      data.posts &&
-        data.posts.data.forEach(async post => {
-          const existImage = await findOneImage(post.id);
-          if (!existImage) {
-            await insertImage(post.id, {
+    const siteExist = await findOneSite(req.body.pageId);
+    if (!siteExist) {
+      const defaultNavItems = [
+        {
+          name: "Home",
+          order: 1,
+          isActive: true
+        },
+        {
+          name: "About",
+          order: 2,
+          isActive: true
+        },
+        {
+          name: "Gallery",
+          order: 3,
+          isActive: true
+        },
+        {
+          name: "Event",
+          order: 4,
+          isActive: true
+        },
+        {
+          name: "Contact",
+          order: 5,
+          isActive: true
+        },
+        {
+          name: "News",
+          order: 6,
+          isActive: true
+        }
+      ];
+      const saveImage = new Promise(function(resolve, reject) {
+        data.posts &&
+          data.posts.data.forEach(async post => {
+            await insertImage(post.id ? post.id : "", {
               url: post.full_picture ? post.full_picture : ""
             });
-          } else {
-            await editImage(post.id, {
-              url: post.full_picture ? post.full_picture : ""
-            });
-          }
-        });
-    });
-    const saveVideo = new Promise(function(resolve, reject) {
-      data.videos &&
-        data.videos.data.forEach(async video => {
-          const videoExist = await findOneVideo(video.id);
-          if (!videoExist) {
-            await insertVideo(video.id, {
+          });
+      });
+      const saveVideo = new Promise(function(resolve, reject) {
+        data.videos &&
+          data.videos.data.forEach(async video => {
+            await insertVideo(video.id ? video.id : "", {
               url: video.permalink_url ? video.permalink_url : ""
             });
-          } else {
-            await editVideo(video.id, {
-              url: video.permalink_url ? video.permalink_url : ""
-            });
-          }
+          });
+      });
+      const saveHomePageImage = new Promise(async function(resolve, reject) {
+        await insertHomePageImage(req.body.pageId ? req.body.pageId : "", {
+          url: data.cover ? data.cover.source : ""
         });
-    });
-    const saveHomePageImage = new Promise(async function(resolve, reject) {
-      const homePageImageExist = await findOneHomePageImage(req.body.pageId);
-      if (!homePageImageExist) {
-        await insertHomePageImage(req.body.pageId, {
-          url: data.cover.source ? data.cover.source : ""
-        });
-      } else {
-        await editHomePageImage(req.body.pageId, {
-          url: data.cover.source ? data.cover.source : ""
-        });
-      }
-    });
-    Promise.all([saveImage, saveVideo, saveHomePageImage]).then(function(
-      response
-    ) {});
-    const savePost = new Promise(async function(resolve, reject) {
+      });
+      Promise.all([saveImage, saveVideo, saveHomePageImage]).then(function(
+        response
+      ) {});
+      const postsIdList = [];
       data.posts &&
         data.posts.data.forEach(async post => {
-          const exist = await findOnePost(post.id);
-          if (!exist) {
-            await insertPost(post.id, {
-              content: post.message ? post.message : ""
-            });
-          } else {
-            await editPost(post.id, {
-              content: post.message ? post.message : ""
-            });
-          }
+          await insertPost(post.id ? post.id : "", {
+            content: post.message ? post.message : ""
+          }).then(post => {
+            postsIdList.push(new mongoose.Types.ObjectId(post._id));
+          });
         });
-    });
-    Promise.all([savePost]).finally(async function(response) {});
-
-    const saveSite = new Promise(async function(resolve, reject) {
-      const postsList = await findAllPost();
-      let postsIdList = [];
-      postsList.forEach(post => {
-        postsIdList.push(post._id);
+      var theme = await Theme.findOne({
+        "categories.name": "theme3"
       });
-      const siteExist = await findOneSite(req.body.pageId);
-      if (!siteExist) {
-        await insertSite(req.body.pageId, req.body.userId, {
-          phone: data.phone ? data.phone : "",
-          longitude: data.location.longitude ? data.location.longitude : "",
-          latitude: data.location.latitude ? data.location.latitude : "",
-          logo: data.logo ? data.logo : "",
-          fontTitle: req.body.fontTitle ? req.body.fontTitle : "",
-          fontBody: req.body.fontBody ? req.body.fontBody : "",
-          title: req.body.name ? req.body.name : "",
-          address: data.single_line_address ? data.single_line_address : "",
-          navItems: navItemsList ? navItemsList : [],
-          posts: postsIdList ? postsIdList : [],
-          username: req.body.profile.name ? req.body.profile.name : ""
-        });
-      } else {
-        await editSite(req.body.pageId, {
-          phone: data.phone ? data.phone : "",
-          longitude: data.location.longitude ? data.location.longitude : "",
-          latitude: data.location.latitude ? data.location.latitude : "",
-          logo: data.logo ? data.logo : "",
-          fontTitle: req.body.fontTitle ? req.body.fontTitle : "",
-          fontBody: req.body.fontBody ? req.body.fontBody : "",
-          title: req.body.name ? req.body.name : "",
-          address: data.single_line_address ? data.single_line_address : "",
-          navItems: navItemsList ? navItemsList : [],
-          posts: postsIdList ? postsIdList : [],
-          profile: req.body.profile ? req.body.profile : {}
-        });
+      if (!theme) {
+        var theme = await Theme.findOne();
       }
-    });
-    Promise.all([saveSite]).finally(function(response) {});
-
-    // const saveTheme = new Promise(async function(resolve, reject) {
-    // const themeExist = await findOneTheme(req.body.pageId);
-    // if (!themeExist) {
-    //   await insertTheme(req.body.pageId, {
-    //     name: req.body.name ? req.body.name : "",
-    //     mainFont: req.body.fontTitle ? req.body.fontTitle : "",
-    //     mainColor: req.body.color ? req.body.color : "",
-    //     categories: categoryList ? categoryList : []
-    //   });
-    // } else {
-    //   await editTheme(req.body.pageId, {
-    //     name: req.body.name ? req.body.name : "",
-    //     mainFont: req.body.fontTitle ? req.body.fontTitle : "",
-    //     mainColor: req.body.color ? req.body.color : "",
-    //     categories: categoryList ? categoryList : []
-    //   });
-    // }
-    // });
-    console.log(categoryList);
-    const theme = await findOneThemeByCategory(categoryList[0].category);
-    console.log(theme);
-    const saveCategory = new Promise(async function(resolve, reject) {
-      const categoryExist = await findOneCategory(req.body.pageId);
-      if (!categoryExist) {
-        await insertCategory(req.body.pageId, {
-          name: req.body.name ? req.body.name : ""
-        });
+      const insertStatus = await insertSite(req.body.pageId, req.body.userId, {
+        phone: data.phone ? data.phone : "",
+        longitude: data.location.longitude ? data.location.longitude : "",
+        latitude: data.location.latitude ? data.location.latitude : "",
+        logo: data.logo ? data.logo : "",
+        fontTitle: theme.fontTitle ? theme.fontTitle : "",
+        fontBody: theme.fontBody ? theme.fontBody : "",
+        title: req.body.name ? req.body.name : "",
+        address: data.single_line_address ? data.single_line_address : "",
+        navItems: defaultNavItems ? defaultNavItems : [],
+        posts: postsIdList ? postsIdList : [],
+        username: req.body.profile.name ? req.body.profile.name : "",
+        themeId: new mongoose.Types.ObjectId(theme._id)
+      });
+      if (insertStatus) {
+        return res.status(200).send(insertStatus);
       } else {
-        await editCategory(req.body.pageId, {
-          name: req.body.name ? req.body.name : ""
-        });
+        return res.status(500).send("Insert failed!");
       }
-    });
-    Promise.all([saveCategory]).finally(function(response) {});
-    const data2 = await findAllSiteByUser(
-      req.body.userId,
-      req.body.accessToken
-    );
-    // console.log(req.body.userId + "-" + req.body.accessToken);
-    // console.log(data2);
-    return res.status(200).send(data2);
+    }
+    return res.status(500).send("Site existed!");
   }
   return res.status(500).send("No data found!");
 });
