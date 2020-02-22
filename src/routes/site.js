@@ -9,7 +9,7 @@ import {
   findAllSiteByUser
 } from "../actions/siteDB";
 import { Site, Theme } from "../models";
-
+import { authenticate } from "../actions/middleware";
 const router = Router();
 
 router.get("/create", async (req, res) => {
