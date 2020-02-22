@@ -28,7 +28,7 @@ router.post("/insert/:id", async (req, res) => {
       return res.status(200).send(result);
     })
     .catch(error => {
-      return res.status(500).send("Something broke!");
+      return res.status(500).send(error);
     });
 });
 
@@ -48,7 +48,7 @@ router.patch("/delete/:id", async (req, res) => {
       return res.status(200).send(result);
     })
     .catch(error => {
-      return res.status(500).send("Something broke!");
+      return res.status(500).send(error);
     });
 });
 
@@ -58,17 +58,17 @@ router.get("/find/:id", async (req, res) => {
       return res.status(200).send(result);
     })
     .catch(error => {
-      return res.status(500).send("Something broke!");
+      return res.status(500).send(error);
     });
 });
 
 router.get("/findAllByUser", async (req, res) => {
-  await findAllSiteByUser(req.body.userId, req.body.profile.accessToken)
+  await findAllSiteByUser(req.params.userId, req.params.accessToken)
     .then(result => {
       return res.status(200).send(result);
     })
     .catch(error => {
-      return res.status(500).send("Something broke!");
+      return res.status(500).send(error);
     });
 });
 
@@ -78,7 +78,7 @@ router.get("/findAll", async (req, res) => {
       return res.status(200).send(result);
     })
     .catch(error => {
-      return res.status(500).send("Something broke!");
+      return res.status(500).send(error);
     });
 });
 
