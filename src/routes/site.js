@@ -1,7 +1,6 @@
 import { Router } from "express";
 import {
   createSite,
-  insertSite,
   editSite,
   deleteSite,
   findAllSite,
