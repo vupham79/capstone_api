@@ -205,8 +205,8 @@ router.post("/createNewSite", authenticate, async (req, res) => {
       }
       const insertStatus = await insertSite(req.body.pageId, req.body.userId, {
         phone: data.phone ? data.phone : "",
-        longitude: data.location.longitude ? data.location.longitude : "",
-        latitude: data.location.latitude ? data.location.latitude : "",
+        longitude: data.location ? data.location.longitude : "",
+        latitude: data.location ? data.location.latitude : "",
         logo: data.logo ? data.logo : "",
         fontTitle: theme.fontTitle ? theme.fontTitle : "",
         fontBody: theme.fontBody ? theme.fontBody : "",
