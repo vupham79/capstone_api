@@ -87,7 +87,7 @@ export async function getPageData({ access_token, pageId }) {
     params: {
       fields:
         "name,about,category,posts{full_picture,message},events,cover,videos{permalink_url},location,single_line_address," +
-        "phone,photos{link,images,album,picture,webp_images}",
+        "phone,photos{link,images,album,picture,webp_images},picture{url}",
       locale: "en_US ",
       access_token
     },

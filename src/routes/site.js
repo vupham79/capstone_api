@@ -158,9 +158,11 @@ router.post("/createNewSite", authenticate, async (req, res) => {
           url: data.cover ? data.cover.source : ""
         });
       });
-      Promise.all([saveImage, saveVideo, saveHomePageImage]).then(function(
-        response
-      ) {});
+      Promise.all([
+        saveImage,
+        saveVideo,
+        saveHomePageImage
+      ]).then(function() {});
       const postsIdList = [];
       data.posts &&
         data.posts.data.forEach(async post => {
@@ -184,7 +186,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
             : "",
         latitude:
           data.location && data.location.latitude ? data.location.latitude : "",
-        logo: data.logo ? data.logo : "",
+        logo: data.picture ? data.picture.data.url : "",
         fontTitle: theme.fontTitle ? theme.fontTitle : "",
         fontBody: theme.fontBody ? theme.fontBody : "",
         title: data.name ? data.name : "",
