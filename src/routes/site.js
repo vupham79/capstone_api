@@ -6,9 +6,6 @@ import { insertImage } from "../actions/imageDB";
 import { authenticate } from "../actions/middleware";
 import { insertPost } from "../actions/postDB";
 import {
-  createSite,
-  deleteSite,
-  editSite,
   findAllSite,
   findAllSiteByUser,
   findOneSite,
@@ -17,46 +14,6 @@ import {
 import { insertVideo } from "../actions/videoDB";
 import { Site, Theme } from "../models";
 const router = Router();
-
-router.get("/create", async (req, res) => {
-  await createSite()
-    .then(result => {
-      return res.status(200).send(result);
-    })
-    .catch(error => {
-      return res.status(500).send(error);
-    });
-});
-
-router.post("/insert/:id", async (req, res) => {
-  await insertSite(req.params.id, req.body)
-    .then(result => {
-      return res.status(200).send(result);
-    })
-    .catch(error => {
-      return res.status(500).send(error);
-    });
-});
-
-router.patch("/update/:id", async (req, res) => {
-  await editSite(req.params.id, req.body)
-    .then(result => {
-      return res.status(200).send(result);
-    })
-    .catch(error => {
-      return res.status(500).send(error);
-    });
-});
-
-router.patch("/delete/:id", async (req, res) => {
-  await deleteSite(req.params.id)
-    .then(result => {
-      return res.status(200).send(result);
-    })
-    .catch(error => {
-      return res.status(500).send(error);
-    });
-});
 
 router.get("/find/:id", async (req, res) => {
   await findOneSite(req.params.id)
@@ -86,6 +43,22 @@ router.get("/findAll", async (req, res) => {
     .catch(error => {
       return res.status(500).send(error);
     });
+});
+
+router.patch("/publish", async (req, res) => {
+  const { id, isPublish } = req.body;
+  const publish = await Site.updateOne(
+    {
+      id
+    },
+    {
+      isPublish
+    }
+  );
+  if (publish) {
+    return res.status(200).send(publish);
+  }
+  return res.status(500).send("Action failed!");
 });
 
 router.post("/saveDesign", authenticate, async (req, res) => {
