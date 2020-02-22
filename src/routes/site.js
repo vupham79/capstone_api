@@ -187,7 +187,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
         logo: data.logo ? data.logo : "",
         fontTitle: theme.fontTitle ? theme.fontTitle : "",
         fontBody: theme.fontBody ? theme.fontBody : "",
-        title: req.body.name ? req.body.name : "",
+        title: data.name ? data.name : "",
         address: data.single_line_address ? data.single_line_address : "",
         navItems: defaultNavItems ? defaultNavItems : [],
         posts: postsIdList ? postsIdList : [],
