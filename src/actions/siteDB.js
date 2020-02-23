@@ -90,7 +90,7 @@ export async function insertSite(pageId, userId, body, session) {
       }
     ],
     { session }
-  ).catch(error => console.log("Create site failed!"));
+  );
   return site;
 }
 
@@ -107,15 +107,8 @@ export async function editSite(id, body) {
     address: body.address ? body.title : "",
     navItems: body.navItems ? body.navItems : "",
     posts: body.posts ? body.posts : ""
-  }).catch(error => console.log(""));
-  return await Site.find().populate({
-    path: " posts userId homePageImageId",
-    populate: [
-      {
-        path: "videoId imageId"
-      }
-    ]
   });
+  return SiteResult;
 }
 
 export async function deleteSite(id) {
@@ -123,14 +116,7 @@ export async function deleteSite(id) {
   await SiteResult.updateOne({
     isPublish: false
   });
-  return await Site.find().populate({
-    path: " posts userId homePageImageId",
-    populate: [
-      {
-        path: "videoId imageId"
-      }
-    ]
-  });
+  return SiteResult;
 }
 
 export async function findAllSite() {
@@ -173,20 +159,18 @@ export async function findAllSiteByUser(id, accessToken) {
   const user = await User.findOne({
     id: id,
     accessToken: accessToken ? accessToken : ""
-  }).catch(error => console.log(""));
+  });
   if (user) {
     const site = await Site.find({
       userId: new mongoose.Types.ObjectId(user._id)
-    })
-      .populate({
-        path: "posts userId homePageImageId",
-        populate: [
-          {
-            path: "videoId imageId"
-          }
-        ]
-      })
-      .catch(error => console.log(""));
+    }).populate({
+      path: "posts userId homePageImageId",
+      populate: [
+        {
+          path: "videoId imageId"
+        }
+      ]
+    });
     return site;
   }
   return false;

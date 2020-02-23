@@ -2,7 +2,7 @@ import { Router } from "express";
 import mongoose from "mongoose";
 import { getPageData } from "../actions/fbPage";
 import { insertHomePageImage } from "../actions/homePageImageDB";
-import { insertImage, createImage } from "../actions/imageDB";
+import { insertImage } from "../actions/imageDB";
 import { authenticate } from "../actions/middleware";
 import { insertPost } from "../actions/postDB";
 import {
@@ -12,7 +12,7 @@ import {
   insertSite
 } from "../actions/siteDB";
 import { insertVideo } from "../actions/videoDB";
-import { Site, Theme, Image, Video, Post } from "../models";
+import { Image, Site, Theme } from "../models";
 const router = Router();
 
 router.get("/find/:id", async (req, res) => {
@@ -21,7 +21,7 @@ router.get("/find/:id", async (req, res) => {
       return res.status(200).send(result);
     })
     .catch(error => {
-      return res.status(500).send(error);
+      return res.status(500).send({ error });
     });
 });
 
@@ -31,7 +31,7 @@ router.get("/findAllByUser", async (req, res) => {
       return res.status(200).send(result);
     })
     .catch(error => {
-      return res.status(500).send(error);
+      return res.status(500).send({ error });
     });
 });
 
@@ -41,7 +41,7 @@ router.get("/findAll", async (req, res) => {
       return res.status(200).send(result);
     })
     .catch(error => {
-      return res.status(500).send(error);
+      return res.status(500).send({ error });
     });
 });
 
@@ -58,10 +58,10 @@ router.patch("/publish", async (req, res) => {
   if (publish) {
     return res.status(200).send(publish);
   }
-  return res.status(500).send("Action failed!");
+  return res.status(500).send({ error: "Action failed!" });
 });
 
-router.post("/saveDesign", authenticate, async (req, res) => {
+router.patch("/saveDesign", authenticate, async (req, res) => {
   const {
     logo,
     fontBody,
@@ -71,30 +71,26 @@ router.post("/saveDesign", authenticate, async (req, res) => {
     pageId,
     name
   } = req.body;
-  const siteExist = await findOneSite(pageId);
-  if (!siteExist) {
-    const theme = await Theme.findOne({ id: themeId });
-    if (theme) {
-      const update = await Site.updateOne(
-        { id: pageId },
-        {
-          logo: logo ? logo : "",
-          fontTitle: fontTitle ? fontTitle : "",
-          fontBody: fontBody ? fontBody : "",
-          title: name ? name : "",
-          navItems: navItems ? navItems : [],
-          themeId: new mongoose.Types.ObjectId(theme._id)
-        }
-      );
-      if (update) {
-        return res.status(200).send(update);
-      } else {
-        return res.status(500).send("Insert failed!");
+  const theme = await Theme.findOne({ id: themeId });
+  if (theme) {
+    const update = await Site.updateOne(
+      { id: pageId },
+      {
+        logo: logo ? logo : "",
+        fontTitle: fontTitle ? fontTitle : "",
+        fontBody: fontBody ? fontBody : "",
+        title: name ? name : "",
+        navItems: navItems ? navItems : [],
+        themeId: new mongoose.Types.ObjectId(theme._id)
       }
+    );
+    if (update) {
+      return res.status(200).send(update);
+    } else {
+      return res.status(500).send({ error: "Insert failed!" });
     }
-    return res.status(500).send("Theme not exist!");
   }
-  return res.status(500).send("Site existed!");
+  return res.status(500).send({ error: "Theme not exist!" });
 });
 
 router.post("/createNewSite", authenticate, async (req, res) => {
@@ -216,13 +212,13 @@ router.post("/createNewSite", authenticate, async (req, res) => {
           if (insertStatus) {
             return res.status(200).send(insertStatus);
           } else {
-            return res.status(500).send("Insert failed!");
+            return res.status(500).send({ error: "Insert failed!" });
           }
         });
     }
-    return res.status(500).send("Site existed!");
+    return res.status(500).send({ error: "Site existed!" });
   }
-  return res.status(500).send("No data found!");
+  return res.status(500).send({ error: "No data found!" });
 });
 
 export default router;
