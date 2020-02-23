@@ -68,6 +68,7 @@ export async function createSite() {
 export async function insertSite(pageId, userId, body) {
   const UserResult = await User.findOne({ id: userId });
   const HomePageImageResult = await HomePageImage.findOne({ id: pageId });
+  const PostResult = await Post.find({ id: pageId });
   const site = await Site.create({
     id: pageId,
     phone: body.phone ? body.phone : "",
@@ -79,7 +80,7 @@ export async function insertSite(pageId, userId, body) {
     title: body.title ? body.title : "",
     address: body.address ? body.title : "",
     navItems: body.navItems ? body.navItems : "",
-    posts: body.posts ? body.posts : "",
+    posts: PostResult ? PostResult : "",
     isPublish: true,
     userId: UserResult && UserResult._id,
     homePageImageId: HomePageImageResult && HomePageImageResult._id,

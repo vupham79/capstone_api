@@ -4,8 +4,8 @@ const PostSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      default: "",
-      unique: [true, "Id already existed!"]
+      default: ""
+      // unique: [true, "Id already existed!"]
     },
     content: {
       type: String,

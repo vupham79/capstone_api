@@ -4,8 +4,7 @@ const ImageSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      default: "",
-      unique: [true, "Id already existed!"]
+      default: ""
     },
     url: {
       type: String,

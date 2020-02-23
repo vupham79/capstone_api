@@ -2,7 +2,7 @@ import { Router } from "express";
 import mongoose from "mongoose";
 import { getPageData } from "../actions/fbPage";
 import { insertHomePageImage } from "../actions/homePageImageDB";
-import { insertImage } from "../actions/imageDB";
+import { insertImage, createImage } from "../actions/imageDB";
 import { authenticate } from "../actions/middleware";
 import { insertPost } from "../actions/postDB";
 import {
@@ -12,7 +12,7 @@ import {
   insertSite
 } from "../actions/siteDB";
 import { insertVideo } from "../actions/videoDB";
-import { Site, Theme } from "../models";
+import { Site, Theme, Image, Video, Post } from "../models";
 const router = Router();
 
 router.get("/find/:id", async (req, res) => {
@@ -137,64 +137,81 @@ router.post("/createNewSite", authenticate, async (req, res) => {
           isActive: true
         }
       ];
-      const saveImage = new Promise(function(resolve, reject) {
-        data.posts &&
-          data.posts.data.forEach(async post => {
-            await insertImage(post.id ? post.id : "", {
-              url: post.full_picture ? post.full_picture : ""
-            });
+
+      return Image.createCollection()
+        .then(() => Image.startSession())
+        .then(session =>
+          session.withTransaction(async () => {
+            data.posts &&
+              data.posts.data.forEach(
+                async post => {
+                  await insertImage(post.id ? post.id : "", {
+                    url: post.full_picture ? post.full_picture : ""
+                  });
+                },
+                { session: session }
+              );
+            data.videos &&
+              data.videos.data.forEach(
+                async video => {
+                  await insertVideo(video.id ? video.id : "", {
+                    url: video.permalink_url ? video.permalink_url : ""
+                  });
+                },
+                { session: session }
+              );
+            console.log("000");
+            await insertHomePageImage(
+              req.body.pageId ? req.body.pageId : "",
+              {
+                url: data.cover ? data.cover.source : ""
+              },
+              { session: session }
+            );
+          })
+        )
+        .then(
+          data.posts &&
+            data.posts.data.forEach(async post => {
+              await insertPost(req.body.pageId ? req.body.pageId : "", {
+                content: post.message ? post.message : ""
+              });
+            })
+        )
+        .then(async () => {
+          var theme = await Theme.findOne({
+            "categories.name": req.body.category
           });
-      });
-      const saveVideo = new Promise(function(resolve, reject) {
-        data.videos &&
-          data.videos.data.forEach(async video => {
-            await insertVideo(video.id ? video.id : "", {
-              url: video.permalink_url ? video.permalink_url : ""
-            });
-          });
-      });
-      const saveHomePageImage = new Promise(async function(resolve, reject) {
-        await insertHomePageImage(req.body.pageId ? req.body.pageId : "", {
-          url: data.cover ? data.cover.source : ""
+          if (!theme) {
+            var theme = await Theme.findOne();
+          }
+          console.log("Logo: " + req.body.logo);
+          const insertStatus = await insertSite(
+            req.body.pageId,
+            req.body.userId,
+            {
+              phone: data.phone ? data.phone : "",
+              longitude: data.location ? data.location.longitude : "",
+              latitude: data.location ? data.location.latitude : "",
+              logo: req.body.logo ? req.body.logo : "",
+              fontTitle: theme.fontTitle ? theme.fontTitle : "",
+              fontBody: theme.fontBody ? theme.fontBody : "",
+              title: req.body.name ? req.body.name : "",
+              address: data.single_line_address ? data.single_line_address : "",
+              navItems: defaultNavItems ? defaultNavItems : [],
+              username: req.body.profile.name ? req.body.profile.name : "",
+              themeId: new mongoose.Types.ObjectId(theme._id)
+            }
+          );
+
+          if (insertStatus) {
+            console.log(insertStatus.id);
+            return res.status(200).send(insertStatus);
+          } else {
+            console.log("Failed");
+            return res.status(500).send("Insert failed!");
+          }
         });
-      });
-      Promise.all([saveImage, saveVideo, saveHomePageImage]).then(function(
-        response
-      ) {});
-      const postsIdList = [];
-      data.posts &&
-        data.posts.data.forEach(async post => {
-          await insertPost(post.id ? post.id : "", {
-            content: post.message ? post.message : ""
-          }).then(post => {
-            postsIdList.push(new mongoose.Types.ObjectId(post._id));
-          });
-        });
-      var theme = await Theme.findOne({
-        "categories.name": "theme3"
-      });
-      if (!theme) {
-        var theme = await Theme.findOne();
-      }
-      const insertStatus = await insertSite(req.body.pageId, req.body.userId, {
-        phone: data.phone ? data.phone : "",
-        longitude: data.location ? data.location.longitude : "",
-        latitude: data.location ? data.location.latitude : "",
-        logo: data.logo ? data.logo : "",
-        fontTitle: theme.fontTitle ? theme.fontTitle : "",
-        fontBody: theme.fontBody ? theme.fontBody : "",
-        title: req.body.name ? req.body.name : "",
-        address: data.single_line_address ? data.single_line_address : "",
-        navItems: defaultNavItems ? defaultNavItems : [],
-        posts: postsIdList ? postsIdList : [],
-        username: req.body.profile.name ? req.body.profile.name : "",
-        themeId: new mongoose.Types.ObjectId(theme._id)
-      });
-      if (insertStatus) {
-        return res.status(200).send(insertStatus);
-      } else {
-        return res.status(500).send("Insert failed!");
-      }
     }
     return res.status(500).send("Site existed!");
   }
