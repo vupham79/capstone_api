@@ -15,15 +15,20 @@ export async function createPost() {
   });
 }
 
-export async function insertPost(id, { content }) {
+export async function insertPost(id, { content }, session) {
   const VideoResult = await Video.findOne({ id: id });
   const ImageResult = await Image.findOne({ id: id });
-  const post = await Post.create({
-    id: id,
-    content: content ? content : "",
-    videoId: VideoResult && VideoResult._id,
-    imageId: ImageResult && ImageResult._id
-  });
+  const post = await Post.create(
+    [
+      {
+        id: id,
+        content: content ? content : "",
+        videoId: VideoResult && VideoResult._id,
+        imageId: ImageResult && ImageResult._id
+      }
+    ],
+    { session }
+  );
   return post;
 }
 

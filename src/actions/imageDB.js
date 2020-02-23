@@ -1,30 +1,16 @@
 import { Image } from "../models";
 require("dotenv").config();
 
-export async function createImage() {
-  await Image.create([
-    {
-      id: "1",
-      url: "https://i.ibb.co/gVpcW78/pv-featured-images.jpg"
-    },
-    {
-      id: "2",
-      url: "https://i.ibb.co/0qXLK9v/transparent-piano.jpg"
-    },
-    {
-      id: "3",
-      url: "https://i.ibb.co/KDkDJyk/piano-icon-30.jpg"
-    }
-  ]);
-  return await Image.find();
-}
-
-export async function insertImage(id, body) {
-  await Image.collection.insertOne({
-    id: id,
-    url: body.url ? body.url : ""
-  });
-  return await Image.find();
+export async function insertImage(id, body, session = null) {
+  await Image.create(
+    [
+      {
+        id: id,
+        url: body.url ? body.url : ""
+      }
+    ],
+    { session }
+  );
 }
 
 export async function editImage(id, body) {
@@ -32,7 +18,7 @@ export async function editImage(id, body) {
   await ImageResult.updateOne({
     url: body.url ? body.url : ""
   });
-  return await Image.find();
+  return ImageResult;
 }
 
 export async function findAllImage() {

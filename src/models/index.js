@@ -33,5 +33,6 @@ export {
   Site,
   Video,
   HomePageImage,
-  Category
+  Category,
+  mongoose
 };

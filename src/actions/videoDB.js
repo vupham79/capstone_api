@@ -19,20 +19,24 @@ export async function createVideo() {
   return await Video.find();
 }
 
-export async function insertVideo(id, body) {
-  await Video.collection.insertOne({
-    id: id,
-    url: body.url ? body.url : ""
-  });
-  return await Video.find();
+export async function insertVideo(id, body, session = null) {
+  Video.create(
+    [
+      {
+        id: id,
+        url: body.url ? body.url : ""
+      }
+    ],
+    { session }
+  );
 }
 
 export async function editVideo(id, body) {
-  const VideoResult = await Video.findOne({ id: id });
-  await VideoResult.updateOne({
+  const video = await Video.findOne({ id: id });
+  await video.updateOne({
     url: body.url ? body.url : ""
   });
-  return await Video.find();
+  return video;
 }
 
 export async function findAllVideo() {

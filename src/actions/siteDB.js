@@ -65,26 +65,32 @@ export async function createSite() {
   });
 }
 
-export async function insertSite(pageId, userId, body) {
+export async function insertSite(pageId, userId, body, session) {
   const UserResult = await User.findOne({ id: userId });
   const HomePageImageResult = await HomePageImage.findOne({ id: pageId });
-  const site = await Site.create({
-    id: pageId,
-    phone: body.phone ? body.phone : "",
-    longitude: body.longitude ? body.longitude : "",
-    latitude: body.latitude ? body.latitude : "",
-    logo: body.logo ? body.logo : "",
-    fontTitle: body.fontTitle ? body.fontTitle : "",
-    fontBody: body.fontBody ? body.fontBody : "",
-    title: body.title ? body.title : "",
-    address: body.address ? body.title : "",
-    navItems: body.navItems ? body.navItems : "",
-    posts: body.posts ? body.posts : "",
-    isPublish: true,
-    userId: UserResult && UserResult._id,
-    homePageImageId: HomePageImageResult && HomePageImageResult._id,
-    themeId: body.themeId
-  }).catch(error => console.log("Create site failed!"));
+  const PostResult = await Post.find({ id: pageId });
+  const site = await Site.create(
+    [
+      {
+        id: pageId,
+        phone: body.phone ? body.phone : "",
+        longitude: body.longitude ? body.longitude : "",
+        latitude: body.latitude ? body.latitude : "",
+        logo: body.logo ? body.logo : "",
+        fontTitle: body.fontTitle ? body.fontTitle : "",
+        fontBody: body.fontBody ? body.fontBody : "",
+        title: body.title ? body.title : "",
+        address: body.address ? body.title : "",
+        navItems: body.navItems ? body.navItems : "",
+        posts: PostResult ? PostResult : "",
+        isPublish: true,
+        userId: UserResult && UserResult._id,
+        homePageImageId: HomePageImageResult && HomePageImageResult._id,
+        themeId: body.themeId
+      }
+    ],
+    { session }
+  ).catch(error => console.log("Create site failed!"));
   return site;
 }
 

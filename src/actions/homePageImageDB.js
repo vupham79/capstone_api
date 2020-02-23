@@ -19,12 +19,17 @@ export async function createHomePageImage() {
   return await HomePageImage.find();
 }
 
-export async function insertHomePageImage(id, body) {
-  await HomePageImage.collection.insertOne({
-    id: id,
-    url: body.url ? body.url : ""
-  });
-  return await HomePageImage.find();
+export async function insertHomePageImage(id, body, session = null) {
+  const insert = await HomePageImage.create(
+    [
+      {
+        id: id,
+        url: body.url ? body.url : ""
+      }
+    ],
+    { session }
+  );
+  return insert;
 }
 
 export async function editHomePageImage(id, body) {
