@@ -26,7 +26,7 @@ router.get("/find/:id", async (req, res) => {
 });
 
 router.get("/findAllByUser", async (req, res) => {
-  await findAllSiteByUser(req.params.userId, req.params.accessToken)
+  await findAllSiteByUser(req.query.userId, req.query.accessToken)
     .then(result => {
       return res.status(200).send(result);
     })
@@ -61,18 +61,21 @@ router.patch("/publish", async (req, res) => {
   return res.status(500).send("Action failed!");
 });
 
-router.post("/saveDesign", authenticate, async (req, res) => {
-  const {
-    logo,
-    fontBody,
-    fontTitle,
-    navItems,
-    themeId,
-    pageId,
-    name
-  } = req.body;
-  const siteExist = await findOneSite(pageId);
-  if (!siteExist) {
+router.patch(
+  "/saveDesign",
+  authenticate,
+  async (req, res) => {
+    const {
+      logo,
+      fontBody,
+      fontTitle,
+      navItems,
+      themeId,
+      pageId,
+      name
+    } = req.body;
+    // const siteExist = await findOneSite(pageId);
+    // if (!siteExist) {
     const theme = await Theme.findOne({ id: themeId });
     if (theme) {
       const update = await Site.updateOne(
@@ -94,8 +97,9 @@ router.post("/saveDesign", authenticate, async (req, res) => {
     }
     return res.status(500).send("Theme not exist!");
   }
-  return res.status(500).send("Site existed!");
-});
+  // return res.status(500).send("Site existed!");
+  // }
+);
 
 router.post("/createNewSite", authenticate, async (req, res) => {
   const data = await getPageData({
