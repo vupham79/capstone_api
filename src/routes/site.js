@@ -160,7 +160,6 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                 },
                 { session: session }
               );
-            console.log("000");
             await insertHomePageImage(
               req.body.pageId ? req.body.pageId : "",
               {
@@ -185,7 +184,6 @@ router.post("/createNewSite", authenticate, async (req, res) => {
           if (!theme) {
             var theme = await Theme.findOne();
           }
-          console.log("Logo: " + req.body.logo);
           const insertStatus = await insertSite(
             req.body.pageId,
             req.body.userId,
@@ -205,10 +203,8 @@ router.post("/createNewSite", authenticate, async (req, res) => {
           );
 
           if (insertStatus) {
-            console.log(insertStatus.id);
             return res.status(200).send(insertStatus);
           } else {
-            console.log("Failed");
             return res.status(500).send("Insert failed!");
           }
         });
