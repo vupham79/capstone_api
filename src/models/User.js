@@ -4,7 +4,8 @@ const UserSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      default: ""
+      default: "",
+      unique: [true, "Id already existed!"]
     },
     picture: {
       type: String,

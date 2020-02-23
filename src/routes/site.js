@@ -12,7 +12,7 @@ import {
   insertSite
 } from "../actions/siteDB";
 import { insertVideo } from "../actions/videoDB";
-import { Image, Site, Theme } from "../models";
+import { Image, Site, Theme, Post, Video } from "../models";
 const router = Router();
 
 router.get("/find/:id", async (req, res) => {
@@ -69,7 +69,8 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
     navItems,
     themeId,
     pageId,
-    name
+    name,
+    color
   } = req.body;
   const theme = await Theme.findOne({ id: themeId });
   if (theme) {
@@ -79,6 +80,7 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
         logo: logo ? logo : "",
         fontTitle: fontTitle ? fontTitle : "",
         fontBody: fontBody ? fontBody : "",
+        color: color ? color : "",
         title: name ? name : "",
         navItems: navItems ? navItems : [],
         themeId: new mongoose.Types.ObjectId(theme._id)
@@ -100,6 +102,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
   });
   if (data) {
     const siteExist = await findOneSite(req.body.pageId);
+    console.log(siteExist);
     if (!siteExist) {
       const defaultNavItems = [
         {
@@ -141,25 +144,31 @@ router.post("/createNewSite", authenticate, async (req, res) => {
           session.withTransaction(async () => {
             data.posts &&
               data.posts.data.forEach(async post => {
-                post.id &&
-                  insertImage(
-                    post.id,
-                    {
-                      url: post.full_picture ? post.full_picture : ""
-                    },
-                    session
-                  );
+                const postExisted = Post.find({ id: post.id });
+                if (!postExisted) {
+                  post.id &&
+                    insertImage(
+                      post.id,
+                      {
+                        url: post.full_picture ? post.full_picture : ""
+                      },
+                      session
+                    );
+                }
               });
             data.videos &&
               data.videos.data.forEach(async video => {
-                video.id &&
-                  insertVideo(
-                    video.id,
-                    {
-                      url: video.permalink_url ? video.permalink_url : ""
-                    },
-                    session
-                  );
+                const videoExisted = Video.find({ id: video.id });
+                if (!videoExisted) {
+                  video.id &&
+                    insertVideo(
+                      video.id,
+                      {
+                        url: video.permalink_url ? video.permalink_url : ""
+                      },
+                      session
+                    );
+                }
               });
             data.cover &&
               insertHomePageImage(
@@ -174,13 +183,16 @@ router.post("/createNewSite", authenticate, async (req, res) => {
         .then(
           data.posts &&
             data.posts.data.forEach(async post => {
-              await insertPost(
-                req.body.pageId ? req.body.pageId : "",
-                {
-                  content: post.message ? post.message : ""
-                },
-                session
-              );
+              const postExisted = await Post.findOne({ id: post.id });
+              if (!postExisted) {
+                await insertPost(
+                  req.body.pageId ? req.body.pageId : "",
+                  {
+                    content: post.message ? post.message : ""
+                  },
+                  session
+                );
+              }
             })
         )
         .then(async () => {
@@ -190,6 +202,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
           if (!theme) {
             var theme = await Theme.findOne();
           }
+          console.log(theme.mainColor);
           const insertStatus = await insertSite(
             req.body.pageId,
             req.body.userId,
@@ -200,6 +213,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
               logo: data.picture ? data.picture.data.url : "",
               fontTitle: theme.fontTitle ? theme.fontTitle : "",
               fontBody: theme.fontBody ? theme.fontBody : "",
+              color: theme.mainColor ? theme.mainColor : "",
               title: req.body.name ? req.body.name : "",
               address: data.single_line_address ? data.single_line_address : "",
               navItems: defaultNavItems ? defaultNavItems : [],
@@ -208,7 +222,6 @@ router.post("/createNewSite", authenticate, async (req, res) => {
             },
             session
           );
-
           if (insertStatus) {
             return res.status(200).send(insertStatus);
           } else {

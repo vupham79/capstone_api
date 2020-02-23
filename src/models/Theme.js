@@ -4,7 +4,8 @@ const ThemeSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      default: ""
+      default: "",
+      unique: [true, "Id already existed!"]
     },
     name: {
       type: String,

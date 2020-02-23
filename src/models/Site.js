@@ -19,6 +19,10 @@ const SiteSchema = new mongoose.Schema(
       type: String,
       default: ""
     },
+    color: {
+      type: String,
+      default: ""
+    },
     logo: {
       type: String,
       default: ""
