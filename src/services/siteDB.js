@@ -1,11 +1,9 @@
 import mongoose from "mongoose";
-import { HomePageImage, Post, Site, User } from "../models";
+import { Site, User } from "../models";
 require("dotenv").config();
 
 export async function createSite() {
-  const PostResult = await Post.findOne({ id: "1" });
   const UserResult = await User.findOne({ id: "1" });
-  const HomePageImageResult = await HomePageImage.findOne({ id: "1" });
   await Site.create([
     {
       id: "1",
@@ -51,54 +49,20 @@ export async function createSite() {
         }
       ],
       isPublish: true,
-      posts: [PostResult._id],
-      userId: UserResult._id,
-      homePageImageId: HomePageImageResult._id
+      cover: ["https://i.ibb.co/gVpcW78/pv-featured-images.jpg"],
+      posts: [],
+      userId: UserResult._id
     }
   ]);
   return await Site.find().populate({
-    path: " posts userId homePageImageId",
-    populate: [
-      {
-        path: "videoId imageId"
-      }
-    ]
+    path: "posts userId themeId"
   });
 }
 
-export async function insertSite(pageId, userId, body, session) {
+export async function insertSite(pageId, userId, body) {
   const UserResult = await User.findOne({ id: userId });
-  const HomePageImageResult = await HomePageImage.findOne({ id: pageId });
-  const PostResult = await Post.find({ id: pageId });
-  const site = await Site.create(
-    [
-      {
-        id: pageId,
-        phone: body.phone ? body.phone : "",
-        longitude: body.longitude ? body.longitude : "",
-        latitude: body.latitude ? body.latitude : "",
-        color: body.color ? body.color : "",
-        logo: body.logo ? body.logo : "",
-        fontTitle: body.fontTitle ? body.fontTitle : "",
-        fontBody: body.fontBody ? body.fontBody : "",
-        title: body.title ? body.title : "",
-        address: body.address ? body.title : "",
-        navItems: body.navItems ? body.navItems : "",
-        posts: PostResult ? PostResult : "",
-        isPublish: true,
-        userId: UserResult && UserResult._id,
-        homePageImageId: HomePageImageResult && HomePageImageResult._id,
-        themeId: body.themeId
-      }
-    ],
-    { session }
-  );
-  return site;
-}
-
-export async function editSite(id, body) {
-  const SiteResult = await Site.findOne({ id: id });
-  await SiteResult.updateOne({
+  const site = await Site.create({
+    id: pageId,
     phone: body.phone ? body.phone : "",
     longitude: body.longitude ? body.longitude : "",
     latitude: body.latitude ? body.latitude : "",
@@ -107,11 +71,40 @@ export async function editSite(id, body) {
     fontTitle: body.fontTitle ? body.fontTitle : "",
     fontBody: body.fontBody ? body.fontBody : "",
     title: body.title ? body.title : "",
-    address: body.address ? body.title : "",
+    address: body.address ? body.address : "",
     navItems: body.navItems ? body.navItems : "",
-    posts: body.posts ? body.posts : ""
+    isPublish: true,
+    userId: UserResult && UserResult._id,
+    themeId: body.themeId,
+    cover: body.cover ? body.cover : [],
+    posts: body.posts ? body.posts : []
   });
-  return SiteResult;
+  return site.populate({
+    path: "posts userId themeId images"
+  });
+}
+
+export async function editSite(id, body) {
+  const update = await Site.updateOne(
+    { id: id },
+    {
+      phone: body.phone ? body.phone : "",
+      longitude: body.longitude ? body.longitude : "",
+      latitude: body.latitude ? body.latitude : "",
+      color: body.color ? body.color : "",
+      logo: body.logo ? body.logo : "",
+      fontTitle: body.fontTitle ? body.fontTitle : "",
+      fontBody: body.fontBody ? body.fontBody : "",
+      title: body.title ? body.title : "",
+      address: body.address ? body.address : "",
+      navItems: body.navItems ? body.navItems : "",
+      cover: body.cover ? body.cover : [],
+      posts: body.posts ? body.posts : []
+    }
+  );
+  return update.populate({
+    path: "posts userId themeId images"
+  });
 }
 
 export async function deleteSite(id) {
@@ -119,17 +112,14 @@ export async function deleteSite(id) {
   await SiteResult.updateOne({
     isPublish: false
   });
-  return SiteResult;
+  return SiteResult.populate({
+    path: "posts userId themeId images"
+  });
 }
 
 export async function findAllSite() {
   return await Site.find().populate({
-    path: " posts userId homePageImageId",
-    populate: [
-      {
-        path: "videoId imageId"
-      }
-    ]
+    path: "posts userId themeId images"
   });
 }
 
@@ -138,23 +128,13 @@ export async function findOneSiteByAccessToken(id, body) {
     id: id,
     accessToken: body.accessToken ? body.accessToken : ""
   }).populate({
-    path: " posts userId homePageImageId",
-    populate: [
-      {
-        path: "videoId imageId"
-      }
-    ]
+    path: "posts userId themeId images"
   });
 }
 
 export async function findOneSite(id) {
   return await Site.findOne({ id: id }).populate({
-    path: " posts userId homePageImageId",
-    populate: [
-      {
-        path: "videoId imageId"
-      }
-    ]
+    path: "posts userId themeId images"
   });
 }
 
@@ -167,12 +147,7 @@ export async function findAllSiteByUser(id, accessToken) {
     const site = await Site.find({
       userId: new mongoose.Types.ObjectId(user._id)
     }).populate({
-      path: "posts userId homePageImageId",
-      populate: [
-        {
-          path: "videoId imageId"
-        }
-      ]
+      path: "posts userId themeId images"
     });
     return site;
   }

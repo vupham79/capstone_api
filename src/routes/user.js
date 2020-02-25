@@ -5,7 +5,7 @@ import {
   findAllUser,
   findOneUser,
   insertUser
-} from "../actions/userDB";
+} from "../services/userDB";
 
 const router = Router();
 

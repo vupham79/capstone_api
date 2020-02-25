@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { getFacebookPageInfo, getUserPages } from "../actions/fbPage";
-import { findOneSiteByAccessToken } from "../actions/siteDB";
+import { getFacebookPageInfo, getUserPages } from "../services/fbPage";
+import { findOneSiteByAccessToken } from "../services/siteDB";
 
 const router = Router();
 
@@ -13,6 +13,16 @@ router.get("/pageInfo", async (req, res) => {
 });
 
 router.get("/pages", async (req, res) => {
+  const data = await getUserPages(
+    req.query.access_token ? req.query.access_token : ""
+  );
+  if (data && data.accounts) {
+    return res.status(200).send(data.accounts.data);
+  }
+  return res.status(500).send("No data found!");
+});
+
+router.get("/syncPage", async (req, res) => {
   const data = await getUserPages(
     req.query.access_token ? req.query.access_token : ""
   );

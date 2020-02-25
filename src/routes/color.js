@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getColor } from "../actions/color";
+import { getColor } from "../services/color";
 
 const router = Router();
 

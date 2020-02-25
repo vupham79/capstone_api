@@ -1,5 +1,6 @@
 import axios from "../utils/axios";
 import bucket from "../utils/firebase";
+import { Site, Theme } from "../models";
 
 export async function getFacebookPageInfo(
   url = process.env.facebookAPI + "103983364470143",
@@ -82,7 +83,38 @@ export async function downloadPageImage(id) {
   }
 }
 
+export async function getPostData({ access_token, pageId }) {
+  const data = await axios({
+    params: {
+      fields:
+        "name,cover,phone," +
+        "location,single_line_address," +
+        "posts{message,attachments{title,media_type,subattachments,media}}",
+      locale: "en_US ",
+      access_token
+    },
+    url: process.env.facebookAPI + pageId
+  });
+  return data.data;
+}
+
 export async function getPageData({ access_token, pageId }) {
+  const data = await axios({
+    params: {
+      fields:
+        "name,about,category,events,cover," +
+        "posts{message,attachments{title,media_type,subattachments,media}}," +
+        "location,single_line_address," +
+        "phone,photos{link,images,album,picture,webp_images},picture{url}",
+      locale: "en_US ",
+      access_token
+    },
+    url: process.env.facebookAPI + pageId
+  });
+  return data.data;
+}
+
+export async function getPageDataAndTheme({ access_token, pageId }) {
   const data = await axios({
     params: {
       fields:
@@ -93,5 +125,15 @@ export async function getPageData({ access_token, pageId }) {
     },
     url: process.env.facebookAPI + pageId
   });
-  return data.data;
+  const theme = null;
+  const site = await Site.find({ id: pageId });
+  if (site) {
+    theme = Theme.find({ id: site.id });
+  }
+  const result = {
+    data: data.data,
+    site: site,
+    theme: theme
+  };
+  return result;
 }

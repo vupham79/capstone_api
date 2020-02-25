@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getFirebaseValue } from "../actions/firebase";
+import { getFirebaseValue } from "../services/firebase";
 
 const router = Router();
 

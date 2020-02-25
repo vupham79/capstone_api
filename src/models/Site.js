@@ -43,6 +43,10 @@ const SiteSchema = new mongoose.Schema(
       type: String,
       default: ""
     },
+    color: {
+      type: String,
+      default: ""
+    },
     navItems: [
       {
         name: {
@@ -60,9 +64,24 @@ const SiteSchema = new mongoose.Schema(
       }
     ],
     isPublish: Boolean,
-    posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
+    posts: [
+      {
+        id: {
+          type: String,
+          default: "",
+          unique: [true, "Id already existed!"]
+        },
+        title: { type: String, default: "" },
+        message: { type: String, default: "" },
+        attachments: {
+          media_type: { type: String, default: "" },
+          images: [{ type: String, default: "" }],
+          video: { type: String, default: "" }
+        }
+      }
+    ],
+    cover: [{ type: String, default: "" }],
     userId: { type: Schema.Types.ObjectId, ref: "User" },
-    homePageImageId: [{ type: Schema.Types.ObjectId, ref: "HomePageImage" }],
     themeId: { type: Schema.Types.ObjectId, ref: "Theme" }
   },
   {

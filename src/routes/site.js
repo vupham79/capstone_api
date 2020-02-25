@@ -1,18 +1,14 @@
 import { Router } from "express";
 import mongoose from "mongoose";
-import { getPageData } from "../actions/fbPage";
-import { insertHomePageImage } from "../actions/homePageImageDB";
-import { insertImage } from "../actions/imageDB";
-import { authenticate } from "../actions/middleware";
-import { insertPost } from "../actions/postDB";
+import { getPostData } from "../services/fbPage";
+import { authenticate } from "../services/middleware";
 import {
   findAllSite,
   findAllSiteByUser,
   findOneSite,
   insertSite
-} from "../actions/siteDB";
-import { insertVideo } from "../actions/videoDB";
-import { Image, Site, Theme, Post, Video } from "../models";
+} from "../services/siteDB";
+import { Site, Theme } from "../models";
 const router = Router();
 
 router.get("/find/:id", async (req, res) => {
@@ -72,166 +68,203 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
     name,
     color
   } = req.body;
-  const theme = await Theme.findOne({ id: themeId });
-  if (theme) {
-    const update = await Site.updateOne(
-      { id: pageId },
-      {
-        logo: logo ? logo : "",
-        fontTitle: fontTitle ? fontTitle : "",
-        fontBody: fontBody ? fontBody : "",
-        color: color ? color : "",
-        title: name ? name : "",
-        navItems: navItems ? navItems : [],
-        themeId: new mongoose.Types.ObjectId(theme._id)
+  try {
+    const theme = await Theme.findOne({ id: themeId });
+    if (theme) {
+      const update = await Site.updateOne(
+        { id: pageId },
+        {
+          logo: logo && logo,
+          fontTitle: fontTitle && fontTitle,
+          fontBody: fontBody && fontBody,
+          title: name && name,
+          color: color && color,
+          navItems: navItems && navItems,
+          themeId: new mongoose.Types.ObjectId(theme._id)
+        }
+      );
+      if (update) {
+        return res.status(200).send(update);
+      } else {
+        return res.status(500).send({ error: "Insert failed!" });
       }
-    );
-    if (update) {
-      return res.status(200).send(update);
-    } else {
-      return res.status(500).send({ error: "Insert failed!" });
     }
+    return res.status(500).send({ error: "Theme not exist!" });
+  } catch (error) {
+    return res.status(500).send({ error });
   }
-  return res.status(500).send({ error: "Theme not exist!" });
 });
 
 router.post("/createNewSite", authenticate, async (req, res) => {
-  const data = await getPageData({
+  const data = await getPostData({
     pageId: req.body.pageId ? req.body.pageId : "",
     access_token: req.body.accessToken ? req.body.accessToken : ""
   });
   if (data) {
     const siteExist = await findOneSite(req.body.pageId);
-    console.log(siteExist);
-    if (!siteExist) {
-      const defaultNavItems = [
-        {
-          name: "Home",
-          order: 1,
-          isActive: true
-        },
-        {
-          name: "About",
-          order: 2,
-          isActive: true
-        },
-        {
-          name: "Gallery",
-          order: 3,
-          isActive: true
-        },
-        {
-          name: "Event",
-          order: 4,
-          isActive: true
-        },
-        {
-          name: "Contact",
-          order: 5,
-          isActive: true
-        },
-        {
-          name: "News",
-          order: 6,
-          isActive: true
-        }
-      ];
-      let session;
-      return Image.createCollection()
-        .then(() => Image.startSession())
-        .then(_session => {
-          session = _session;
-          session.withTransaction(async () => {
-            data.posts &&
-              data.posts.data.forEach(async post => {
-                const postExisted = Post.find({ id: post.id });
-                if (!postExisted) {
-                  post.id &&
-                    insertImage(
-                      post.id,
-                      {
-                        url: post.full_picture ? post.full_picture : ""
-                      },
-                      session
+    try {
+      if (!siteExist) {
+        const defaultNavItems = [
+          {
+            name: "Home",
+            order: 1,
+            isActive: true
+          },
+          {
+            name: "About",
+            order: 2,
+            isActive: true
+          },
+          {
+            name: "Gallery",
+            order: 3,
+            isActive: true
+          },
+          {
+            name: "Event",
+            order: 4,
+            isActive: true
+          },
+          {
+            name: "Contact",
+            order: 5,
+            isActive: true
+          },
+          {
+            name: "News",
+            order: 6,
+            isActive: true
+          }
+        ];
+        let session;
+        let imageIds = [];
+        let videoIds = [];
+        return Site.createCollection()
+          .then(() => Site.startSession())
+          .then(_session => {
+            session = _session;
+            session.withTransaction(async () => {
+              const postsList = [];
+              data.posts &&
+                data.posts.data.forEach(post => {
+                  if (
+                    post.attachments &&
+                    post.attachments.data[0].media_type === "album"
+                  ) {
+                    const subAttachmentList = [];
+                    post.attachments.data[0].subattachments.data.forEach(
+                      subAttachment => {
+                        subAttachmentList.push(subAttachment.media.image.src);
+                      }
                     );
-                }
+                    postsList.push({
+                      id: post.id,
+                      title: post.attachments.data[0].title
+                        ? post.attachments.data[0].title
+                        : "",
+                      message: post.message ? post.message : "",
+                      attachments: {
+                        id: post.id,
+                        media_type: "album",
+                        images: subAttachmentList,
+                        video: ""
+                      }
+                    });
+                  } else if (
+                    post.attachments &&
+                    post.attachments.data[0].media_type === "photo"
+                  ) {
+                    postsList.push({
+                      id: post.id,
+                      message: post.message ? post.message : "",
+                      title: post.attachments.data[0].title
+                        ? post.attachments.data[0].title
+                        : "",
+                      attachments: {
+                        id: post.id,
+                        media_type: "photo",
+                        images: [post.attachments.data[0].media.image.src],
+                        video: ""
+                      }
+                    });
+                  } else if (
+                    post.attachments &&
+                    post.attachments.data[0].media_type === "event"
+                  ) {
+                    postsList.push({
+                      id: post.id,
+                      message: post.message ? post.message : "",
+                      title: post.attachments.data[0].title
+                        ? post.attachments.data[0].title
+                        : "",
+                      attachments: {
+                        id: post.id,
+                        media_type: "event",
+                        images: [post.attachments.data[0].media.image.src],
+                        video: ""
+                      }
+                    });
+                  } else if (
+                    post.attachments &&
+                    post.attachments.data[0].media_type === "video"
+                  ) {
+                    postsList.push({
+                      id: post.id,
+                      message: post.message ? post.message : "",
+                      title: post.attachments.data[0].title
+                        ? post.attachments.data[0].title
+                        : "",
+                      attachments: {
+                        id: post.id,
+                        media_type: "video",
+                        images: [],
+                        video: post.attachments.data[0].media.source
+                      }
+                    });
+                  }
+                });
+              var theme = await Theme.findOne({
+                "categories.name": req.body.category
               });
-            data.videos &&
-              data.videos.data.forEach(async video => {
-                const videoExisted = Video.find({ id: video.id });
-                if (!videoExisted) {
-                  video.id &&
-                    insertVideo(
-                      video.id,
-                      {
-                        url: video.permalink_url ? video.permalink_url : ""
-                      },
-                      session
-                    );
-                }
-              });
-            data.cover &&
-              insertHomePageImage(
-                req.body.pageId,
-                {
-                  url: data.cover.source
-                },
-                session
-              );
-          });
-        })
-        .then(
-          data.posts &&
-            data.posts.data.forEach(async post => {
-              const postExisted = await Post.findOne({ id: post.id });
-              if (!postExisted) {
-                await insertPost(
-                  req.body.pageId ? req.body.pageId : "",
-                  {
-                    content: post.message ? post.message : ""
-                  },
-                  session
-                );
+              if (!theme) {
+                var theme = await Theme.findOne();
               }
-            })
-        )
-        .then(async () => {
-          var theme = await Theme.findOne({
-            "categories.name": req.body.category
+              const insertStatus = await insertSite(
+                req.body.pageId,
+                req.body.userId,
+                {
+                  phone: data.phone ? data.phone : "",
+                  longitude: data.location ? data.location.longitude : "",
+                  latitude: data.location ? data.location.latitude : "",
+                  logo: req.body.logo ? req.body.logo : "",
+                  fontTitle: theme.fontTitle ? theme.fontTitle : "",
+                  fontBody: theme.fontBody ? theme.fontBody : "",
+                  color: theme.mainColor ? theme.mainColor : "",
+                  title: data.name ? data.name : "",
+                  address: data.single_line_address
+                    ? data.single_line_address
+                    : "",
+                  navItems: defaultNavItems ? defaultNavItems : [],
+                  username: req.body.profile.name ? req.body.profile.name : "",
+                  themeId: new mongoose.Types.ObjectId(theme._id),
+                  posts: postsList,
+                  cover: data.cover ? [data.cover.source] : []
+                }
+              ).catch(error => console.log("site error"));
+              console.log(insertStatus.id);
+              if (insertStatus) {
+                return res.status(200).send(insertStatus);
+              } else {
+                return res.status(500).send({ error: "Insert failed!" });
+              }
+            });
           });
-          if (!theme) {
-            var theme = await Theme.findOne();
-          }
-          console.log(theme.mainColor);
-          const insertStatus = await insertSite(
-            req.body.pageId,
-            req.body.userId,
-            {
-              phone: data.phone ? data.phone : "",
-              longitude: data.location ? data.location.longitude : "",
-              latitude: data.location ? data.location.latitude : "",
-              logo: data.picture ? data.picture.data.url : "",
-              fontTitle: theme.fontTitle ? theme.fontTitle : "",
-              fontBody: theme.fontBody ? theme.fontBody : "",
-              color: theme.mainColor ? theme.mainColor : "",
-              title: req.body.name ? req.body.name : "",
-              address: data.single_line_address ? data.single_line_address : "",
-              navItems: defaultNavItems ? defaultNavItems : [],
-              username: req.body.profile.name ? req.body.profile.name : "",
-              themeId: new mongoose.Types.ObjectId(theme._id)
-            },
-            session
-          );
-          if (insertStatus) {
-            return res.status(200).send(insertStatus);
-          } else {
-            return res.status(500).send({ error: "Insert failed!" });
-          }
-        });
+      }
+      return res.status(500).send({ error: "Site existed!" });
+    } catch (error) {
+      return res.status(500).send({ error });
     }
-    return res.status(500).send({ error: "Site existed!" });
   }
-  return res.status(500).send({ error: "No data found!" });
 });
 
 export default router;

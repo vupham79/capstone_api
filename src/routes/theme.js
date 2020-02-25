@@ -5,7 +5,7 @@ import {
   findAllTheme,
   findOneTheme,
   insertTheme
-} from "../actions/themeDB";
+} from "../services/themeDB";
 
 const router = Router();
 
