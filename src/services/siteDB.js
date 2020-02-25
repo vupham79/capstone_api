@@ -51,16 +51,16 @@ export async function createSite() {
       isPublish: true,
       cover: ["https://i.ibb.co/gVpcW78/pv-featured-images.jpg"],
       posts: [],
-      users: UserResult._id
+      user: UserResult._id
     }
   ]);
   return create.populate({
-    path: "posts users themes"
+    path: "posts user theme"
   });
 }
 
-export async function insertSite(pageId, users, body) {
-  const UserResult = await User.findOne({ id: users });
+export async function insertSite(pageId, user, body) {
+  const UserResult = await User.findOne({ id: user });
   const insert = await Site.create({
     id: pageId,
     phone: body.phone ? body.phone : "",
@@ -74,14 +74,14 @@ export async function insertSite(pageId, users, body) {
     address: body.address ? body.address : "",
     navItems: body.navItems ? body.navItems : "",
     isPublish: true,
-    users: UserResult && UserResult._id,
-    themes: body.themes,
+    user: UserResult && UserResult._id,
+    theme: body.theme,
     cover: body.cover ? body.cover : [],
     posts: body.posts ? body.posts : [],
     categories: body.categories ? body.categories : []
   });
   return insert.populate({
-    path: "posts users themes images"
+    path: "posts user theme images"
   });
   return site;
 }
@@ -113,7 +113,7 @@ export async function deleteSite(id) {
 
 export async function findAllSite() {
   return await Site.find().populate({
-    path: "posts users themes images"
+    path: "posts user theme images"
   });
 }
 
@@ -122,13 +122,13 @@ export async function findOneSiteByAccessToken(id, body) {
     id: id,
     accessToken: body.accessToken ? body.accessToken : ""
   }).populate({
-    path: "posts users themes images"
+    path: "posts user theme images"
   });
 }
 
 export async function findOneSite(id) {
   return await Site.findOne({ id: id }).populate({
-    path: "posts users themes images"
+    path: "posts user theme images"
   });
 }
 
@@ -139,8 +139,8 @@ export async function findAllSiteByUser(id, accessToken) {
   });
   if (user) {
     const site = await Site.find({
-      users: new mongoose.Types.ObjectId(user._id)
-    }).select("logo title categories isPublish");
+      userId: new mongoose.Types.ObjectId(user._id)
+    }).select("logo title categories isPublish id");
     return site;
   }
   return false;

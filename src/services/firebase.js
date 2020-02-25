@@ -27,8 +27,6 @@ export async function getFirebaseValue(
   await axios
     .get(url)
     .then(function(response) {
-      console.log("Response status: " + response.status);
-      // console.log("Image data: " + response.data);
       data = response.responseUrl;
     })
     .catch(function(error) {

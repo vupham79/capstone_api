@@ -55,14 +55,12 @@ export async function deactivateUser(id) {
     }
   );
   const user = await User.findOne({ id: id });
-  console.log(user);
   const site = await Site.updateMany(
-    { users: user._id },
+    { user: user._id },
     {
       isPublish: false
     }
   );
-  console.log(site);
   return user;
 }
 

@@ -23,7 +23,7 @@ router.get("/find/:id", async (req, res) => {
 });
 
 router.get("/findAllByUser", async (req, res) => {
-  await findAllSiteByUser(req.query.users, req.query.accessToken)
+  await findAllSiteByUser(req.query.user, req.query.accessToken)
     .then(result => {
       return res.status(200).send(result);
     })
@@ -64,13 +64,13 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
     fontBody,
     fontTitle,
     navItems,
-    themes,
+    theme,
     pageId,
     name,
     color
   } = req.body;
   try {
-    const theme = await Theme.findOne({ id: themes });
+    const theme = await Theme.findOne({ id: theme });
     if (theme) {
       const update = await Site.updateOne(
         { id: pageId },
@@ -81,7 +81,7 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
           title: name && name,
           color: color && color,
           navItems: navItems && navItems,
-          themes: new mongoose.Types.ObjectId(theme._id)
+          theme: new mongoose.Types.ObjectId(theme._id)
         }
       );
       if (update) {
@@ -230,7 +230,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
               }
               const insertStatus = await insertSite(
                 req.body.pageId,
-                req.body.users,
+                req.body.user,
                 {
                   phone: data.phone ? data.phone : "",
                   longitude: data.location ? data.location.longitude : "",
@@ -244,7 +244,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                     ? data.single_line_address
                     : "",
                   navItems: defaultNavItems ? defaultNavItems : [],
-                  themes: new mongoose.Types.ObjectId(theme._id),
+                  theme: new mongoose.Types.ObjectId(theme._id),
                   posts: postsList && postsList,
                   cover: data.cover ? [data.cover.source] : [],
                   categories: data.category_list ? data.category_list : []
