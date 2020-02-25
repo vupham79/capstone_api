@@ -83,7 +83,8 @@ export async function downloadPageImage(id) {
   }
 }
 
-export async function getPostData({ access_token, pageId }) {
+export async function getPostData({ pageId, access_token }) {
+  console.log("111");
   const data = await axios({
     params: {
       fields:

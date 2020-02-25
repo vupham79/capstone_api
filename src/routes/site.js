@@ -6,7 +6,8 @@ import {
   findAllSite,
   findAllSiteByUser,
   findOneSite,
-  insertSite
+  insertSite,
+  editSite
 } from "../services/siteDB";
 import { Site, Theme } from "../models";
 const router = Router();
@@ -22,7 +23,7 @@ router.get("/find/:id", async (req, res) => {
 });
 
 router.get("/findAllByUser", async (req, res) => {
-  await findAllSiteByUser(req.query.userId, req.query.accessToken)
+  await findAllSiteByUser(req.query.users, req.query.accessToken)
     .then(result => {
       return res.status(200).send(result);
     })
@@ -63,13 +64,13 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
     fontBody,
     fontTitle,
     navItems,
-    themeId,
+    themes,
     pageId,
     name,
     color
   } = req.body;
   try {
-    const theme = await Theme.findOne({ id: themeId });
+    const theme = await Theme.findOne({ id: themes });
     if (theme) {
       const update = await Site.updateOne(
         { id: pageId },
@@ -80,7 +81,7 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
           title: name && name,
           color: color && color,
           navItems: navItems && navItems,
-          themeId: new mongoose.Types.ObjectId(theme._id)
+          themes: new mongoose.Types.ObjectId(theme._id)
         }
       );
       if (update) {
@@ -229,7 +230,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
               }
               const insertStatus = await insertSite(
                 req.body.pageId,
-                req.body.userId,
+                req.body.users,
                 {
                   phone: data.phone ? data.phone : "",
                   longitude: data.location ? data.location.longitude : "",
@@ -243,9 +244,8 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                     ? data.single_line_address
                     : "",
                   navItems: defaultNavItems ? defaultNavItems : [],
-                  username: req.body.profile.name ? req.body.profile.name : "",
-                  themeId: new mongoose.Types.ObjectId(theme._id),
-                  posts: postsList,
+                  themes: new mongoose.Types.ObjectId(theme._id),
+                  posts: postsList && postsList,
                   cover: data.cover ? [data.cover.source] : [],
                   categories: data.category_list ? data.category_list : []
                 }
@@ -265,7 +265,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
   }
 });
 
-router.post("/syncData", authenticate, async (req, res) => {
+router.patch("/syncData", authenticate, async (req, res) => {
   const data = await getPostData({
     pageId: req.body.pageId ? req.body.pageId : "",
     access_token: req.body.accessToken ? req.body.accessToken : ""
@@ -280,7 +280,7 @@ router.post("/syncData", authenticate, async (req, res) => {
           .then(_session => {
             session = _session;
             session.withTransaction(async () => {
-              const postsList = [];
+              let postsList = [];
               data.posts &&
                 data.posts.data.forEach(post => {
                   if (
@@ -365,22 +365,18 @@ router.post("/syncData", authenticate, async (req, res) => {
               if (!theme) {
                 var theme = await Theme.findOne();
               }
-              const insertStatus = await insertSite(
-                req.body.pageId,
-                req.body.userId,
-                {
-                  phone: data.phone ? data.phone : "",
-                  longitude: data.location ? data.location.longitude : "",
-                  latitude: data.location ? data.location.latitude : "",
-                  logo: req.body.logo ? req.body.logo : "",
-                  address: data.single_line_address
-                    ? data.single_line_address
-                    : "",
-                  posts: postsList,
-                  cover: data.cover ? [data.cover.source] : [],
-                  categories: data.category_list ? data.category_list : []
-                }
-              ).catch(error => console.log("Insert error: ", error));
+              const insertStatus = await editSite(req.body.pageId, {
+                phone: data.phone ? data.phone : "",
+                longitude: data.location ? data.location.longitude : "",
+                latitude: data.location ? data.location.latitude : "",
+                logo: req.body.logo ? req.body.logo : "",
+                address: data.single_line_address
+                  ? data.single_line_address
+                  : "",
+                posts: postsList && postsList,
+                cover: data.cover ? [data.cover.source] : [],
+                categories: data.category_list ? data.category_list : []
+              }).catch(error => console.log("Insert error: ", error));
               if (insertStatus) {
                 return res.status(200).send(insertStatus);
               } else {

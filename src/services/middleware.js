@@ -1,6 +1,6 @@
 export async function authenticate(req, res, next) {
   // const user = await User.findOne({
-  //   id: req.params.userId || req.body.userId,
+  //   id: req.params.users || req.body.users,
   //   accessToken: req.params.accessToken || req.body.accessToken
   // });
   // if (user) {

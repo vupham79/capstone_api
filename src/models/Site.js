@@ -92,8 +92,8 @@ const SiteSchema = new mongoose.Schema(
         }
       }
     ],
-    userId: { type: Schema.Types.ObjectId, ref: "User" },
-    themeId: { type: Schema.Types.ObjectId, ref: "Theme" }
+    users: { type: Schema.Types.ObjectId, ref: "User" },
+    themes: { type: Schema.Types.ObjectId, ref: "Theme" }
   },
   {
     timestamps: true

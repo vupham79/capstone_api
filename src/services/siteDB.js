@@ -51,16 +51,16 @@ export async function createSite() {
       isPublish: true,
       cover: ["https://i.ibb.co/gVpcW78/pv-featured-images.jpg"],
       posts: [],
-      userId: UserResult._id
+      users: UserResult._id
     }
   ]);
   return create.populate({
-    path: "posts userId themeId"
+    path: "posts users themes"
   });
 }
 
-export async function insertSite(pageId, userId, body) {
-  const UserResult = await User.findOne({ id: userId });
+export async function insertSite(pageId, users, body) {
+  const UserResult = await User.findOne({ id: users });
   const insert = await Site.create({
     id: pageId,
     phone: body.phone ? body.phone : "",
@@ -74,14 +74,14 @@ export async function insertSite(pageId, userId, body) {
     address: body.address ? body.address : "",
     navItems: body.navItems ? body.navItems : "",
     isPublish: true,
-    userId: UserResult && UserResult._id,
-    themeId: body.themeId,
+    users: UserResult && UserResult._id,
+    themes: body.themes,
     cover: body.cover ? body.cover : [],
     posts: body.posts ? body.posts : [],
     categories: body.categories ? body.categories : []
   });
   return insert.populate({
-    path: "posts userId themeId images"
+    path: "posts users themes images"
   });
   return site;
 }
@@ -93,13 +93,8 @@ export async function editSite(id, body) {
       phone: body.phone ? body.phone : "",
       longitude: body.longitude ? body.longitude : "",
       latitude: body.latitude ? body.latitude : "",
-      color: body.color ? body.color : "",
       logo: body.logo ? body.logo : "",
-      fontTitle: body.fontTitle ? body.fontTitle : "",
-      fontBody: body.fontBody ? body.fontBody : "",
-      title: body.title ? body.title : "",
       address: body.address ? body.address : "",
-      navItems: body.navItems ? body.navItems : "",
       cover: body.cover ? body.cover : [],
       posts: body.posts ? body.posts : [],
       categories: body.categories ? body.categories : []
@@ -118,7 +113,7 @@ export async function deleteSite(id) {
 
 export async function findAllSite() {
   return await Site.find().populate({
-    path: "posts userId themeId images"
+    path: "posts users themes images"
   });
 }
 
@@ -127,13 +122,13 @@ export async function findOneSiteByAccessToken(id, body) {
     id: id,
     accessToken: body.accessToken ? body.accessToken : ""
   }).populate({
-    path: "posts userId themeId images"
+    path: "posts users themes images"
   });
 }
 
 export async function findOneSite(id) {
   return await Site.findOne({ id: id }).populate({
-    path: "posts userId themeId images"
+    path: "posts users themes images"
   });
 }
 
@@ -144,7 +139,7 @@ export async function findAllSiteByUser(id, accessToken) {
   });
   if (user) {
     const site = await Site.find({
-      userId: new mongoose.Types.ObjectId(user._id)
+      users: new mongoose.Types.ObjectId(user._id)
     }).select("logo title categories isPublish");
     return site;
   }

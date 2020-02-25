@@ -3,6 +3,7 @@ require("dotenv").config();
 
 export async function createUser() {
   const site = await Site.find({ id: "109919550538707" });
+  console.log();
   const user = await User.create([
     {
       id: "1",
@@ -54,12 +55,14 @@ export async function deactivateUser(id) {
     }
   );
   const user = await User.findOne({ id: id });
+  console.log(user);
   const site = await Site.updateMany(
-    { userId: user._id },
+    { users: user._id },
     {
       isPublish: false
     }
   );
+  console.log(site);
   return user;
 }
 
