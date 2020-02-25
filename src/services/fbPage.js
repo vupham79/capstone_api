@@ -87,7 +87,7 @@ export async function getPostData({ access_token, pageId }) {
   const data = await axios({
     params: {
       fields:
-        "name,cover,phone," +
+        "name,cover,phone,category_list," +
         "location,single_line_address," +
         "posts{message,attachments{title,media_type,subattachments,media}}",
       locale: "en_US ",

@@ -4,7 +4,9 @@ import {
   editUser,
   findAllUser,
   findOneUser,
-  insertUser
+  insertUser,
+  deactivateUser,
+  activateUser
 } from "../services/userDB";
 
 const router = Router();
@@ -31,6 +33,26 @@ router.post("/insert/:id", async (req, res) => {
 
 router.patch("/update/:id", async (req, res) => {
   await editUser(req.params.id, req.body)
+    .then(result => {
+      return res.status(200).send(result);
+    })
+    .catch(error => {
+      return res.status(500).send(error);
+    });
+});
+
+router.patch("/deactivate/:id", async (req, res) => {
+  await deactivateUser(req.params.id)
+    .then(result => {
+      return res.status(200).send(result);
+    })
+    .catch(error => {
+      return res.status(500).send(error);
+    });
+});
+
+router.patch("/activate/:id", async (req, res) => {
+  await activateUser(req.params.id)
     .then(result => {
       return res.status(200).send(result);
     })

@@ -1,8 +1,9 @@
-import { User } from "../models";
+import { User, Site, mongoose } from "../models";
 require("dotenv").config();
 
 export async function createUser() {
-  await User.create([
+  const site = await Site.find({ id: "109919550538707" });
+  const user = await User.create([
     {
       id: "1",
       displayName: "Hoang Cao",
@@ -10,45 +11,64 @@ export async function createUser() {
       phone: "0907419552",
       accessToken:
         "EAAMIaToJEsABAOgPRL0cXTP1KCUBddRZAUhfWWxiH1xIZCqcyU0yXbL2rlXWxgN0keFOLZC0Wcb4YvBv5guO7t4AOaEJomXxF8ZAcmnZACYRQh1NJywBwVyHZCnggdZABV7Kn8PahQFTCbGPKZAXl4fyDL9SAtVKyKRpbVpMjY7wZBj312HDfO5OYoKK62WvZCKWPAB6xnrdFW9gZDZD",
-      isActivated: true
-    },
-    {
-      id: "2",
-      displayName: "Cao Minh",
-      email: "hoangcmse61788@fpt.edu.vn",
-      phone: "0907419552",
-      accessToken:
-        "EAAMIaToJEsABAOgPRL0cXTP1KCUBddRZAUhfWWxiH1xIZCqcyU0yXbL2rlXWxgN0keFOLZC0Wcb4YvBv5guO7t4AOaEJomXxF8ZAcmnZACYRQh1NJywBwVyHZCnggdZABV7Kn8PahQFTCbGPKZAXl4fyDL9SAtVKyKRpbVpMjY7wZBj312HDfO5OYoKK62WvZCKWPAB6xnrdFW9gZDZD",
-      isActivated: true
+      isActivated: true,
+      sites: [new mongoose.Types.ObjectId(site._id)]
     }
   ]);
-  return await User.find();
+  return user;
 }
 
 export async function insertUser(id, body) {
-  await User.collection.insertOne({
+  const insert = await User.collection.insertOne({
     id: id,
     displayName: body.displayName ? body.displayName : "",
     email: body.email ? body.email : "",
     phone: body.phone ? body.phone : "",
     accessToken: body.accessToken ? body.accessToken : "",
     picture: body.picture ? body.picture : "",
-    isActivated: true
+    isActivated: true,
+    sites: body.sites ? body.sites : []
   });
-  return await User.find();
+  return insert;
 }
 
 export async function editUser(id, body) {
-  const UserResult = await User.findOne({ id: id });
-  await UserResult.updateOne({
-    displayName: body.displayName ? body.displayName : "",
-    email: body.email ? body.email : "",
-    phone: body.phone ? body.phone : "",
-    accessToken: body.accessToken ? body.accessToken : "",
-    picture: body.picture ? body.picture : "",
+  const update = await User.updateOne(
+    { id: id },
+    {
+      displayName: body.displayName ? body.displayName : "",
+      email: body.email ? body.email : "",
+      phone: body.phone ? body.phone : "",
+      accessToken: body.accessToken ? body.accessToken : "",
+      picture: body.picture ? body.picture : ""
+    }
+  );
+  return update;
+}
+
+export async function deactivateUser(id) {
+  await User.updateOne(
+    { id: id },
+    {
+      isActivated: false
+    }
+  );
+  const user = await User.findOne({ id: id });
+  const site = await Site.updateMany(
+    { userId: user._id },
+    {
+      isPublish: false
+    }
+  );
+  return user;
+}
+
+export async function activateUser(id) {
+  const user = User.find({ id: id });
+  await user.updateOne({
     isActivated: true
   });
-  return await User.find();
+  return user;
 }
 
 export async function findAllUser() {

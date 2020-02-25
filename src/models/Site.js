@@ -68,8 +68,7 @@ const SiteSchema = new mongoose.Schema(
       {
         id: {
           type: String,
-          default: "",
-          unique: [true, "Id already existed!"]
+          default: ""
         },
         title: { type: String, default: "" },
         message: { type: String, default: "" },
@@ -81,6 +80,18 @@ const SiteSchema = new mongoose.Schema(
       }
     ],
     cover: [{ type: String, default: "" }],
+    categories: [
+      {
+        id: {
+          type: String,
+          default: ""
+        },
+        name: {
+          type: String,
+          default: ""
+        }
+      }
+    ],
     userId: { type: Schema.Types.ObjectId, ref: "User" },
     themeId: { type: Schema.Types.ObjectId, ref: "Theme" }
   },
