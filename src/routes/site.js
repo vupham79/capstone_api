@@ -137,8 +137,6 @@ router.post("/createNewSite", authenticate, async (req, res) => {
           }
         ];
         let session;
-        let imageIds = [];
-        let videoIds = [];
         return Site.createCollection()
           .then(() => Site.startSession())
           .then(_session => {
@@ -236,7 +234,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                   phone: data.phone ? data.phone : "",
                   longitude: data.location ? data.location.longitude : "",
                   latitude: data.location ? data.location.latitude : "",
-                  logo: req.body.logo ? req.body.logo : "",
+                  logo: data.picture ? data.picture.data.url : "",
                   fontTitle: theme.fontTitle ? theme.fontTitle : "",
                   fontBody: theme.fontBody ? theme.fontBody : "",
                   color: theme.mainColor ? theme.mainColor : "",
@@ -247,11 +245,10 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                   navItems: defaultNavItems ? defaultNavItems : [],
                   username: req.body.profile.name ? req.body.profile.name : "",
                   themeId: new mongoose.Types.ObjectId(theme._id),
-                  posts: postsList,
+                  posts: postsList && postsList,
                   cover: data.cover ? [data.cover.source] : []
                 }
-              ).catch(error => console.log("site error"));
-              console.log(insertStatus.id);
+              ).catch(error => console.log("Insert error: ", error));
               if (insertStatus) {
                 return res.status(200).send(insertStatus);
               } else {

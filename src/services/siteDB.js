@@ -77,11 +77,9 @@ export async function insertSite(pageId, userId, body) {
     userId: UserResult && UserResult._id,
     themeId: body.themeId,
     cover: body.cover ? body.cover : [],
-    posts: body.posts ? body.posts : []
+    posts: body.posts && body.posts
   });
-  return site.populate({
-    path: "posts userId themeId images"
-  });
+  return site;
 }
 
 export async function editSite(id, body) {
@@ -102,9 +100,7 @@ export async function editSite(id, body) {
       posts: body.posts ? body.posts : []
     }
   );
-  return update.populate({
-    path: "posts userId themeId images"
-  });
+  return update;
 }
 
 export async function deleteSite(id) {
@@ -112,9 +108,7 @@ export async function deleteSite(id) {
   await SiteResult.updateOne({
     isPublish: false
   });
-  return SiteResult.populate({
-    path: "posts userId themeId images"
-  });
+  return SiteResult;
 }
 
 export async function findAllSite() {

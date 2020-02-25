@@ -67,16 +67,14 @@ const SiteSchema = new mongoose.Schema(
     posts: [
       {
         id: {
-          type: String,
-          default: "",
-          unique: [true, "Id already existed!"]
+          type: String
         },
-        title: { type: String, default: "" },
-        message: { type: String, default: "" },
+        title: String,
+        message: String,
         attachments: {
-          media_type: { type: String, default: "" },
-          images: [{ type: String, default: "" }],
-          video: { type: String, default: "" }
+          media_type: String,
+          images: [String],
+          video: String
         }
       }
     ],
