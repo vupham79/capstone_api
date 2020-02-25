@@ -2,19 +2,21 @@ import { Category } from "../models";
 require("dotenv").config();
 
 export async function insertCategory(id, body) {
-  await Category.collection.insertOne({
+  const insert = await Category.collection.insertOne({
     id: id,
     name: body.name ? body.name : ""
   });
-  return await Category.find();
+  return insert;
 }
 
 export async function editCategory(id, body) {
-  const CategoryResult = await Category.findOne({ id: id });
-  await CategoryResult.updateOne({
-    name: body.name ? body.name : ""
-  });
-  return await Category.find();
+  const edit = await Category.updateOne(
+    { id: id },
+    {
+      name: body.name ? body.name : ""
+    }
+  );
+  return edit;
 }
 
 export async function findAllCategory() {

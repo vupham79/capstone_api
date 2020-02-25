@@ -4,7 +4,7 @@ require("dotenv").config();
 
 export async function createSite() {
   const UserResult = await User.findOne({ id: "1" });
-  await Site.create([
+  const create = await Site.create([
     {
       id: "1",
       phone: "0907419552",
@@ -54,14 +54,14 @@ export async function createSite() {
       userId: UserResult._id
     }
   ]);
-  return await Site.find().populate({
+  return create.populate({
     path: "posts userId themeId"
   });
 }
 
 export async function insertSite(pageId, userId, body) {
   const UserResult = await User.findOne({ id: userId });
-  const site = await Site.create({
+  const insert = await Site.create({
     id: pageId,
     phone: body.phone ? body.phone : "",
     longitude: body.longitude ? body.longitude : "",
@@ -77,7 +77,11 @@ export async function insertSite(pageId, userId, body) {
     userId: UserResult && UserResult._id,
     themeId: body.themeId,
     cover: body.cover ? body.cover : [],
-    posts: body.posts && body.posts
+    posts: body.posts ? body.posts : [],
+    categories: body.categories ? body.categories : []
+  });
+  return insert.populate({
+    path: "posts userId themeId images"
   });
   return site;
 }
@@ -97,7 +101,8 @@ export async function editSite(id, body) {
       address: body.address ? body.address : "",
       navItems: body.navItems ? body.navItems : "",
       cover: body.cover ? body.cover : [],
-      posts: body.posts ? body.posts : []
+      posts: body.posts ? body.posts : [],
+      categories: body.categories ? body.categories : []
     }
   );
   return update;
@@ -140,9 +145,7 @@ export async function findAllSiteByUser(id, accessToken) {
   if (user) {
     const site = await Site.find({
       userId: new mongoose.Types.ObjectId(user._id)
-    }).populate({
-      path: "posts userId themeId images"
-    });
+    }).select("logo title categories isPublish");
     return site;
   }
   return false;

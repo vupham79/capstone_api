@@ -12,13 +12,16 @@ require("dotenv").config();
 // }
 
 export async function editTheme(id, body) {
-  const ThemeResult = await Theme.findOne({ id: id });
-  return await ThemeResult.updateOne({
-    name: body.name ? body.name : "",
-    fontTitle: body.fontTitle ? body.fontTitle : "",
-    mainColor: body.color ? body.color : "",
-    categories: body.categories ? body.categories : ""
-  });
+  const edit = await Theme.updateOne(
+    { id: id },
+    {
+      name: body.name ? body.name : "",
+      fontTitle: body.fontTitle ? body.fontTitle : "",
+      mainColor: body.color ? body.color : "",
+      categories: body.categories ? body.categories : ""
+    }
+  );
+  return edit;
 }
 
 export async function findAllTheme() {
@@ -27,11 +30,7 @@ export async function findAllTheme() {
 
 export async function findOneThemeByCategory(name) {
   const theme = await Theme.collection.findOne({ "categories.name": name });
-  if (theme) {
-    return theme;
-  } else {
-    return await Theme.findOne();
-  }
+  return theme;
 }
 
 export async function findOneTheme(id) {

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const UserSchema = new mongoose.Schema(
   {
@@ -22,7 +22,12 @@ const UserSchema = new mongoose.Schema(
     accessToken: {
       type: String,
       default: ""
-    }
+    },
+    isActivated: {
+      type: Boolean,
+      default: true
+    },
+    sites: [{ type: Schema.Types.ObjectId, ref: "Site" }]
   },
   {
     timestamps: true

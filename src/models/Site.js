@@ -67,7 +67,8 @@ const SiteSchema = new mongoose.Schema(
     posts: [
       {
         id: {
-          type: String
+          type: String,
+          default: ""
         },
         title: String,
         message: String,
@@ -79,6 +80,18 @@ const SiteSchema = new mongoose.Schema(
       }
     ],
     cover: [{ type: String, default: "" }],
+    categories: [
+      {
+        id: {
+          type: String,
+          default: ""
+        },
+        name: {
+          type: String,
+          default: ""
+        }
+      }
+    ],
     userId: { type: Schema.Types.ObjectId, ref: "User" },
     themeId: { type: Schema.Types.ObjectId, ref: "Theme" }
   },

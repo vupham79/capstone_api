@@ -245,8 +245,140 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                   navItems: defaultNavItems ? defaultNavItems : [],
                   username: req.body.profile.name ? req.body.profile.name : "",
                   themeId: new mongoose.Types.ObjectId(theme._id),
-                  posts: postsList && postsList,
-                  cover: data.cover ? [data.cover.source] : []
+                  posts: postsList,
+                  cover: data.cover ? [data.cover.source] : [],
+                  categories: data.category_list ? data.category_list : []
+                }
+              ).catch(error => console.log("Insert site: ", error));
+              if (insertStatus) {
+                return res.status(200).send(insertStatus);
+              } else {
+                return res.status(500).send({ error: "Insert failed!" });
+              }
+            });
+          });
+      }
+      return res.status(500).send({ error: "Site existed!" });
+    } catch (error) {
+      return res.status(500).send({ error });
+    }
+  }
+});
+
+router.post("/syncData", authenticate, async (req, res) => {
+  const data = await getPostData({
+    pageId: req.body.pageId ? req.body.pageId : "",
+    access_token: req.body.accessToken ? req.body.accessToken : ""
+  });
+  if (data) {
+    const siteExist = await findOneSite(req.body.pageId);
+    try {
+      if (siteExist) {
+        let session;
+        return Site.createCollection()
+          .then(() => Site.startSession())
+          .then(_session => {
+            session = _session;
+            session.withTransaction(async () => {
+              const postsList = [];
+              data.posts &&
+                data.posts.data.forEach(post => {
+                  if (
+                    post.attachments &&
+                    post.attachments.data[0].media_type === "album"
+                  ) {
+                    const subAttachmentList = [];
+                    post.attachments.data[0].subattachments.data.forEach(
+                      subAttachment => {
+                        subAttachmentList.push(subAttachment.media.image.src);
+                      }
+                    );
+                    postsList.push({
+                      id: post.id,
+                      title: post.attachments.data[0].title
+                        ? post.attachments.data[0].title
+                        : "",
+                      message: post.message ? post.message : "",
+                      attachments: {
+                        id: post.id,
+                        media_type: "album",
+                        images: subAttachmentList,
+                        video: ""
+                      }
+                    });
+                  } else if (
+                    post.attachments &&
+                    post.attachments.data[0].media_type === "photo"
+                  ) {
+                    postsList.push({
+                      id: post.id,
+                      message: post.message ? post.message : "",
+                      title: post.attachments.data[0].title
+                        ? post.attachments.data[0].title
+                        : "",
+                      attachments: {
+                        id: post.id,
+                        media_type: "photo",
+                        images: [post.attachments.data[0].media.image.src],
+                        video: ""
+                      }
+                    });
+                  } else if (
+                    post.attachments &&
+                    post.attachments.data[0].media_type === "event"
+                  ) {
+                    postsList.push({
+                      id: post.id,
+                      message: post.message ? post.message : "",
+                      title: post.attachments.data[0].title
+                        ? post.attachments.data[0].title
+                        : "",
+                      attachments: {
+                        id: post.id,
+                        media_type: "event",
+                        images: [post.attachments.data[0].media.image.src],
+                        video: ""
+                      }
+                    });
+                  } else if (
+                    post.attachments &&
+                    post.attachments.data[0].media_type === "video"
+                  ) {
+                    postsList.push({
+                      id: post.id,
+                      message: post.message ? post.message : "",
+                      title: post.attachments.data[0].title
+                        ? post.attachments.data[0].title
+                        : "",
+                      attachments: {
+                        id: post.id,
+                        media_type: "video",
+                        images: [],
+                        video: post.attachments.data[0].media.source
+                      }
+                    });
+                  }
+                });
+              var theme = await Theme.findOne({
+                "categories.name": req.body.category
+              });
+              if (!theme) {
+                var theme = await Theme.findOne();
+              }
+              const insertStatus = await insertSite(
+                req.body.pageId,
+                req.body.userId,
+                {
+                  phone: data.phone ? data.phone : "",
+                  longitude: data.location ? data.location.longitude : "",
+                  latitude: data.location ? data.location.latitude : "",
+                  logo: req.body.logo ? req.body.logo : "",
+                  address: data.single_line_address
+                    ? data.single_line_address
+                    : "",
+                  posts: postsList,
+                  cover: data.cover ? [data.cover.source] : [],
+                  categories: data.category_list ? data.category_list : []
                 }
               ).catch(error => console.log("Insert error: ", error));
               if (insertStatus) {
@@ -257,7 +389,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
             });
           });
       }
-      return res.status(500).send({ error: "Site existed!" });
+      return res.status(500).send({ error: "Site not existed!" });
     } catch (error) {
       return res.status(500).send({ error });
     }
