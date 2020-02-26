@@ -71,7 +71,7 @@ router.get("/findAll", async (req, res) => {
 });
 
 router.get("/findAllByAdmin", async (req, res) => {
-  await findAllThemeByAdmin(req.body.username, req.body.password)
+  await findAllThemeByAdmin(req.params.username, req.params.password)
     .then(result => {
       return res.status(200).send(result);
     })
