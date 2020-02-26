@@ -7,7 +7,8 @@ import {
   findAllSiteByUser,
   findOneSite,
   insertSite,
-  editSite
+  editSite,
+  findAllSiteByAdmin
 } from "../services/siteDB";
 import { Site, Theme } from "../models";
 const router = Router();
@@ -42,6 +43,16 @@ router.get("/findAll", async (req, res) => {
     });
 });
 
+router.get("/findAllByAdmin", async (req, res) => {
+  await findAllSiteByAdmin(req.params.username, req.params.password)
+    .then(result => {
+      return res.status(200).send(result);
+    })
+    .catch(error => {
+      return res.status(500).send({ error });
+    });
+});
+
 router.patch("/publish", async (req, res) => {
   const { id, isPublish } = req.body;
   const publish = await Site.updateOne(
@@ -59,7 +70,16 @@ router.patch("/publish", async (req, res) => {
 });
 
 router.patch("/saveDesign", authenticate, async (req, res) => {
-  const { logo, fontBody, fontTitle, navItems, theme, name, color } = req.body;
+  const {
+    logo,
+    fontBody,
+    fontTitle,
+    navItems,
+    pageId,
+    theme,
+    name,
+    color
+  } = req.body;
   try {
     const findTheme = await Theme.findOne({ id: theme });
     if (findTheme) {
@@ -83,7 +103,7 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
     }
     return res.status(500).send({ error: "Theme not exist!" });
   } catch (error) {
-    return res.status(500).send({ error });
+    return res.status(500).send(error);
   }
 });
 

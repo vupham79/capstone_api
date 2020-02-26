@@ -1,4 +1,4 @@
-import { Theme } from "../models";
+import { Theme, Admin } from "../models";
 require("dotenv").config();
 
 // export async function insertTheme(id, body) {
@@ -26,6 +26,17 @@ export async function editTheme(id, body) {
 
 export async function findAllTheme() {
   return await Theme.find();
+}
+
+export async function findAllThemeByAdmin(username, password) {
+  const admin = await Admin.findOne({
+    username: username,
+    password: password
+  });
+  if (admin) {
+    return await Theme.find();
+  }
+  return false;
 }
 
 export async function findOneThemeByCategory(name) {

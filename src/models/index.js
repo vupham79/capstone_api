@@ -3,6 +3,7 @@ import Category from "./Category";
 import Site from "./Site";
 import Theme from "./Theme";
 import User from "./User";
+import Admin from "./Admin";
 require("dotenv").config();
 
 const connectDb = () => {
@@ -21,4 +22,4 @@ const connectDb = () => {
     });
 };
 
-export { connectDb, User, Theme, Site, Category, mongoose };
+export { connectDb, User, Theme, Site, Category, Admin, mongoose };

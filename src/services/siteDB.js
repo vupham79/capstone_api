@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Site, User } from "../models";
+import { Site, User, Admin } from "../models";
 require("dotenv").config();
 
 export async function createSite() {
@@ -141,6 +141,22 @@ export async function findAllSiteByUser(id, accessToken) {
     const site = await Site.find({
       user: new mongoose.Types.ObjectId(user._id)
     }).select("logo title categories isPublish id");
+    return site;
+  }
+  return false;
+}
+
+export async function findAllSiteByAdmin(username, password) {
+  const admin = await Admin.findOne({
+    username: username,
+    password: password
+  });
+  if (admin) {
+    const site = await Site.find()
+      .select("logo title categories fontTitle fontBody theme isPublish id")
+      .populate({
+        path: "theme categories"
+      });
     return site;
   }
   return false;

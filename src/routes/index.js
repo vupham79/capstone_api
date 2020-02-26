@@ -4,6 +4,7 @@ import readColor from "./readColor";
 import site from "./site";
 import theme from "./theme";
 import user from "./user";
+import admin from "./admin";
 
 export default app => {
   app.use("/theme", theme);
@@ -12,4 +13,5 @@ export default app => {
   app.use("/site", site);
   app.use("/facebook", facebook);
   app.use("/readColor", readColor);
+  app.use("/admin", admin);
 };

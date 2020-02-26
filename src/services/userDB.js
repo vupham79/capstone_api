@@ -2,8 +2,8 @@ import { User, Site, mongoose } from "../models";
 require("dotenv").config();
 
 export async function createUser() {
-  const site = await Site.find({ id: "109919550538707" });
-  console.log();
+  const site = await Site.findOne({ id: "109919550538707" });
+  console.log(JSON.stringify(site._id));
   const user = await User.create([
     {
       id: "1",
