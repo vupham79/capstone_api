@@ -230,7 +230,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
               }
               const insertStatus = await insertSite(
                 req.body.pageId,
-                req.body.user,
+                req.body.userId,
                 {
                   phone: data.phone ? data.phone : "",
                   longitude: data.location ? data.location.longitude : "",
