@@ -23,7 +23,7 @@ router.get("/find/:id", async (req, res) => {
 });
 
 router.get("/findAllByUser", async (req, res) => {
-  await findAllSiteByUser(req.query.user, req.query.accessToken)
+  await findAllSiteByUser(req.query.userId, req.query.accessToken)
     .then(result => {
       return res.status(200).send(result);
     })
