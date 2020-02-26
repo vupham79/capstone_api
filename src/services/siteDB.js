@@ -139,7 +139,7 @@ export async function findAllSiteByUser(id, accessToken) {
   });
   if (user) {
     const site = await Site.find({
-      userId: new mongoose.Types.ObjectId(user._id)
+      user: new mongoose.Types.ObjectId(user._id)
     }).select("logo title categories isPublish id");
     return site;
   }
