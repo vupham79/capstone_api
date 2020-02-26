@@ -7,7 +7,8 @@ import {
   findAllSiteByUser,
   findOneSite,
   insertSite,
-  editSite
+  editSite,
+  findAllSiteByAdmin
 } from "../services/siteDB";
 import { Site, Theme } from "../models";
 const router = Router();
@@ -23,7 +24,7 @@ router.get("/find/:id", async (req, res) => {
 });
 
 router.get("/findAllByUser", async (req, res) => {
-  await findAllSiteByUser(req.params.userId, req.params.accessToken)
+  await findAllSiteByUser(req.query.userId, req.query.accessToken)
     .then(result => {
       return res.status(200).send(result);
     })
@@ -34,6 +35,16 @@ router.get("/findAllByUser", async (req, res) => {
 
 router.get("/findAll", async (req, res) => {
   await findAllSite()
+    .then(result => {
+      return res.status(200).send(result);
+    })
+    .catch(error => {
+      return res.status(500).send({ error });
+    });
+});
+
+router.get("/findAllByAdmin", async (req, res) => {
+  await findAllSiteByAdmin(req.body.username, req.body.password)
     .then(result => {
       return res.status(200).send(result);
     })
@@ -64,13 +75,13 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
     fontBody,
     fontTitle,
     navItems,
-    theme,
+    themeId,
     pageId,
     name,
     color
   } = req.body;
   try {
-    const theme = await Theme.findOne({ id: theme });
+    const theme = await Theme.findOne({ id: themeId });
     if (theme) {
       const update = await Site.updateOne(
         { id: pageId },
@@ -230,7 +241,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
               }
               const insertStatus = await insertSite(
                 req.body.pageId,
-                req.body.user,
+                req.body.userId,
                 {
                   phone: data.phone ? data.phone : "",
                   longitude: data.location ? data.location.longitude : "",

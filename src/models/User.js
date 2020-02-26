@@ -27,6 +27,10 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: true
     },
+    isAdmin: {
+      type: Boolean,
+      default: true
+    },
     sites: [{ type: Schema.Types.ObjectId, ref: "Site" }]
   },
   {

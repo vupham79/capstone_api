@@ -4,7 +4,8 @@ import {
   editTheme,
   findAllTheme,
   findOneTheme,
-  insertTheme
+  insertTheme,
+  findAllThemeByAdmin
 } from "../services/themeDB";
 
 const router = Router();
@@ -61,6 +62,16 @@ router.get("/find/:id", async (req, res) => {
 
 router.get("/findAll", async (req, res) => {
   await findAllTheme()
+    .then(result => {
+      return res.status(200).send(result);
+    })
+    .catch(error => {
+      return res.status(500).send("Something broke!");
+    });
+});
+
+router.get("/findAllByAdmin", async (req, res) => {
+  await findAllThemeByAdmin(req.body.username, req.body.password)
     .then(result => {
       return res.status(200).send(result);
     })

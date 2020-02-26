@@ -1,16 +1,8 @@
 import { Router } from "express";
-import { getFacebookPageInfo, getUserPages } from "../services/fbPage";
+import { getUserPages } from "../services/fbPage";
 import { findOneSiteByAccessToken } from "../services/siteDB";
 
 const router = Router();
-
-router.get("/pageInfo", async (req, res) => {
-  const data = await getFacebookPageInfo();
-  if (data) {
-    return res.status(200).send(data);
-  }
-  return res.status(500).send("No data found!");
-});
 
 router.get("/pages", async (req, res) => {
   const data = await getUserPages(
