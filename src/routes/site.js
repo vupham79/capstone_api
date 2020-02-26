@@ -59,19 +59,10 @@ router.patch("/publish", async (req, res) => {
 });
 
 router.patch("/saveDesign", authenticate, async (req, res) => {
-  const {
-    logo,
-    fontBody,
-    fontTitle,
-    navItems,
-    theme,
-    pageId,
-    name,
-    color
-  } = req.body;
+  const { logo, fontBody, fontTitle, navItems, theme, name, color } = req.body;
   try {
-    const theme = await Theme.findOne({ id: theme });
-    if (theme) {
+    const findTheme = await Theme.findOne({ id: theme });
+    if (findTheme) {
       const update = await Site.updateOne(
         { id: pageId },
         {
@@ -81,7 +72,7 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
           title: name && name,
           color: color && color,
           navItems: navItems && navItems,
-          theme: new mongoose.Types.ObjectId(theme._id)
+          theme: new mongoose.Types.ObjectId(findTheme._id)
         }
       );
       if (update) {
