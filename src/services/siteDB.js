@@ -48,7 +48,7 @@ export async function createSite() {
           order: 6
         }
       ],
-      isPublish: true,
+      isPublish: false,
       cover: ["https://i.ibb.co/gVpcW78/pv-featured-images.jpg"],
       posts: [],
       user: UserResult._id
@@ -73,17 +73,14 @@ export async function insertSite(pageId, user, body) {
     title: body.title ? body.title : "",
     address: body.address ? body.address : "",
     navItems: body.navItems ? body.navItems : "",
-    isPublish: true,
+    isPublish: false,
     user: UserResult && UserResult._id,
     theme: body.theme,
     cover: body.cover ? body.cover : [],
     posts: body.posts ? body.posts : [],
     categories: body.categories ? body.categories : []
   });
-  return insert.populate({
-    path: "posts user theme images"
-  });
-  return site;
+  return insert;
 }
 
 export async function editSite(id, body) {
@@ -93,7 +90,6 @@ export async function editSite(id, body) {
       phone: body.phone ? body.phone : "",
       longitude: body.longitude ? body.longitude : "",
       latitude: body.latitude ? body.latitude : "",
-      logo: body.logo ? body.logo : "",
       address: body.address ? body.address : "",
       cover: body.cover ? body.cover : [],
       posts: body.posts ? body.posts : [],

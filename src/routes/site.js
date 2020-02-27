@@ -14,59 +14,79 @@ import { Site, Theme } from "../models";
 const router = Router();
 
 router.get("/find/:id", async (req, res) => {
-  await findOneSite(req.params.id)
-    .then(result => {
-      return res.status(200).send(result);
-    })
-    .catch(error => {
-      return res.status(500).send({ error });
-    });
+  try {
+    await findOneSite(req.params.id)
+      .then(result => {
+        return res.status(200).send(result);
+      })
+      .catch(error => {
+        return res.status(500).send({ error });
+      });
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
 });
 
 router.get("/findAllByUser", async (req, res) => {
-  await findAllSiteByUser(req.query.userId, req.query.accessToken)
-    .then(result => {
-      return res.status(200).send(result);
-    })
-    .catch(error => {
-      return res.status(500).send({ error });
-    });
+  try {
+    await findAllSiteByUser(req.query.userId, req.query.accessToken)
+      .then(result => {
+        return res.status(200).send(result);
+      })
+      .catch(error => {
+        return res.status(500).send({ error });
+      });
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
 });
 
 router.get("/findAll", async (req, res) => {
-  await findAllSite()
-    .then(result => {
-      return res.status(200).send(result);
-    })
-    .catch(error => {
-      return res.status(500).send({ error });
-    });
+  try {
+    await findAllSite()
+      .then(result => {
+        return res.status(200).send(result);
+      })
+      .catch(error => {
+        return res.status(500).send({ error });
+      });
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
 });
 
 router.get("/findAllByAdmin", async (req, res) => {
-  await findAllSiteByAdmin(req.params.username, req.params.password)
-    .then(result => {
-      return res.status(200).send(result);
-    })
-    .catch(error => {
-      return res.status(500).send({ error });
-    });
+  try {
+    await findAllSiteByAdmin(req.params.username, req.params.password)
+      .then(result => {
+        return res.status(200).send(result);
+      })
+      .catch(error => {
+        return res.status(500).send({ error });
+      });
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
 });
 
 router.patch("/publish", async (req, res) => {
   const { id, isPublish } = req.body;
-  const publish = await Site.updateOne(
-    {
-      id
-    },
-    {
-      isPublish
+  try {
+    const publish = await Site.updateOne(
+      {
+        id
+      },
+      {
+        isPublish
+      }
+    );
+    if (publish) {
+      return res.status(200).send(publish);
     }
-  );
-  if (publish) {
-    return res.status(200).send(publish);
+    return res.status(500).send({ error: "Action failed!" });
+  } catch (error) {
+    return res.status(500).send({ error });
   }
-  return res.status(500).send({ error: "Action failed!" });
 });
 
 router.patch("/saveDesign", authenticate, async (req, res) => {
@@ -103,58 +123,58 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
     }
     return res.status(500).send({ error: "Theme not exist!" });
   } catch (error) {
-    return res.status(500).send(error);
+    return res.status(500).send({ error });
   }
 });
 
 router.post("/createNewSite", authenticate, async (req, res) => {
-  const data = await getPostData({
-    pageId: req.body.pageId ? req.body.pageId : "",
-    access_token: req.body.accessToken ? req.body.accessToken : ""
-  });
-  if (data) {
-    const siteExist = await findOneSite(req.body.pageId);
-    try {
+  try {
+    const postsList = [];
+    const data = await getPostData({
+      pageId: req.body.pageId ? req.body.pageId : "",
+      access_token: req.body.accessToken ? req.body.accessToken : ""
+    });
+    const defaultNavItems = [
+      {
+        name: "Home",
+        order: 1,
+        isActive: true
+      },
+      {
+        name: "About",
+        order: 2,
+        isActive: true
+      },
+      {
+        name: "Gallery",
+        order: 3,
+        isActive: true
+      },
+      {
+        name: "Event",
+        order: 4,
+        isActive: true
+      },
+      {
+        name: "Contact",
+        order: 5,
+        isActive: true
+      },
+      {
+        name: "News",
+        order: 6,
+        isActive: true
+      }
+    ];
+    if (data) {
+      const siteExist = await findOneSite(req.body.pageId);
       if (!siteExist) {
-        const defaultNavItems = [
-          {
-            name: "Home",
-            order: 1,
-            isActive: true
-          },
-          {
-            name: "About",
-            order: 2,
-            isActive: true
-          },
-          {
-            name: "Gallery",
-            order: 3,
-            isActive: true
-          },
-          {
-            name: "Event",
-            order: 4,
-            isActive: true
-          },
-          {
-            name: "Contact",
-            order: 5,
-            isActive: true
-          },
-          {
-            name: "News",
-            order: 6,
-            isActive: true
-          }
-        ];
         let session;
         return Site.createCollection()
           .then(() => Site.startSession())
           .then(_session => {
             session = _session;
             session.withTransaction(async () => {
-              const postsList = [];
               data.posts &&
                 data.posts.data.forEach(post => {
                   if (
@@ -260,7 +280,9 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                   cover: data.cover ? [data.cover.source] : [],
                   categories: data.category_list ? data.category_list : []
                 }
-              ).catch(error => console.log("Insert site: ", error));
+              ).catch(error => {
+                return res.status(500).send({ error });
+              });
               if (insertStatus) {
                 return res.status(200).send(insertStatus);
               } else {
@@ -270,20 +292,21 @@ router.post("/createNewSite", authenticate, async (req, res) => {
           });
       }
       return res.status(500).send({ error: "Site existed!" });
-    } catch (error) {
-      return res.status(500).send({ error });
     }
+  } catch (error) {
+    return res.status(500).send({ error });
   }
 });
 
 router.patch("/syncData", authenticate, async (req, res) => {
-  const data = await getPostData({
-    pageId: req.body.pageId ? req.body.pageId : "",
-    access_token: req.body.accessToken ? req.body.accessToken : ""
-  });
-  if (data) {
-    const siteExist = await findOneSite(req.body.pageId);
-    try {
+  try {
+    let postsList = [];
+    const data = await getPostData({
+      pageId: req.body.pageId ? req.body.pageId : "",
+      access_token: req.body.accessToken ? req.body.accessToken : ""
+    });
+    if (data) {
+      const siteExist = await findOneSite(req.body.pageId);
       if (siteExist) {
         let session;
         return Site.createCollection()
@@ -291,7 +314,6 @@ router.patch("/syncData", authenticate, async (req, res) => {
           .then(_session => {
             session = _session;
             session.withTransaction(async () => {
-              let postsList = [];
               data.posts &&
                 data.posts.data.forEach(post => {
                   if (
@@ -380,7 +402,6 @@ router.patch("/syncData", authenticate, async (req, res) => {
                 phone: data.phone ? data.phone : "",
                 longitude: data.location ? data.location.longitude : "",
                 latitude: data.location ? data.location.latitude : "",
-                logo: req.body.logo ? req.body.logo : "",
                 address: data.single_line_address
                   ? data.single_line_address
                   : "",
@@ -397,9 +418,9 @@ router.patch("/syncData", authenticate, async (req, res) => {
           });
       }
       return res.status(500).send({ error: "Site not existed!" });
-    } catch (error) {
-      return res.status(500).send({ error });
     }
+  } catch (error) {
+    return res.status(500).send({ error });
   }
 });
 

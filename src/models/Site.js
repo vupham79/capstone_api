@@ -63,19 +63,32 @@ const SiteSchema = new mongoose.Schema(
         }
       }
     ],
-    isPublish: Boolean,
+    isPublish: {
+      type: Boolean,
+      default: false
+    },
     posts: [
       {
         id: {
           type: String,
           default: ""
         },
-        title: String,
-        message: String,
+        title: {
+          type: String,
+          default: ""
+        },
+        message: {
+          type: String,
+          default: ""
+        },
         attachments: {
           media_type: String,
           images: [String],
           video: String
+        },
+        isActive: {
+          type: Boolean,
+          default: true
         }
       }
     ],

@@ -1,39 +1,37 @@
 import { Router } from "express";
-import { getUserPages } from "../services/fbPage";
+import { getUserPages, getPostData } from "../services/fbPage";
 import { findOneSiteByAccessToken } from "../services/siteDB";
 
 const router = Router();
 
 router.get("/pages", async (req, res) => {
-  const data = await getUserPages(
-    req.query.access_token ? req.query.access_token : ""
-  );
-  if (data && data.accounts) {
-    return res.status(200).send(data.accounts.data);
+  try {
+    const data = await getUserPages(
+      req.query.access_token ? req.query.access_token : ""
+    );
+    if (data && data.accounts) {
+      return res.status(200).send(data.accounts.data);
+    }
+    return res.status(500).send("No data found!");
+  } catch (error) {
+    return res.status(500).send({ error });
   }
-  return res.status(500).send("No data found!");
-});
-
-router.get("/syncPage", async (req, res) => {
-  const data = await getUserPages(
-    req.query.access_token ? req.query.access_token : ""
-  );
-  if (data && data.accounts) {
-    return res.status(200).send(data.accounts.data);
-  }
-  return res.status(500).send("No data found!");
 });
 
 //authenticate
 router.get("/getSiteInfo", async (req, res) => {
-  const data = await findOneSiteByAccessToken(
-    req.params.pageId ? req.params.pageId : "",
-    req.params.accessToken ? req.params.accessToken : ""
-  );
-  if (data) {
-    return res.status(200).send(data);
+  try {
+    const data = await findOneSiteByAccessToken(
+      req.params.pageId ? req.params.pageId : "",
+      req.params.accessToken ? req.params.accessToken : ""
+    );
+    if (data) {
+      return res.status(200).send(data);
+    }
+    return res.status(500).send("No data found!");
+  } catch (error) {
+    return res.status(500).send({ error });
   }
-  return res.status(500).send("No data found!");
 });
 
 export default router;
