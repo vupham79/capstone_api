@@ -403,4 +403,23 @@ router.patch("/syncData", authenticate, async (req, res) => {
   }
 });
 
+router.patch("/logo", async (req, res) => {
+  const { logo, id } = req.body;
+  try {
+    const update = await Site.updateOne(
+      {
+        id
+      },
+      {
+        logo
+      }
+    );
+    if (update) {
+      return res.status(200).send(update);
+    }
+    return res.status(500).send({ error: "Action failed!" });
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+});
 export default router;
