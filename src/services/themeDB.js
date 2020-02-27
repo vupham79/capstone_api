@@ -17,6 +17,7 @@ export async function editTheme(id, body) {
     {
       name: body.name ? body.name : "",
       fontTitle: body.fontTitle ? body.fontTitle : "",
+      fontBody: body.fontBody ? body.fontBody : "",
       mainColor: body.color ? body.color : "",
       categories: body.categories ? body.categories : ""
     }

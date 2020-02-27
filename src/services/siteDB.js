@@ -50,17 +50,15 @@ export async function createSite() {
       ],
       isPublish: false,
       cover: ["https://i.ibb.co/gVpcW78/pv-featured-images.jpg"],
-      posts: [],
-      user: UserResult._id
+      posts: []
     }
   ]);
   return create.populate({
-    path: "posts user theme"
+    path: "posts theme"
   });
 }
 
-export async function insertSite(pageId, user, body) {
-  const UserResult = await User.findOne({ id: user });
+export async function insertSite(pageId, body) {
   const insert = await Site.create({
     id: pageId,
     phone: body.phone ? body.phone : "",
@@ -74,7 +72,6 @@ export async function insertSite(pageId, user, body) {
     address: body.address ? body.address : "",
     navItems: body.navItems ? body.navItems : "",
     isPublish: false,
-    user: UserResult && UserResult._id,
     theme: body.theme,
     cover: body.cover ? body.cover : [],
     posts: body.posts ? body.posts : [],
@@ -109,7 +106,7 @@ export async function deleteSite(id) {
 
 export async function findAllSite() {
   return await Site.find().populate({
-    path: "posts user theme images"
+    path: "posts theme"
   });
 }
 
@@ -118,28 +115,23 @@ export async function findOneSiteByAccessToken(id, body) {
     id: id,
     accessToken: body.accessToken ? body.accessToken : ""
   }).populate({
-    path: "posts user theme images"
+    path: "posts theme"
   });
 }
 
 export async function findOneSite(id) {
   return await Site.findOne({ id: id }).populate({
-    path: "posts user theme images"
+    path: "posts theme"
   });
 }
 
 export async function findAllSiteByUser(id, accessToken) {
-  const user = await User.findOne({
-    id: id,
-    accessToken: accessToken ? accessToken : ""
-  });
-  if (user) {
-    const site = await Site.find({
-      user: new mongoose.Types.ObjectId(user._id)
-    }).select("logo title categories isPublish id");
-    return site;
-  }
-  return false;
+  const sites = await User.findOne({
+    id: id
+  })
+    .populate("sites")
+    .select("sites");
+  return sites;
 }
 
 export async function findAllSiteByAdmin(username, password) {

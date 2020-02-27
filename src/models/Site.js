@@ -81,6 +81,10 @@ const SiteSchema = new mongoose.Schema(
           type: String,
           default: ""
         },
+        createdTime: {
+          type: String,
+          default: ""
+        },
         attachments: {
           media_type: String,
           images: [String],
@@ -105,7 +109,6 @@ const SiteSchema = new mongoose.Schema(
         }
       }
     ],
-    user: { type: Schema.Types.ObjectId, ref: "User" },
     theme: { type: Schema.Types.ObjectId, ref: "Theme" }
   },
   {

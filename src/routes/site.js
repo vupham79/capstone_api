@@ -10,7 +10,7 @@ import {
   editSite,
   findAllSiteByAdmin
 } from "../services/siteDB";
-import { Site, Theme } from "../models";
+import { Site, Theme, User } from "../models";
 const router = Router();
 
 router.get("/find/:id", async (req, res) => {
@@ -189,10 +189,11 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                     );
                     postsList.push({
                       id: post.id,
+                      message: post.message ? post.message : "",
                       title: post.attachments.data[0].title
                         ? post.attachments.data[0].title
                         : "",
-                      message: post.message ? post.message : "",
+                      createdTime: post.createdTime ? post.createdTime : "",
                       attachments: {
                         id: post.id,
                         media_type: "album",
@@ -210,6 +211,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                       title: post.attachments.data[0].title
                         ? post.attachments.data[0].title
                         : "",
+                      createdTime: post.createdTime ? post.createdTime : "",
                       attachments: {
                         id: post.id,
                         media_type: "photo",
@@ -227,6 +229,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                       title: post.attachments.data[0].title
                         ? post.attachments.data[0].title
                         : "",
+                      createdTime: post.createdTime ? post.createdTime : "",
                       attachments: {
                         id: post.id,
                         media_type: "event",
@@ -244,6 +247,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                       title: post.attachments.data[0].title
                         ? post.attachments.data[0].title
                         : "",
+                      createdTime: post.createdTime ? post.createdTime : "",
                       attachments: {
                         id: post.id,
                         media_type: "video",
@@ -259,32 +263,34 @@ router.post("/createNewSite", authenticate, async (req, res) => {
               if (!theme) {
                 var theme = await Theme.findOne();
               }
-              const insertStatus = await insertSite(
-                req.body.pageId,
-                req.body.userId,
-                {
-                  phone: data.phone ? data.phone : "",
-                  longitude: data.location ? data.location.longitude : "",
-                  latitude: data.location ? data.location.latitude : "",
-                  logo: data.picture ? data.picture.data.url : "",
-                  fontTitle: theme.fontTitle ? theme.fontTitle : "",
-                  fontBody: theme.fontBody ? theme.fontBody : "",
-                  color: theme.mainColor ? theme.mainColor : "",
-                  title: data.name ? data.name : "",
-                  address: data.single_line_address
-                    ? data.single_line_address
-                    : "",
-                  navItems: defaultNavItems ? defaultNavItems : [],
-                  theme: new mongoose.Types.ObjectId(theme._id),
-                  posts: postsList && postsList,
-                  cover: data.cover ? [data.cover.source] : [],
-                  categories: data.category_list ? data.category_list : []
-                }
-              ).catch(error => {
+              const insert = await insertSite(req.body.pageId, {
+                phone: data.phone ? data.phone : "",
+                longitude: data.location ? data.location.longitude : "",
+                latitude: data.location ? data.location.latitude : "",
+                logo: data.picture ? data.picture.data.url : "",
+                fontTitle: theme.fontTitle ? theme.fontTitle : "",
+                fontBody: theme.fontBody ? theme.fontBody : "",
+                color: theme.mainColor ? theme.mainColor : "",
+                title: data.name ? data.name : "",
+                address: data.single_line_address
+                  ? data.single_line_address
+                  : "",
+                navItems: defaultNavItems ? defaultNavItems : [],
+                theme: new mongoose.Types.ObjectId(theme._id),
+                posts: postsList && postsList,
+                cover: data.cover ? [data.cover.source] : [],
+                categories: data.category_list ? data.category_list : []
+              }).catch(error => {
                 return res.status(500).send({ error });
               });
-              if (insertStatus) {
-                return res.status(200).send(insertStatus);
+              if (insert) {
+                const user = await User.findOne({ id: req.body.userId });
+                if (user) {
+                  let sitesList = user.sites;
+                  sitesList.push(insert._id);
+                  await user.update({ sites: sitesList });
+                }
+                return res.status(200).send(insert);
               } else {
                 return res.status(500).send({ error: "Insert failed!" });
               }
@@ -332,6 +338,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
                         ? post.attachments.data[0].title
                         : "",
                       message: post.message ? post.message : "",
+                      createdTime: post.createdTime ? post.createdTime : "",
                       attachments: {
                         id: post.id,
                         media_type: "album",
@@ -345,10 +352,11 @@ router.patch("/syncData", authenticate, async (req, res) => {
                   ) {
                     postsList.push({
                       id: post.id,
-                      message: post.message ? post.message : "",
                       title: post.attachments.data[0].title
                         ? post.attachments.data[0].title
                         : "",
+                      message: post.message ? post.message : "",
+                      createdTime: post.createdTime ? post.createdTime : "",
                       attachments: {
                         id: post.id,
                         media_type: "photo",
@@ -362,10 +370,11 @@ router.patch("/syncData", authenticate, async (req, res) => {
                   ) {
                     postsList.push({
                       id: post.id,
-                      message: post.message ? post.message : "",
                       title: post.attachments.data[0].title
                         ? post.attachments.data[0].title
                         : "",
+                      message: post.message ? post.message : "",
+                      createdTime: post.createdTime ? post.createdTime : "",
                       attachments: {
                         id: post.id,
                         media_type: "event",
@@ -379,10 +388,11 @@ router.patch("/syncData", authenticate, async (req, res) => {
                   ) {
                     postsList.push({
                       id: post.id,
-                      message: post.message ? post.message : "",
                       title: post.attachments.data[0].title
                         ? post.attachments.data[0].title
                         : "",
+                      message: post.message ? post.message : "",
+                      createdTime: post.createdTime ? post.createdTime : "",
                       attachments: {
                         id: post.id,
                         media_type: "video",
@@ -398,7 +408,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
               if (!theme) {
                 var theme = await Theme.findOne();
               }
-              const insertStatus = await editSite(req.body.pageId, {
+              const insert = await editSite(req.body.pageId, {
                 phone: data.phone ? data.phone : "",
                 longitude: data.location ? data.location.longitude : "",
                 latitude: data.location ? data.location.latitude : "",
@@ -409,8 +419,8 @@ router.patch("/syncData", authenticate, async (req, res) => {
                 cover: data.cover ? [data.cover.source] : [],
                 categories: data.category_list ? data.category_list : []
               }).catch(error => console.log("Insert error: ", error));
-              if (insertStatus) {
-                return res.status(200).send(insertStatus);
+              if (insert) {
+                return res.status(200).send(insert);
               } else {
                 return res.status(500).send({ error: "Insert failed!" });
               }

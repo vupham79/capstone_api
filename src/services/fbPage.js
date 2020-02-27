@@ -18,7 +18,7 @@ export async function getSyncData({ pageId, access_token }) {
       fields:
         "name,cover,phone,category_list,picture," +
         "location,single_line_address," +
-        "posts{message,attachments{title,media_type,subattachments,media}}",
+        "posts{message,created_time,attachments{title,media_type,subattachments,media}}",
       locale: "en_US ",
       access_token
     },
@@ -33,7 +33,7 @@ export async function getPostData({ pageId, access_token }) {
       fields:
         "name,cover,phone,category_list,picture," +
         "location,single_line_address," +
-        "posts{message,attachments{title,media_type,subattachments,media}}",
+        "posts{message,created_time,attachments{title,media_type,subattachments,media}}",
       locale: "en_US ",
       access_token
     },
