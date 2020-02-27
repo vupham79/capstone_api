@@ -78,7 +78,8 @@ export async function insertSite(pageId, user, body) {
     theme: body.theme,
     cover: body.cover ? body.cover : [],
     posts: body.posts ? body.posts : [],
-    categories: body.categories ? body.categories : []
+    categories: body.categories ? body.categories : [],
+    url: body.url ? body.url : ""
   });
   return insert;
 }

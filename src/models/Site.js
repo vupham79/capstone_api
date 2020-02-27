@@ -105,7 +105,10 @@ const SiteSchema = new mongoose.Schema(
         }
       }
     ],
-    user: { type: Schema.Types.ObjectId, ref: "User" },
+    url: {
+      type: String,
+      default: ""
+    },
     theme: { type: Schema.Types.ObjectId, ref: "Theme" }
   },
   {

@@ -259,28 +259,25 @@ router.post("/createNewSite", authenticate, async (req, res) => {
               if (!theme) {
                 var theme = await Theme.findOne();
               }
-              const insertStatus = await insertSite(
-                req.body.pageId,
-                req.body.userId,
-                {
-                  phone: data.phone ? data.phone : "",
-                  longitude: data.location ? data.location.longitude : "",
-                  latitude: data.location ? data.location.latitude : "",
-                  logo: data.picture ? data.picture.data.url : "",
-                  fontTitle: theme.fontTitle ? theme.fontTitle : "",
-                  fontBody: theme.fontBody ? theme.fontBody : "",
-                  color: theme.mainColor ? theme.mainColor : "",
-                  title: data.name ? data.name : "",
-                  address: data.single_line_address
-                    ? data.single_line_address
-                    : "",
-                  navItems: defaultNavItems ? defaultNavItems : [],
-                  theme: new mongoose.Types.ObjectId(theme._id),
-                  posts: postsList && postsList,
-                  cover: data.cover ? [data.cover.source] : [],
-                  categories: data.category_list ? data.category_list : []
-                }
-              ).catch(error => {
+              const insert = await insertSite(req.body.pageId, {
+                phone: data.phone ? data.phone : "",
+                longitude: data.location ? data.location.longitude : "",
+                latitude: data.location ? data.location.latitude : "",
+                logo: data.picture ? data.picture.data.url : "",
+                fontTitle: theme.fontTitle ? theme.fontTitle : "",
+                fontBody: theme.fontBody ? theme.fontBody : "",
+                color: theme.mainColor ? theme.mainColor : "",
+                title: data.name ? data.name : "",
+                address: data.single_line_address
+                  ? data.single_line_address
+                  : "",
+                navItems: defaultNavItems ? defaultNavItems : [],
+                theme: new mongoose.Types.ObjectId(theme._id),
+                posts: postsList && postsList,
+                cover: data.cover ? [data.cover.source] : [],
+                categories: data.category_list ? data.category_list : [],
+                url: req.body.pageUrl ? req.body.pageUrl : ""
+              }).catch(error => {
                 return res.status(500).send({ error });
               });
               if (insertStatus) {
