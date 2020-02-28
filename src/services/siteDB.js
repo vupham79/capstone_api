@@ -142,9 +142,9 @@ export async function findOneSite(id) {
 export async function findAllSiteByUser(id, accessToken) {
   const sites = await User.findOne({
     id: id,
-    accessToken: accessToken ? accessToken : ""
+    accessToken: accessToken
   })
-    .select("sites.categories")
+    .select("sites")
     .populate({
       path: "sites",
       select: "categories id title isPublish logo"
