@@ -1,6 +1,4 @@
 import axios from "../utils/axios";
-import bucket from "../utils/firebase";
-import { Site, Theme } from "../models";
 
 export async function getUserPages(access_token) {
   const data = await axios({
@@ -27,7 +25,7 @@ export async function getSyncData({ pageId, access_token }) {
   return data.data;
 }
 
-export async function getPostData({ pageId, access_token }) {
+export async function getPageData({ pageId, access_token }) {
   const data = await axios({
     params: {
       fields:
