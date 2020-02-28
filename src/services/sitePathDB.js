@@ -1,0 +1,17 @@
+import { SitePath } from "../models";
+require("dotenv").config();
+
+export async function insertSitePath(pathName) {
+  const insert = await SitePath.collection.insertOne({
+    pathName: pathName
+  });
+  return insert;
+}
+
+export async function findOneSitePath(pathname) {
+  return await SitePath.findOne({ pathname });
+}
+
+export async function findAllSitePath() {
+  return await SitePath.find();
+}

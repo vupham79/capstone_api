@@ -75,7 +75,9 @@ export async function insertSite(pageId, body) {
     theme: body.theme,
     cover: body.cover ? body.cover : [],
     posts: body.posts ? body.posts : [],
-    categories: body.categories ? body.categories : []
+    categories: body.categories ? body.categories : [],
+    url: body.url ? body.url : "",
+    sitePath: body.sitePath ? body.sitePath : {}
   });
   return insert;
 }
@@ -127,11 +129,23 @@ export async function findOneSite(id) {
 
 export async function findAllSiteByUser(id, accessToken) {
   const sites = await User.findOne({
-    id: id
+    id: id,
+    accessToken: accessToken ? accessToken : ""
   })
-    .populate("sites")
-    .select("sites");
-  return sites;
+    .select("sites")
+    .populate({
+      path: "sites",
+      populate: {
+        path: "sites.posts",
+        populate: {
+          path: "posts.attachments"
+        }
+      }
+    });
+  if (sites) {
+    return sites;
+  }
+  return false;
 }
 
 export async function findAllSiteByAdmin(username, password) {

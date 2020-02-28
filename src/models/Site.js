@@ -109,6 +109,11 @@ const SiteSchema = new mongoose.Schema(
         }
       }
     ],
+    url: {
+      type: String,
+      default: ""
+    },
+    sitePath: { type: Schema.Types.ObjectId, ref: "SitePath" },
     theme: { type: Schema.Types.ObjectId, ref: "Theme" }
   },
   {
