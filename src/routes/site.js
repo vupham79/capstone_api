@@ -1,5 +1,5 @@
 import { Router } from "express";
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { getPageData } from "../services/fbPage";
 import { authenticate } from "../services/middleware";
 import {
@@ -305,11 +305,12 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                         });
                       }
                     });
-                  console.log(postsList);
                   await Post.insertMany(postsList, (error, docs) => {
                     if (error) {
+                      console.log("failed!");
                       return res.status(500).send("failed!");
                     }
+                    console.log(docs);
                     Site.updateOne({ id: req.body.pageId }, { sites: docs });
                   });
                   return res.status(200).send(insert);
