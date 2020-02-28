@@ -59,8 +59,7 @@ export async function createSite() {
   });
 }
 
-export async function insertSite(pageId, user, body) {
-  const UserResult = await User.findOne({ id: user });
+export async function insertSite(pageId, body) {
   const insert = await Site.create({
     id: pageId,
     phone: body.phone ? body.phone : "",
@@ -74,12 +73,12 @@ export async function insertSite(pageId, user, body) {
     address: body.address ? body.address : "",
     navItems: body.navItems ? body.navItems : "",
     isPublish: false,
-    user: UserResult && UserResult._id,
     theme: body.theme,
     cover: body.cover ? body.cover : [],
     posts: body.posts ? body.posts : [],
     categories: body.categories ? body.categories : [],
-    url: body.url ? body.url : ""
+    url: body.url ? body.url : "",
+    sitePath: body.sitePath ? body.sitePath : {}
   });
   return insert;
 }
@@ -130,15 +129,14 @@ export async function findOneSite(id) {
 }
 
 export async function findAllSiteByUser(id, accessToken) {
-  const user = await User.findOne({
+  const sites = await User.findOne({
     id: id,
     accessToken: accessToken ? accessToken : ""
-  });
-  if (user) {
-    const site = await Site.find({
-      user: new mongoose.Types.ObjectId(user._id)
-    }).select("logo title categories isPublish id");
-    return site;
+  })
+    .select("sites")
+    .populate({ path: "sites" });
+  if (sites) {
+    return sites;
   }
   return false;
 }

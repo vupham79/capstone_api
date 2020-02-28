@@ -10,7 +10,8 @@ import {
   editSite,
   findAllSiteByAdmin
 } from "../services/siteDB";
-import { Site, Theme } from "../models";
+import { insertSitePath, findOneSitePath } from "../services/sitePathDB";
+import { Site, Theme, User } from "../models";
 const router = Router();
 
 router.get("/find/:id", async (req, res) => {
@@ -72,18 +73,22 @@ router.get("/findAllByAdmin", async (req, res) => {
 router.patch("/publish", async (req, res) => {
   const { id, isPublish } = req.body;
   try {
-    const publish = await Site.updateOne(
-      {
-        id
-      },
-      {
-        isPublish
+    const user = await User.find({ "sites.id": id });
+    if (user) {
+      const publish = await Site.updateOne(
+        {
+          id
+        },
+        {
+          isPublish
+        }
+      );
+      if (publish) {
+        return res.status(200).send(publish);
       }
-    );
-    if (publish) {
-      return res.status(200).send(publish);
+      return res.status(500).send({ error: "Action failed!" });
     }
-    return res.status(500).send({ error: "Action failed!" });
+    return res.status(500).send({ error: "Can't find any result!" });
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -259,32 +264,47 @@ router.post("/createNewSite", authenticate, async (req, res) => {
               if (!theme) {
                 var theme = await Theme.findOne();
               }
-              const insert = await insertSite(req.body.pageId, {
-                phone: data.phone ? data.phone : "",
-                longitude: data.location ? data.location.longitude : "",
-                latitude: data.location ? data.location.latitude : "",
-                logo: data.picture ? data.picture.data.url : "",
-                fontTitle: theme.fontTitle ? theme.fontTitle : "",
-                fontBody: theme.fontBody ? theme.fontBody : "",
-                color: theme.mainColor ? theme.mainColor : "",
-                title: data.name ? data.name : "",
-                address: data.single_line_address
-                  ? data.single_line_address
-                  : "",
-                navItems: defaultNavItems ? defaultNavItems : [],
-                theme: new mongoose.Types.ObjectId(theme._id),
-                posts: postsList && postsList,
-                cover: data.cover ? [data.cover.source] : [],
-                categories: data.category_list ? data.category_list : [],
-                url: req.body.pageUrl ? req.body.pageUrl : ""
-              }).catch(error => {
-                return res.status(500).send({ error });
-              });
-              if (insertStatus) {
-                return res.status(200).send(insertStatus);
-              } else {
-                return res.status(500).send({ error: "Insert failed!" });
+              const sitePathResult = await findOneSitePath(data.name);
+              if (!sitePathResult) {
+                const sitePath = await insertSitePath(data.name);
+                const insert = await insertSite(req.body.pageId, {
+                  phone: data.phone ? data.phone : "",
+                  longitude: data.location ? data.location.longitude : "",
+                  latitude: data.location ? data.location.latitude : "",
+                  logo: data.picture ? data.picture.data.url : "",
+                  fontTitle: theme.fontTitle ? theme.fontTitle : "",
+                  fontBody: theme.fontBody ? theme.fontBody : "",
+                  color: theme.mainColor ? theme.mainColor : "",
+                  title: data.name ? data.name : "",
+                  address: data.single_line_address
+                    ? data.single_line_address
+                    : "",
+                  navItems: defaultNavItems ? defaultNavItems : [],
+                  theme: new mongoose.Types.ObjectId(theme._id),
+                  posts: postsList && postsList,
+                  cover: data.cover ? [data.cover.source] : [],
+                  categories: data.category_list ? data.category_list : [],
+                  url: req.body.pageUrl ? req.body.pageUrl : "",
+                  sitePath: new mongoose.Types.ObjectId(sitePath._id)
+                }).catch(error => {
+                  return res.status(500).send({ error });
+                });
+                const user = await User.findOne({ id: req.body.userId })
+                  .select("sites")
+                  .then(async result => {
+                    let siteList = result.sites;
+                    siteList.push(insert._id);
+                    const userResult = await result.updateOne({
+                      sites: siteList
+                    });
+                  });
+                if (insert) {
+                  return res.status(200).send(insert);
+                } else {
+                  return res.status(500).send({ error: "Insert failed!" });
+                }
               }
+              return res.status(500).send({ error: "Site path existed!" });
             });
           });
       }
@@ -395,7 +415,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
               if (!theme) {
                 var theme = await Theme.findOne();
               }
-              const insertStatus = await editSite(req.body.pageId, {
+              const insert = await editSite(req.body.pageId, {
                 phone: data.phone ? data.phone : "",
                 longitude: data.location ? data.location.longitude : "",
                 latitude: data.location ? data.location.latitude : "",
@@ -406,8 +426,8 @@ router.patch("/syncData", authenticate, async (req, res) => {
                 cover: data.cover ? [data.cover.source] : [],
                 categories: data.category_list ? data.category_list : []
               }).catch(error => console.log("Insert error: ", error));
-              if (insertStatus) {
-                return res.status(200).send(insertStatus);
+              if (insert) {
+                return res.status(200).send(insert);
               } else {
                 return res.status(500).send({ error: "Insert failed!" });
               }
