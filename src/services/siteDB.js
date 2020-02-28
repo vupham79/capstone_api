@@ -150,12 +150,13 @@ export async function findAllSiteByAdmin(username, password) {
     password: password
   });
   if (admin) {
-    const site = await Site.find()
-      .select("logo title categories fontTitle fontBody theme isPublish id")
+    const users = await User.find()
+      .select("id displayName sites")
       .populate({
-        path: "theme categories"
+        path: "sites",
+        select: ""
       });
-    return site;
+    return users;
   }
   return false;
 }
