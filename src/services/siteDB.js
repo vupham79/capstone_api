@@ -54,7 +54,10 @@ export async function createSite() {
     }
   ]);
   return create.populate({
-    path: "posts theme"
+    path: "theme",
+    populate: {
+      path: "posts"
+    }
   });
 }
 
@@ -108,7 +111,10 @@ export async function deleteSite(id) {
 
 export async function findAllSite() {
   return await Site.find().populate({
-    path: "posts theme"
+    path: "theme",
+    populate: {
+      path: "posts"
+    }
   });
 }
 
@@ -117,13 +123,19 @@ export async function findOneSiteByAccessToken(id, body) {
     id: id,
     accessToken: body.accessToken ? body.accessToken : ""
   }).populate({
-    path: "posts theme"
+    path: "theme",
+    populate: {
+      path: "posts"
+    }
   });
 }
 
 export async function findOneSite(id) {
   return await Site.findOne({ id: id }).populate({
-    path: "posts theme"
+    path: "theme",
+    populate: {
+      path: "posts"
+    }
   });
 }
 
@@ -132,15 +144,10 @@ export async function findAllSiteByUser(id, accessToken) {
     id: id,
     accessToken: accessToken ? accessToken : ""
   })
-    .select("sites")
+    .select("sites.categories")
     .populate({
       path: "sites",
-      populate: {
-        path: "sites.posts",
-        populate: {
-          path: "posts.attachments"
-        }
-      }
+      select: "categories id title isPublish logo"
     });
   if (sites) {
     return sites;
