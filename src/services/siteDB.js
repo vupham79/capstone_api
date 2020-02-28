@@ -134,8 +134,17 @@ export async function findAllSiteByUser(id, accessToken) {
     accessToken: accessToken ? accessToken : ""
   })
     .select("sites")
-    .populate({ path: "sites" });
+    .populate({
+      path: "sites",
+      populate: {
+        path: "sites.posts",
+        populate: {
+          path: "posts.attachments"
+        }
+      }
+    });
   if (sites) {
+    console.log(sites.sites[0]);
     return sites;
   }
   return false;
