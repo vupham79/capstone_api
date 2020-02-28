@@ -67,31 +67,6 @@ const SiteSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
-    posts: [
-      {
-        id: {
-          type: String,
-          default: ""
-        },
-        title: {
-          type: String,
-          default: ""
-        },
-        message: {
-          type: String,
-          default: ""
-        },
-        attachments: {
-          media_type: String,
-          images: [String],
-          video: String
-        },
-        isActive: {
-          type: Boolean,
-          default: true
-        }
-      }
-    ],
     cover: [{ type: String, default: "" }],
     categories: [
       {
@@ -109,6 +84,7 @@ const SiteSchema = new mongoose.Schema(
       type: String,
       default: ""
     },
+    posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
     sitePath: { type: Schema.Types.ObjectId, ref: "SitePath" },
     theme: { type: Schema.Types.ObjectId, ref: "Theme" }
   },

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import mongoose from "mongoose";
-import { getPostData } from "../services/fbPage";
+import { getPageData } from "../services/fbPage";
 import { authenticate } from "../services/middleware";
 import {
   findAllSite,
@@ -11,7 +11,7 @@ import {
   findAllSiteByAdmin
 } from "../services/siteDB";
 import { insertSitePath, findOneSitePath } from "../services/sitePathDB";
-import { Site, Theme, User } from "../models";
+import { Site, Post, User, Theme } from "../models";
 const router = Router();
 
 router.get("/find/:id", async (req, res) => {
@@ -58,7 +58,7 @@ router.get("/findAll", async (req, res) => {
 
 router.get("/findAllByAdmin", async (req, res) => {
   try {
-    await findAllSiteByAdmin(req.params.username, req.params.password)
+    await findAllSiteByAdmin(req.query.username, req.query.password)
       .then(result => {
         return res.status(200).send(result);
       })
@@ -106,7 +106,7 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
     color
   } = req.body;
   try {
-    const findTheme = await Theme.findOne({ id: theme });
+    const findTheme = await Post.findOne({ id: theme });
     if (findTheme) {
       const update = await Site.updateOne(
         { id: pageId },
@@ -126,7 +126,7 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
         return res.status(500).send({ error: "Insert failed!" });
       }
     }
-    return res.status(500).send({ error: "Theme not exist!" });
+    return res.status(500).send({ error: "Post not exist!" });
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -135,7 +135,7 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
 router.post("/createNewSite", authenticate, async (req, res) => {
   try {
     const postsList = [];
-    const data = await getPostData({
+    const data = await getPageData({
       pageId: req.body.pageId ? req.body.pageId : "",
       access_token: req.body.accessToken ? req.body.accessToken : ""
     });
@@ -180,84 +180,6 @@ router.post("/createNewSite", authenticate, async (req, res) => {
           .then(_session => {
             session = _session;
             session.withTransaction(async () => {
-              data.posts &&
-                data.posts.data.forEach(post => {
-                  if (
-                    post.attachments &&
-                    post.attachments.data[0].media_type === "album"
-                  ) {
-                    const subAttachmentList = [];
-                    post.attachments.data[0].subattachments.data.forEach(
-                      subAttachment => {
-                        subAttachmentList.push(subAttachment.media.image.src);
-                      }
-                    );
-                    postsList.push({
-                      id: post.id,
-                      title: post.attachments.data[0].title
-                        ? post.attachments.data[0].title
-                        : "",
-                      message: post.message ? post.message : "",
-                      attachments: {
-                        id: post.id,
-                        media_type: "album",
-                        images: subAttachmentList,
-                        video: ""
-                      }
-                    });
-                  } else if (
-                    post.attachments &&
-                    post.attachments.data[0].media_type === "photo"
-                  ) {
-                    postsList.push({
-                      id: post.id,
-                      message: post.message ? post.message : "",
-                      title: post.attachments.data[0].title
-                        ? post.attachments.data[0].title
-                        : "",
-                      attachments: {
-                        id: post.id,
-                        media_type: "photo",
-                        images: [post.attachments.data[0].media.image.src],
-                        video: ""
-                      }
-                    });
-                  } else if (
-                    post.attachments &&
-                    post.attachments.data[0].media_type === "event"
-                  ) {
-                    postsList.push({
-                      id: post.id,
-                      message: post.message ? post.message : "",
-                      title: post.attachments.data[0].title
-                        ? post.attachments.data[0].title
-                        : "",
-                      attachments: {
-                        id: post.id,
-                        media_type: "event",
-                        images: [post.attachments.data[0].media.image.src],
-                        video: ""
-                      }
-                    });
-                  } else if (
-                    post.attachments &&
-                    post.attachments.data[0].media_type === "video"
-                  ) {
-                    postsList.push({
-                      id: post.id,
-                      message: post.message ? post.message : "",
-                      title: post.attachments.data[0].title
-                        ? post.attachments.data[0].title
-                        : "",
-                      attachments: {
-                        id: post.id,
-                        media_type: "video",
-                        images: [],
-                        video: post.attachments.data[0].media.source
-                      }
-                    });
-                  }
-                });
               var theme = await Theme.findOne({
                 "categories.name": req.body.category
               });
@@ -281,30 +203,123 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                     : "",
                   navItems: defaultNavItems ? defaultNavItems : [],
                   theme: new mongoose.Types.ObjectId(theme._id),
-                  posts: postsList && postsList,
                   cover: data.cover ? [data.cover.source] : [],
                   categories: data.category_list ? data.category_list : [],
                   url: req.body.pageUrl ? req.body.pageUrl : "",
-                  sitePath: new mongoose.Types.ObjectId(sitePath._id)
+                  sitePath: new mongoose.Types.ObjectId(sitePath._id),
+                  isPublish: req.body.isPublish
                 }).catch(error => {
                   return res.status(500).send({ error });
                 });
-                const user = await User.findOne({ id: req.body.userId })
+                await User.findOne({ id: req.body.userId })
                   .select("sites")
                   .then(async result => {
                     let siteList = result.sites;
                     siteList.push(insert._id);
-                    const userResult = await result.updateOne({
+                    await result.updateOne({
                       sites: siteList
                     });
                   });
                 if (insert) {
+                  data.posts &&
+                    data.posts.data.forEach(async post => {
+                      if (
+                        post.attachments &&
+                        post.attachments.data[0].media_type === "album"
+                      ) {
+                        const subAttachmentList = [];
+                        post.attachments.data[0].subattachments.data.forEach(
+                          subAttachment => {
+                            subAttachmentList.push(
+                              subAttachment.media.image.src
+                            );
+                          }
+                        );
+                        postsList.push({
+                          id: post.id,
+                          title: post.attachments.data[0].title
+                            ? post.attachments.data[0].title
+                            : "",
+                          message: post.message ? post.message : "",
+                          isActive: true,
+                          attachments: {
+                            id: post.id,
+                            media_type: "album",
+                            images: subAttachmentList,
+                            video: ""
+                          }
+                        });
+                      } else if (
+                        post.attachments &&
+                        post.attachments.data[0].media_type === "photo"
+                      ) {
+                        postsList.push({
+                          id: post.id,
+                          message: post.message ? post.message : "",
+                          title: post.attachments.data[0].title
+                            ? post.attachments.data[0].title
+                            : "",
+                          isActive: true,
+                          attachments: {
+                            id: post.id,
+                            media_type: "photo",
+                            images: [post.attachments.data[0].media.image.src],
+                            video: ""
+                          }
+                        });
+                      } else if (
+                        post.attachments &&
+                        post.attachments.data[0].media_type === "event"
+                      ) {
+                        postsList.push({
+                          id: post.id,
+                          message: post.message ? post.message : "",
+                          title: post.attachments.data[0].title
+                            ? post.attachments.data[0].title
+                            : "",
+                          isActive: true,
+                          attachments: {
+                            id: post.id,
+                            media_type: "event",
+                            images: [post.attachments.data[0].media.image.src],
+                            video: ""
+                          }
+                        });
+                      } else if (
+                        post.attachments &&
+                        post.attachments.data[0].media_type === "video"
+                      ) {
+                        postsList.push({
+                          id: post.id,
+                          message: post.message ? post.message : "",
+                          title: post.attachments.data[0].title
+                            ? post.attachments.data[0].title
+                            : "",
+                          isActive: true,
+                          attachments: {
+                            id: post.id,
+                            media_type: "video",
+                            images: [],
+                            video: post.attachments.data[0].media.source
+                          }
+                        });
+                      }
+                    });
+                  console.log(postsList);
+                  await Post.insertMany(postsList, (error, docs) => {
+                    if (error) {
+                      return res.status(500).send("failed!");
+                    }
+                    Site.updateOne({ id: req.body.pageId }, { sites: docs });
+                  });
                   return res.status(200).send(insert);
                 } else {
-                  return res.status(500).send({ error: "Insert failed!" });
+                  return res.status(500).send({ error: "Insert site failed!" });
                 }
               }
-              return res.status(500).send({ error: "Site path existed!" });
+              return res
+                .status(500)
+                .send({ error: "Insert site path failed!" });
             });
           });
       }
@@ -318,7 +333,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
 router.patch("/syncData", authenticate, async (req, res) => {
   try {
     let postsList = [];
-    const data = await getPostData({
+    const data = await getPageData({
       pageId: req.body.pageId ? req.body.pageId : "",
       access_token: req.body.accessToken ? req.body.accessToken : ""
     });
@@ -349,6 +364,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
                         ? post.attachments.data[0].title
                         : "",
                       message: post.message ? post.message : "",
+                      isActive: true,
                       attachments: {
                         id: post.id,
                         media_type: "album",
@@ -366,6 +382,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
                       title: post.attachments.data[0].title
                         ? post.attachments.data[0].title
                         : "",
+                      isActive: true,
                       attachments: {
                         id: post.id,
                         media_type: "photo",
@@ -383,6 +400,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
                       title: post.attachments.data[0].title
                         ? post.attachments.data[0].title
                         : "",
+                      isActive: true,
                       attachments: {
                         id: post.id,
                         media_type: "event",
@@ -400,6 +418,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
                       title: post.attachments.data[0].title
                         ? post.attachments.data[0].title
                         : "",
+                      isActive: true,
                       attachments: {
                         id: post.id,
                         media_type: "video",
@@ -409,11 +428,11 @@ router.patch("/syncData", authenticate, async (req, res) => {
                     });
                   }
                 });
-              var theme = await Theme.findOne({
+              var theme = await Post.findOne({
                 "categories.name": req.body.category
               });
               if (!theme) {
-                var theme = await Theme.findOne();
+                var theme = await Post.findOne();
               }
               const insert = await editSite(req.body.pageId, {
                 phone: data.phone ? data.phone : "",
