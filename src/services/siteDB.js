@@ -54,33 +54,30 @@ export async function createSite() {
     }
   ]);
   return create.populate({
-    path: "theme",
-    populate: {
-      path: "posts"
-    }
+    path: "theme"
   });
 }
 
 export async function insertSite(pageId, body) {
   const insert = await Site.create({
     id: pageId,
-    phone: body.phone ? body.phone : "",
-    longitude: body.longitude ? body.longitude : "",
-    latitude: body.latitude ? body.latitude : "",
-    color: body.color ? body.color : "",
-    logo: body.logo ? body.logo : "",
-    fontTitle: body.fontTitle ? body.fontTitle : "",
-    fontBody: body.fontBody ? body.fontBody : "",
-    title: body.title ? body.title : "",
-    address: body.address ? body.address : "",
-    navItems: body.navItems ? body.navItems : "",
-    isPublish: false,
+    phone: body.phone,
+    longitude: body.longitude,
+    latitude: body.latitude,
+    color: body.color,
+    logo: body.logo,
+    fontTitle: body.fontTitle,
+    fontBody: body.fontBody,
+    title: body.title,
+    address: body.address,
+    navItems: body.navItems,
     theme: body.theme,
-    cover: body.cover ? body.cover : [],
-    posts: body.posts ? body.posts : [],
-    categories: body.categories ? body.categories : [],
-    url: body.url ? body.url : "",
-    sitePath: body.sitePath ? body.sitePath : {}
+    cover: body.cover,
+    posts: body.posts,
+    categories: body.categories,
+    url: body.url,
+    sitePath: body.sitePath,
+    isPublish: body.isPublish
   });
   return insert;
 }
@@ -89,13 +86,13 @@ export async function editSite(id, body) {
   const update = await Site.updateOne(
     { id: id },
     {
-      phone: body.phone ? body.phone : "",
-      longitude: body.longitude ? body.longitude : "",
-      latitude: body.latitude ? body.latitude : "",
-      address: body.address ? body.address : "",
-      cover: body.cover ? body.cover : [],
-      posts: body.posts ? body.posts : [],
-      categories: body.categories ? body.categories : []
+      phone: body.phone,
+      longitude: body.longitude,
+      latitude: body.latitude,
+      address: body.address,
+      cover: body.cover,
+      posts: body.posts,
+      categories: body.categories
     }
   );
   return update;
@@ -111,10 +108,7 @@ export async function deleteSite(id) {
 
 export async function findAllSite() {
   return await Site.find().populate({
-    path: "theme",
-    populate: {
-      path: "posts"
-    }
+    path: "theme"
   });
 }
 
@@ -123,19 +117,13 @@ export async function findOneSiteByAccessToken(id, body) {
     id: id,
     accessToken: body.accessToken ? body.accessToken : ""
   }).populate({
-    path: "theme",
-    populate: {
-      path: "posts"
-    }
+    path: "theme"
   });
 }
 
 export async function findOneSite(id) {
   return await Site.findOne({ id: id }).populate({
-    path: "theme",
-    populate: {
-      path: "posts"
-    }
+    path: "theme"
   });
 }
 
@@ -161,12 +149,13 @@ export async function findAllSiteByAdmin(username, password) {
     password: password
   });
   if (admin) {
-    const site = await Site.find()
-      .select("logo title categories fontTitle fontBody theme isPublish id")
+    const users = await User.find()
+      .select("id displayName sites")
       .populate({
-        path: "theme categories"
+        path: "sites",
+        select: ""
       });
-    return site;
+    return users;
   }
   return false;
 }
