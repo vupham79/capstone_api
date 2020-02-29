@@ -309,7 +309,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                   const postIdList = [];
                   await Post.insertMany(postsList, async (error, docs) => {
                     if (error) {
-                      error;
+                      return error;
                     } else {
                       docs.forEach(doc => {
                         postIdList.push(doc._id);
