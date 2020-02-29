@@ -1,5 +1,4 @@
 import { Category } from "../models";
-require("dotenv").config();
 
 export async function insertCategory(id, body) {
   const insert = await Category.collection.insertOne({

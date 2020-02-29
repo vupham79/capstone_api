@@ -1,16 +1,16 @@
 import { Router } from "express";
 import {
-  editAdmin,
-  findAllAdmin,
-  findOneAdmin,
-  loginAdmin
-} from "../services/adminDB";
+  editPost,
+  findAllPost,
+  findOnePost,
+  insertPost
+} from "../services/postDB";
 
 const router = Router();
 
-router.post("/login", async (req, res) => {
+router.post("/insert/:id", async (req, res) => {
   try {
-    await loginAdmin(req.body.username, req.body.password)
+    await insertPost(req.params.id, req.body)
       .then(result => {
         return res.status(200).send(result);
       })
@@ -22,9 +22,9 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.patch("/update", async (req, res) => {
+router.patch("/update/:id", async (req, res) => {
   try {
-    await editAdmin(req.query.username, req.query.password)
+    await editPost(req.params.id, req.body)
       .then(result => {
         return res.status(200).send(result);
       })
@@ -36,9 +36,9 @@ router.patch("/update", async (req, res) => {
   }
 });
 
-router.get("/find/:username", async (req, res) => {
+router.get("/find/:id", async (req, res) => {
   try {
-    await findOneAdmin(req.params.username)
+    await findOnePost(req.params.id)
       .then(result => {
         return res.status(200).send(result);
       })
@@ -52,7 +52,7 @@ router.get("/find/:username", async (req, res) => {
 
 router.get("/findAll", async (req, res) => {
   try {
-    await findAllAdmin()
+    await findAllPost()
       .then(result => {
         return res.status(200).send(result);
       })

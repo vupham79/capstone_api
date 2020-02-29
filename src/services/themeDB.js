@@ -1,5 +1,4 @@
 import { Theme, Admin } from "../models";
-require("dotenv").config();
 
 // export async function insertTheme(id, body) {
 //   return await Theme.collection.insertOne({

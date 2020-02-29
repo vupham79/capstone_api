@@ -5,6 +5,7 @@ import Theme from "./Theme";
 import User from "./User";
 import Admin from "./Admin";
 import SitePath from "./SitePath";
+import Post from "./Post";
 require("dotenv").config();
 
 const connectDb = () => {
@@ -23,4 +24,4 @@ const connectDb = () => {
     });
 };
 
-export { connectDb, User, Theme, Site, Category, Admin, SitePath, mongoose };
+export { connectDb, User, Theme, Site, Category, Admin, SitePath, Post, mongoose };
