@@ -10,17 +10,19 @@ import {
   editSite,
   findAllSiteByAdmin
 } from "../services/siteDB";
-import { insertSitePath, findOneSitePath } from "../services/sitePathDB";
-import { Site, Post, User, Theme, SitePath } from "../models";
+import { Site, Post, User, Theme } from "../models";
 const router = Router();
 
 router.get("/find/:id", async (req, res) => {
   try {
+    console.log(req.params.id);
     await findOneSite(req.params.id)
       .then(result => {
+        console.log("success!");
         return res.status(200).send(result);
       })
       .catch(error => {
+        console.log("fail!");
         return res.status(500).send({ error });
       });
   } catch (error) {
@@ -186,144 +188,137 @@ router.post("/createNewSite", authenticate, async (req, res) => {
               if (!theme) {
                 var theme = await Theme.findOne();
               }
-              const sitePathResult = await findOneSitePath(data.name);
-              if (!sitePathResult) {
-                const sitePath = await insertSitePath(data.name);
-                const insert = await insertSite(req.body.pageId, {
-                  phone: data.phone ? data.phone : "",
-                  longitude: data.location ? data.location.longitude : "",
-                  latitude: data.location ? data.location.latitude : "",
-                  logo: data.picture ? data.picture.data.url : "",
-                  fontTitle: theme.fontTitle ? theme.fontTitle : "",
-                  fontBody: theme.fontBody ? theme.fontBody : "",
-                  color: theme.mainColor ? theme.mainColor : "",
-                  title: data.name ? data.name : "",
-                  address: data.single_line_address
-                    ? data.single_line_address
-                    : "",
-                  navItems: defaultNavItems ? defaultNavItems : [],
-                  theme: new mongoose.Types.ObjectId(theme._id),
-                  cover: data.cover ? [data.cover.source] : [],
-                  categories: data.category_list ? data.category_list : [],
-                  url: req.body.pageUrl ? req.body.pageUrl : "",
-                  sitePath: new mongoose.Types.ObjectId(sitePath._id),
-                  isPublish: req.body.isPublish
-                }).catch(error => {
-                  return res.status(500).send({ error });
-                });
-                await User.findOne({ id: req.body.userId })
-                  .select("sites")
-                  .then(async result => {
-                    let siteList = result.sites;
-                    siteList.push(insert._id);
-                    await result.updateOne({
-                      sites: siteList
-                    });
+              const insert = await insertSite(req.body.pageId, {
+                phone: data.phone ? data.phone : "",
+                longitude: data.location ? data.location.longitude : "",
+                latitude: data.location ? data.location.latitude : "",
+                logo: data.picture ? data.picture.data.url : "",
+                fontTitle: theme.fontTitle ? theme.fontTitle : "",
+                fontBody: theme.fontBody ? theme.fontBody : "",
+                color: theme.mainColor ? theme.mainColor : "",
+                title: data.name ? data.name : "",
+                address: data.single_line_address
+                  ? data.single_line_address
+                  : "",
+                navItems: defaultNavItems ? defaultNavItems : [],
+                theme: new mongoose.Types.ObjectId(theme._id),
+                cover: data.cover ? [data.cover.source] : [],
+                categories: data.category_list ? data.category_list : [],
+                url: req.body.pageUrl ? req.body.pageUrl : "",
+                isPublish: req.body.isPublish,
+                sitePath: data.name ? data.name : ""
+              }).catch(error => {
+                return res.status(500).send({ error });
+              });
+              await User.findOne({ id: req.body.userId })
+                .select("sites")
+                .then(async result => {
+                  let siteList = result.sites;
+                  siteList.push(insert._id);
+                  await result.updateOne({
+                    sites: siteList
                   });
-                if (insert) {
-                  data.posts &&
-                    data.posts.data.forEach(async post => {
-                      if (
-                        post.attachments &&
-                        post.attachments.data[0].media_type === "album"
-                      ) {
-                        const subAttachmentList = [];
-                        post.attachments.data[0].subattachments.data.forEach(
-                          subAttachment => {
-                            subAttachmentList.push(
-                              subAttachment.media.image.src
-                            );
-                          }
-                        );
-                        postsList.push({
-                          id: post.id,
-                          title: post.attachments.data[0].title
-                            ? post.attachments.data[0].title
-                            : "",
-                          message: post.message ? post.message : "",
-                          isActive: true,
-                          attachments: {
-                            id: post.id,
-                            media_type: "album",
-                            images: subAttachmentList,
-                            video: ""
-                          }
-                        });
-                      } else if (
-                        post.attachments &&
-                        post.attachments.data[0].media_type === "photo"
-                      ) {
-                        postsList.push({
-                          id: post.id,
-                          message: post.message ? post.message : "",
-                          title: post.attachments.data[0].title
-                            ? post.attachments.data[0].title
-                            : "",
-                          isActive: true,
-                          attachments: {
-                            id: post.id,
-                            media_type: "photo",
-                            images: [post.attachments.data[0].media.image.src],
-                            video: ""
-                          }
-                        });
-                      } else if (
-                        post.attachments &&
-                        post.attachments.data[0].media_type === "event"
-                      ) {
-                        postsList.push({
-                          id: post.id,
-                          message: post.message ? post.message : "",
-                          title: post.attachments.data[0].title
-                            ? post.attachments.data[0].title
-                            : "",
-                          isActive: true,
-                          attachments: {
-                            id: post.id,
-                            media_type: "event",
-                            images: [post.attachments.data[0].media.image.src],
-                            video: ""
-                          }
-                        });
-                      } else if (
-                        post.attachments &&
-                        post.attachments.data[0].media_type === "video"
-                      ) {
-                        postsList.push({
-                          id: post.id,
-                          message: post.message ? post.message : "",
-                          title: post.attachments.data[0].title
-                            ? post.attachments.data[0].title
-                            : "",
-                          isActive: true,
-                          attachments: {
-                            id: post.id,
-                            media_type: "video",
-                            images: [],
-                            video: post.attachments.data[0].media.source
-                          }
-                        });
-                      }
-                    });
-                  const postIdList = [];
-                  await Post.insertMany(postsList, async (error, docs) => {
-                    if (error) {
-                      return error;
-                    } else {
-                      docs.forEach(doc => {
-                        postIdList.push(doc._id);
-                      });
-                      await Site.updateOne(
-                        { id: req.body.pageId },
-                        { posts: postIdList }
+                });
+              if (insert) {
+                data.posts &&
+                  data.posts.data.forEach(async post => {
+                    if (
+                      post.attachments &&
+                      post.attachments.data[0].media_type === "album"
+                    ) {
+                      const subAttachmentList = [];
+                      post.attachments.data[0].subattachments.data.forEach(
+                        subAttachment => {
+                          subAttachmentList.push(subAttachment.media.image.src);
+                        }
                       );
+                      postsList.push({
+                        id: post.id,
+                        title: post.attachments.data[0].title
+                          ? post.attachments.data[0].title
+                          : "",
+                        message: post.message ? post.message : "",
+                        isActive: true,
+                        attachments: {
+                          id: post.id,
+                          media_type: "album",
+                          images: subAttachmentList,
+                          video: ""
+                        }
+                      });
+                    } else if (
+                      post.attachments &&
+                      post.attachments.data[0].media_type === "photo"
+                    ) {
+                      postsList.push({
+                        id: post.id,
+                        message: post.message ? post.message : "",
+                        title: post.attachments.data[0].title
+                          ? post.attachments.data[0].title
+                          : "",
+                        isActive: true,
+                        attachments: {
+                          id: post.id,
+                          media_type: "photo",
+                          images: [post.attachments.data[0].media.image.src],
+                          video: ""
+                        }
+                      });
+                    } else if (
+                      post.attachments &&
+                      post.attachments.data[0].media_type === "event"
+                    ) {
+                      postsList.push({
+                        id: post.id,
+                        message: post.message ? post.message : "",
+                        title: post.attachments.data[0].title
+                          ? post.attachments.data[0].title
+                          : "",
+                        isActive: true,
+                        attachments: {
+                          id: post.id,
+                          media_type: "event",
+                          images: [post.attachments.data[0].media.image.src],
+                          video: ""
+                        }
+                      });
+                    } else if (
+                      post.attachments &&
+                      post.attachments.data[0].media_type === "video"
+                    ) {
+                      postsList.push({
+                        id: post.id,
+                        message: post.message ? post.message : "",
+                        title: post.attachments.data[0].title
+                          ? post.attachments.data[0].title
+                          : "",
+                        isActive: true,
+                        attachments: {
+                          id: post.id,
+                          media_type: "video",
+                          images: [],
+                          video: post.attachments.data[0].media.source
+                        }
+                      });
                     }
                   });
-
-                  return res.status(200).send(insert);
-                } else {
-                  return res.status(500).send({ error: "Insert site failed!" });
-                }
+                const postIdList = [];
+                await Post.insertMany(postsList, async (error, docs) => {
+                  if (error) {
+                    return error;
+                  } else {
+                    docs.forEach(doc => {
+                      postIdList.push(doc._id);
+                    });
+                    await Site.updateOne(
+                      { id: req.body.pageId },
+                      { posts: postIdList }
+                    );
+                  }
+                });
+                return res.status(200).send(insert);
+              } else {
+                return res.status(500).send({ error: "Insert site failed!" });
               }
               return res
                 .status(500)
@@ -439,26 +434,22 @@ router.patch("/syncData", authenticate, async (req, res) => {
               if (!theme) {
                 var theme = await Post.findOne();
               }
-              const sitePathResult = await findOneSitePath(data.name);
-              if (sitePathResult) {
-                await SitePath.updateOne({ pathName: data.name });
-                const insert = await editSite(req.body.pageId, {
-                  phone: data.phone ? data.phone : "",
-                  longitude: data.location ? data.location.longitude : "",
-                  latitude: data.location ? data.location.latitude : "",
-                  address: data.single_line_address
-                    ? data.single_line_address
-                    : "",
-                  posts: postsList && postsList,
-                  cover: data.cover ? [data.cover.source] : [],
-                  categories: data.category_list ? data.category_list : [],
-                  sitePath: new mongoose.Types.ObjectId(sitePathResult._id)
-                }).catch(error => ("Insert error: ", error));
-                if (insert) {
-                  return res.status(200).send(insert);
-                } else {
-                  return res.status(500).send({ error: "Insert failed!" });
-                }
+              const insert = await editSite(req.body.pageId, {
+                phone: data.phone ? data.phone : "",
+                longitude: data.location ? data.location.longitude : "",
+                latitude: data.location ? data.location.latitude : "",
+                address: data.single_line_address
+                  ? data.single_line_address
+                  : "",
+                posts: postsList && postsList,
+                cover: data.cover ? [data.cover.source] : [],
+                categories: data.category_list ? data.category_list : [],
+                sitePath: data.name ? data.name : ""
+              }).catch(error => ("Insert error: ", error));
+              if (insert) {
+                return res.status(200).send(insert);
+              } else {
+                return res.status(500).send({ error: "Insert failed!" });
               }
             });
           });
