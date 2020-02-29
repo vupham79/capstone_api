@@ -306,16 +306,6 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                         });
                       }
                     });
-                  // postsList.length > 0 &&
-                  //   postsList.forEach(async post => {
-                  //     if (!(await findOnePost(post.id))) {
-                  //        (post.id);
-                  //       await insertPost(post);
-                  //     }
-                  //   });
-
-                  //  (postIdList);
-
                   const postIdList = [];
                   await Post.insertMany(postsList, async (error, docs) => {
                     if (error) {
