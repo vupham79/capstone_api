@@ -122,7 +122,7 @@ export async function findOneSiteByAccessToken(id, body) {
 
 export async function findOneSite(id) {
   return await Site.findOne({ id: id }).populate({
-    path: "theme"
+    path: "theme posts"
   });
 }
 
