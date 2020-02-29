@@ -59,7 +59,7 @@ router.get("/findAll", async (req, res) => {
 
 router.get("/findAllByAdmin", async (req, res) => {
   try {
-    await findAllSiteByAdmin(req.query.username, req.query.password)
+    await findAllSiteByAdmin(req.body.username, req.body.password)
       .then(result => {
         return res.status(200).send(result);
       })

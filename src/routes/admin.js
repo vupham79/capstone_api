@@ -24,7 +24,7 @@ router.post("/login", async (req, res) => {
 
 router.patch("/update", async (req, res) => {
   try {
-    await editAdmin(req.query.username, req.query.password)
+    await editAdmin(req.body.username, req.body.password)
       .then(result => {
         return res.status(200).send(result);
       })
@@ -38,7 +38,7 @@ router.patch("/update", async (req, res) => {
 
 router.get("/find/:username", async (req, res) => {
   try {
-    await findOneAdmin(req.params.username)
+    await findOneAdmin(req.body.username)
       .then(result => {
         return res.status(200).send(result);
       })
