@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import { Site, User, Admin } from "../models";
-require("dotenv").config();
 
 export async function createSite() {
   const UserResult = await User.findOne({ id: "1" });

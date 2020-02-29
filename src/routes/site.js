@@ -10,6 +10,7 @@ import {
   editSite,
   findAllSiteByAdmin
 } from "../services/siteDB";
+import { insertPost, findOnePost } from "../services/postDB";
 import { insertSitePath, findOneSitePath } from "../services/sitePathDB";
 import { Site, Post, User, Theme } from "../models";
 const router = Router();
@@ -305,14 +306,33 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                         });
                       }
                     });
-                  await Post.insertMany(postsList, (error, docs) => {
+                  // postsList.length > 0 &&
+                  //   postsList.forEach(async post => {
+                  //     if (!(await findOnePost(post.id))) {
+                  //       console.log(post.id);
+                  //       await insertPost(post);
+                  //     }
+                  //   });
+
+                  // console.log(postIdList);
+
+                  const postIdList = [];
+                  await Post.insertMany(postsList, async (error, docs) => {
                     if (error) {
                       console.log("failed!");
-                      return res.status(500).send("failed!");
+                    } else {
+                      console.log(docs.length);
+                      docs.forEach(doc => {
+                        postIdList.push(doc._id);
+                      });
+                      console.log(postIdList);
+                      await Site.updateOne(
+                        { id: req.body.pageId },
+                        { posts: postIdList }
+                      );
                     }
-                    console.log(docs);
-                    Site.updateOne({ id: req.body.pageId }, { sites: docs });
                   });
+
                   return res.status(200).send(insert);
                 } else {
                   return res.status(500).send({ error: "Insert site failed!" });

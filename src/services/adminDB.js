@@ -1,5 +1,4 @@
 import { Admin } from "../models";
-require("dotenv").config();
 
 export async function loginAdmin(username, password) {
   const login = await Admin.findOne({ username: username, password: password });

@@ -1,5 +1,4 @@
 import { SitePath } from "../models";
-require("dotenv").config();
 
 export async function insertSitePath(pathName) {
   const insert = await SitePath.collection.insertOne({
