@@ -10,13 +10,11 @@ const router = Router();
 
 router.post("/insert", async (req, res) => {
   try {
-    await insertSitePath(req.body.pathName)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const insert = await insertSitePath(req.body.pathName);
+    if (insert) {
+      return res.status(200).send(insert);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -24,13 +22,11 @@ router.post("/insert", async (req, res) => {
 
 router.patch("/update", async (req, res) => {
   try {
-    await updateSitePath(req.body.pathName)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const update = await updateSitePath(req.body.pathName);
+    if (update) {
+      return res.status(200).send(update);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -38,13 +34,11 @@ router.patch("/update", async (req, res) => {
 
 router.get("/findAll", async (req, res) => {
   try {
-    await findAllSitePath()
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const sitepaths = await findAllSitePath();
+    if (sitepaths) {
+      return res.status(200).send(sitepaths);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -52,13 +46,11 @@ router.get("/findAll", async (req, res) => {
 
 router.get("/find/:pathName", async (req, res) => {
   try {
-    await findOneSitePath(req.params.pathName)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const sitepath = await findOneSitePath(req.params.pathName);
+    if (sitepath) {
+      return res.status(200).send(sitepath);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }

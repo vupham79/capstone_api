@@ -1,5 +1,5 @@
 import { Router } from "express";
-import mongoose, { Schema } from "mongoose";
+import mongoose from "mongoose";
 import { getPageData } from "../services/fbPage";
 import { authenticate } from "../services/middleware";
 import {
@@ -16,13 +16,14 @@ const router = Router();
 
 router.get("/find/:id", async (req, res) => {
   try {
-    await findOneSite(req.params.id)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const site = await Site.findOne({ id: req.params.id }).populate({
+      path: "theme posts"
+    });
+    if (site) {
+      return res.status(200).send(site);
+    } else {
+      return res.status(500).send();
+    }
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -30,13 +31,15 @@ router.get("/find/:id", async (req, res) => {
 
 router.get("/findAllByUser", async (req, res) => {
   try {
-    await findAllSiteByUser(req.query.userId, req.query.accessToken)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const sites = await findAllSiteByUser(
+      req.query.userId,
+      req.query.accessToken
+    );
+    if (sites) {
+      return res.status(200).send(sites);
+    } else {
+      return res.status(500).send();
+    }
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -44,13 +47,12 @@ router.get("/findAllByUser", async (req, res) => {
 
 router.get("/findAll", async (req, res) => {
   try {
-    await findAllSite()
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const sites = await findAllSite();
+    if (sites) {
+      return res.status(200).send(sites);
+    } else {
+      return res.status(500).send();
+    }
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -58,13 +60,15 @@ router.get("/findAll", async (req, res) => {
 
 router.get("/findAllByAdmin", async (req, res) => {
   try {
-    await findAllSiteByAdmin(req.body.username, req.body.password)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const users = await findAllSiteByAdmin(
+      req.body.username,
+      req.body.password
+    );
+    if (users) {
+      return res.status(200).send(users);
+    } else {
+      return res.status(500).send();
+    }
   } catch (error) {
     return res.status(500).send({ error });
   }

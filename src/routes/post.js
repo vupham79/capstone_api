@@ -10,13 +10,11 @@ const router = Router();
 
 router.post("/insert/:id", async (req, res) => {
   try {
-    await insertPost(req.params.id, req.body)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const insert = await insertPost(req.params.id, req.body);
+    if (insert) {
+      return res.status(200).send(insert);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }

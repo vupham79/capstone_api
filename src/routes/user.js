@@ -13,13 +13,11 @@ const router = Router();
 
 router.get("/create", async (req, res) => {
   try {
-    await createUser()
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const user = await createUser();
+    if (user) {
+      return res.status(200).send(user);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
