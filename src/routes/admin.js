@@ -8,9 +8,9 @@ import {
 
 const router = Router();
 
-router.get("/login", async (req, res) => {
+router.post("/login", async (req, res) => {
   try {
-    await loginAdmin(req.query.username, req.query.password)
+    await loginAdmin(req.body.username, req.body.password)
       .then(result => {
         return res.status(200).send(result);
       })
