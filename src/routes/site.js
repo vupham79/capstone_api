@@ -11,7 +11,7 @@ import {
   findAllSiteByAdmin
 } from "../services/siteDB";
 import { insertSitePath, findOneSitePath } from "../services/sitePathDB";
-import { Site, Post, User, Theme } from "../models";
+import { Site, Post, User, Theme, SitePath } from "../models";
 const router = Router();
 
 router.get("/find/:id", async (req, res) => {
@@ -439,21 +439,26 @@ router.patch("/syncData", authenticate, async (req, res) => {
               if (!theme) {
                 var theme = await Post.findOne();
               }
-              const insert = await editSite(req.body.pageId, {
-                phone: data.phone ? data.phone : "",
-                longitude: data.location ? data.location.longitude : "",
-                latitude: data.location ? data.location.latitude : "",
-                address: data.single_line_address
-                  ? data.single_line_address
-                  : "",
-                posts: postsList && postsList,
-                cover: data.cover ? [data.cover.source] : [],
-                categories: data.category_list ? data.category_list : []
-              }).catch(error => ("Insert error: ", error));
-              if (insert) {
-                return res.status(200).send(insert);
-              } else {
-                return res.status(500).send({ error: "Insert failed!" });
+              const sitePathResult = await findOneSitePath(data.name);
+              if (sitePathResult) {
+                await SitePath.updateOne({ pathName: data.name });
+                const insert = await editSite(req.body.pageId, {
+                  phone: data.phone ? data.phone : "",
+                  longitude: data.location ? data.location.longitude : "",
+                  latitude: data.location ? data.location.latitude : "",
+                  address: data.single_line_address
+                    ? data.single_line_address
+                    : "",
+                  posts: postsList && postsList,
+                  cover: data.cover ? [data.cover.source] : [],
+                  categories: data.category_list ? data.category_list : [],
+                  sitePath: new mongoose.Types.ObjectId(sitePathResult._id)
+                }).catch(error => ("Insert error: ", error));
+                if (insert) {
+                  return res.status(200).send(insert);
+                } else {
+                  return res.status(500).send({ error: "Insert failed!" });
+                }
               }
             });
           });

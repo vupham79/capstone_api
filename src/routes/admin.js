@@ -36,7 +36,7 @@ router.patch("/update", async (req, res) => {
   }
 });
 
-router.get("/find/:username", async (req, res) => {
+router.get("/find", async (req, res) => {
   try {
     await findOneAdmin(req.body.username)
       .then(result => {
