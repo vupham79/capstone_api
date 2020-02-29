@@ -107,7 +107,7 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
     color
   } = req.body;
   try {
-    const findTheme = await Post.findOne({ id: theme });
+    const findTheme = await Theme.findOne({ id: theme });
     if (findTheme) {
       const update = await Site.updateOne(
         { id: pageId },
