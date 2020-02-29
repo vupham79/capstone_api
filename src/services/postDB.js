@@ -15,7 +15,7 @@ export async function insertAllPost(body) {
     if (error) {
       return error;
     } else {
-      console.log(docs);
+      docs;
       return docs;
     }
   });

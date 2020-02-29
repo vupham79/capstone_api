@@ -309,23 +309,21 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                   // postsList.length > 0 &&
                   //   postsList.forEach(async post => {
                   //     if (!(await findOnePost(post.id))) {
-                  //       console.log(post.id);
+                  //        (post.id);
                   //       await insertPost(post);
                   //     }
                   //   });
 
-                  // console.log(postIdList);
+                  //  (postIdList);
 
                   const postIdList = [];
                   await Post.insertMany(postsList, async (error, docs) => {
                     if (error) {
-                      console.log("failed!");
+                      error;
                     } else {
-                      console.log(docs.length);
                       docs.forEach(doc => {
                         postIdList.push(doc._id);
                       });
-                      console.log(postIdList);
                       await Site.updateOne(
                         { id: req.body.pageId },
                         { posts: postIdList }
@@ -465,7 +463,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
                 posts: postsList && postsList,
                 cover: data.cover ? [data.cover.source] : [],
                 categories: data.category_list ? data.category_list : []
-              }).catch(error => console.log("Insert error: ", error));
+              }).catch(error => ("Insert error: ", error));
               if (insert) {
                 return res.status(200).send(insert);
               } else {
