@@ -84,8 +84,11 @@ const SiteSchema = new mongoose.Schema(
       type: String,
       default: ""
     },
+    sitePath: {
+      type: String,
+      default: ""
+    },
     posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
-    sitePath: { type: Schema.Types.ObjectId, ref: "SitePath" },
     theme: { type: Schema.Types.ObjectId, ref: "Theme" }
   },
   {

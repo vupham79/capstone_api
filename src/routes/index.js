@@ -5,7 +5,6 @@ import site from "./site";
 import theme from "./theme";
 import user from "./user";
 import admin from "./admin";
-import sitePath from "./sitePath";
 import post from "./post";
 
 export default app => {
@@ -16,6 +15,5 @@ export default app => {
   app.use("/facebook", facebook);
   app.use("/readColor", readColor);
   app.use("/admin", admin);
-  app.use("/sitePath", sitePath);
   app.use("/post", post);
 };

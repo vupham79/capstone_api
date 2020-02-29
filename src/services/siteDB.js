@@ -91,7 +91,8 @@ export async function editSite(id, body) {
       address: body.address,
       cover: body.cover,
       posts: body.posts,
-      categories: body.categories
+      categories: body.categories,
+      sitePath: body.sitePath
     }
   );
   return update;
