@@ -18,9 +18,8 @@ router.get("/find/:id", async (req, res) => {
     const site = await findOneSite(req.params.id);
     if (site) {
       return res.status(200).send(site);
-    } else {
-      return res.status(500).send();
     }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -34,9 +33,8 @@ router.get("/findAllByUser", async (req, res) => {
     );
     if (sites) {
       return res.status(200).send(sites);
-    } else {
-      return res.status(500).send();
     }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -63,9 +61,8 @@ router.get("/findAllByAdmin", async (req, res) => {
     );
     if (users) {
       return res.status(200).send(users);
-    } else {
-      return res.status(500).send();
     }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
