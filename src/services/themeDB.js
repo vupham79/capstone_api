@@ -28,17 +28,6 @@ export async function findAllTheme() {
   return await Theme.find();
 }
 
-export async function findAllThemeByAdmin(username, password) {
-  const admin = await Admin.findOne({
-    username: username,
-    password: password
-  });
-  if (admin) {
-    return await Theme.find();
-  }
-  return false;
-}
-
 export async function findOneThemeByCategory(name) {
   const theme = await Theme.collection.findOne({ "categories.name": name });
   return theme;

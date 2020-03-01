@@ -14,7 +14,7 @@ router.post("/login", async (req, res) => {
     if (login) {
       return res.status(200).send(login);
     }
-    return res.status(500).send();
+    return res.status(204).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -26,7 +26,7 @@ router.patch("/update", async (req, res) => {
     if (update) {
       return res.status(200).send(update);
     }
-    return res.status(500).send();
+    return res.status(204).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -38,7 +38,7 @@ router.get("/find", async (req, res) => {
     if (find) {
       return res.status(200).send(find);
     }
-    return res.status(500).send();
+    return res.status(204).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -50,7 +50,7 @@ router.get("/findAll", async (req, res) => {
     if (find) {
       return res.status(200).send(find);
     }
-    return res.status(500).send();
+    return res.status(204).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
