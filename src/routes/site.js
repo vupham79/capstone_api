@@ -15,9 +15,9 @@ const router = Router();
 
 router.get("/find/:id", async (req, res) => {
   try {
-    const site = await findOneSite(req.params.id);
-    if (site) {
-      return res.status(200).send(site);
+    const find = await findOneSite(req.params.id);
+    if (find) {
+      return res.status(200).send(find);
     }
     return res.status(500).send();
   } catch (error) {
@@ -27,12 +27,12 @@ router.get("/find/:id", async (req, res) => {
 
 router.get("/findAllByUser", async (req, res) => {
   try {
-    const sites = await findAllSiteByUser(
+    const find = await findAllSiteByUser(
       req.query.userId,
       req.query.accessToken
     );
-    if (sites) {
-      return res.status(200).send(sites);
+    if (find) {
+      return res.status(200).send(find);
     }
     return res.status(500).send();
   } catch (error) {
@@ -42,12 +42,11 @@ router.get("/findAllByUser", async (req, res) => {
 
 router.get("/findAll", async (req, res) => {
   try {
-    const sites = await findAllSite();
-    if (sites) {
-      return res.status(200).send(sites);
-    } else {
-      return res.status(500).send();
+    const find = await findAllSite();
+    if (find) {
+      return res.status(200).send(find);
     }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -55,12 +54,9 @@ router.get("/findAll", async (req, res) => {
 
 router.get("/findAllByAdmin", async (req, res) => {
   try {
-    const users = await findAllSiteByAdmin(
-      req.body.username,
-      req.body.password
-    );
-    if (users) {
-      return res.status(200).send(users);
+    const find = await findAllSiteByAdmin(req.body.username, req.body.password);
+    if (find) {
+      return res.status(200).send(find);
     }
     return res.status(500).send();
   } catch (error) {
@@ -120,9 +116,8 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
       );
       if (update) {
         return res.status(200).send(update);
-      } else {
-        return res.status(500).send({ error: "Insert failed!" });
       }
+      return res.status(500).send({ error: "Insert failed!" });
     }
     return res.status(500).send({ error: "Post not exist!" });
   } catch (error) {
@@ -316,9 +311,6 @@ router.post("/createNewSite", authenticate, async (req, res) => {
               } else {
                 return res.status(500).send({ error: "Insert site failed!" });
               }
-              return res
-                .status(500)
-                .send({ error: "Insert site path failed!" });
             });
           });
       }

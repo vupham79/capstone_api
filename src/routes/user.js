@@ -25,13 +25,11 @@ router.get("/create", async (req, res) => {
 
 router.post("/insert/:id", async (req, res) => {
   try {
-    await insertUser(req.params.id, req.body)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const insert = await insertUser(req.params.id, req.body);
+    if (insert) {
+      return res.status(200).send(insert);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -39,13 +37,11 @@ router.post("/insert/:id", async (req, res) => {
 
 router.patch("/update/:id", async (req, res) => {
   try {
-    await editUser(req.params.id, req.body)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const update = await editUser(req.params.id, req.body);
+    if (update) {
+      return res.status(200).send(update);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -53,13 +49,11 @@ router.patch("/update/:id", async (req, res) => {
 
 router.patch("/deactivate/:id", async (req, res) => {
   try {
-    await deactivateUser(req.params.id)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const update = await deactivateUser(req.params.id);
+    if (update) {
+      return res.status(200).send(update);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -67,13 +61,11 @@ router.patch("/deactivate/:id", async (req, res) => {
 
 router.patch("/activate/:id", async (req, res) => {
   try {
-    await activateUser(req.params.id)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const update = await activateUser(req.params.id);
+    if (update) {
+      return res.status(200).send(update);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -81,13 +73,11 @@ router.patch("/activate/:id", async (req, res) => {
 
 router.get("/find/:id", async (req, res) => {
   try {
-    await findOneUser(req.params.id)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const find = await findOneUser(req.params.id);
+    if (find) {
+      return res.status(200).send(find);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -95,13 +85,11 @@ router.get("/find/:id", async (req, res) => {
 
 router.get("/findAll", async (req, res) => {
   try {
-    await findAllUser()
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const find = await findAllUser();
+    if (find) {
+      return res.status(200).send(find);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
