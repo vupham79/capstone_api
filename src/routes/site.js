@@ -423,25 +423,20 @@ router.patch("/syncData", authenticate, async (req, res) => {
                   }
                 });
 
-              // await Post.updateMany({}, {$set: postsList}, ());
-
-              postsList.forEach(async post => {
-                if (await Post.findOne({ id: post.id })) {
-                  await Post.updateOne({ id: post.id }, post);
+              await Post.create(postsList, async (error, docs) => {
+                if (error) {
+                  console.log(error);
                 } else {
-                  await Post.create(post);
+                  let postIdList = [];
+                  docs.forEach(doc => {
+                    postIdList.push(doc._id);
+                  });
+                  await Site.updateOne(
+                    { id: req.body.pageId },
+                    { posts: postIdList }
+                  );
                 }
               });
-
-              // await Post.find({
-              //   id: { $in: postsList.map(post => post.id) }
-              // }).select("_id").then(async result => {
-              //   console.log(result);
-              //   await Site.updateOne(
-              //     { id: req.body.pageId },
-              //     result.map(post => new mongoose.Types.ObjectId(post._id))
-              //   );
-              // });
 
               if (update) {
                 return res.status(200).send(update);
