@@ -22,13 +22,11 @@ router.post("/insert/:id", async (req, res) => {
 
 router.patch("/update/:id", async (req, res) => {
   try {
-    await editPost(req.params.id, req.body)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const update = await editPost(req.params.id, req.body);
+    if (update) {
+      return res.status(200).send(update);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -36,13 +34,11 @@ router.patch("/update/:id", async (req, res) => {
 
 router.get("/find/:id", async (req, res) => {
   try {
-    await findOnePost(req.params.id)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const find = await findOnePost(req.params.id);
+    if (find) {
+      return res.status(200).send(find);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -50,13 +46,11 @@ router.get("/find/:id", async (req, res) => {
 
 router.get("/findAll", async (req, res) => {
   try {
-    await findAllPost()
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const find = await findAllPost();
+    if (find) {
+      return res.status(200).send(find);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }

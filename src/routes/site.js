@@ -15,9 +15,9 @@ const router = Router();
 
 router.get("/find/:id", async (req, res) => {
   try {
-    const site = await findOneSite(req.params.id);
-    if (site) {
-      return res.status(200).send(site);
+    const find = await findOneSite(req.params.id);
+    if (find) {
+      return res.status(200).send(find);
     } else {
       return res.status(500).send();
     }
@@ -28,12 +28,12 @@ router.get("/find/:id", async (req, res) => {
 
 router.get("/findAllByUser", async (req, res) => {
   try {
-    const sites = await findAllSiteByUser(
+    const find = await findAllSiteByUser(
       req.query.userId,
       req.query.accessToken
     );
-    if (sites) {
-      return res.status(200).send(sites);
+    if (find) {
+      return res.status(200).send(find);
     } else {
       return res.status(500).send();
     }
@@ -44,9 +44,9 @@ router.get("/findAllByUser", async (req, res) => {
 
 router.get("/findAll", async (req, res) => {
   try {
-    const sites = await findAllSite();
-    if (sites) {
-      return res.status(200).send(sites);
+    const find = await findAllSite();
+    if (find) {
+      return res.status(200).send(find);
     } else {
       return res.status(500).send();
     }
@@ -57,12 +57,12 @@ router.get("/findAll", async (req, res) => {
 
 router.get("/findAllByAdmin", async (req, res) => {
   try {
-    const users = await findAllSiteByAdmin(
+    const find = await findAllSiteByAdmin(
       req.body.username,
       req.body.password
     );
-    if (users) {
-      return res.status(200).send(users);
+    if (find) {
+      return res.status(200).send(find);
     } else {
       return res.status(500).send();
     }
@@ -319,9 +319,6 @@ router.post("/createNewSite", authenticate, async (req, res) => {
               } else {
                 return res.status(500).send({ error: "Insert site failed!" });
               }
-              return res
-                .status(500)
-                .send({ error: "Insert site path failed!" });
             });
           });
       }

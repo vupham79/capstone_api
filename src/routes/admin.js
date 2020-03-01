@@ -10,13 +10,11 @@ const router = Router();
 
 router.post("/login", async (req, res) => {
   try {
-    await loginAdmin(req.body.username, req.body.password)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const login = await loginAdmin(req.body.username, req.body.password);
+    if (login) {
+      return res.status(200).send(login);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -24,13 +22,11 @@ router.post("/login", async (req, res) => {
 
 router.patch("/update", async (req, res) => {
   try {
-    await editAdmin(req.body.username, req.body.password)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const update = await editAdmin(req.body.username, req.body.password);
+    if (update) {
+      return res.status(200).send(update);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -38,13 +34,11 @@ router.patch("/update", async (req, res) => {
 
 router.get("/find", async (req, res) => {
   try {
-    await findOneAdmin(req.body.username)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const find = await findOneAdmin(req.body.username);
+    if (find) {
+      return res.status(200).send(find);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -52,13 +46,11 @@ router.get("/find", async (req, res) => {
 
 router.get("/findAll", async (req, res) => {
   try {
-    await findAllAdmin()
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const find = await findAllAdmin();
+    if (find) {
+      return res.status(200).send(find);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }

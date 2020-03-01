@@ -12,13 +12,11 @@ const router = Router();
 
 router.get("/create", async (req, res) => {
   try {
-    await createTheme()
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const create = await createTheme();
+    if (create) {
+      return res.status(200).send(create);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -26,13 +24,11 @@ router.get("/create", async (req, res) => {
 
 router.post("/insert/:id", async (req, res) => {
   try {
-    await insertTheme(req.params.id, req.body)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const insert = await insertTheme(req.params.id, req.body);
+    if (insert) {
+      return res.status(200).send(insert);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -40,13 +36,11 @@ router.post("/insert/:id", async (req, res) => {
 
 router.patch("/update/:id", async (req, res) => {
   try {
-    await editTheme(req.params.id, req.body)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const update = await editTheme(req.params.id, req.body);
+    if (update) {
+      return res.status(200).send(update);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -54,13 +48,11 @@ router.patch("/update/:id", async (req, res) => {
 
 router.patch("/delete/:id", async (req, res) => {
   try {
-    await deleteTheme(req.params.id)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const deleteTheme = await deleteTheme(req.params.id);
+    if (deleteTheme) {
+      return res.status(200).send(deleteTheme);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -68,13 +60,11 @@ router.patch("/delete/:id", async (req, res) => {
 
 router.get("/find/:id", async (req, res) => {
   try {
-    await findOneTheme(req.params.id)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const find = await findOneTheme(req.params.id);
+    if (find) {
+      return res.status(200).send(find);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -82,13 +72,11 @@ router.get("/find/:id", async (req, res) => {
 
 router.get("/findAll", async (req, res) => {
   try {
-    await findAllTheme()
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const find = await findAllTheme();
+    if (find) {
+      return res.status(200).send(find);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -96,13 +84,14 @@ router.get("/findAll", async (req, res) => {
 
 router.get("/findAllByAdmin", async (req, res) => {
   try {
-    await findAllThemeByAdmin(req.query.username, req.query.password)
-      .then(result => {
-        return res.status(200).send(result);
-      })
-      .catch(error => {
-        return res.status(500).send({ error });
-      });
+    const find = await findAllThemeByAdmin(
+      req.query.username,
+      req.query.password
+    );
+    if (find) {
+      return res.status(200).send(find);
+    }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
