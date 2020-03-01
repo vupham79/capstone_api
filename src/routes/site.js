@@ -18,9 +18,8 @@ router.get("/find/:id", async (req, res) => {
     const find = await findOneSite(req.params.id);
     if (find) {
       return res.status(200).send(find);
-    } else {
-      return res.status(500).send();
     }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -34,9 +33,8 @@ router.get("/findAllByUser", async (req, res) => {
     );
     if (find) {
       return res.status(200).send(find);
-    } else {
-      return res.status(500).send();
     }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -47,9 +45,8 @@ router.get("/findAll", async (req, res) => {
     const find = await findAllSite();
     if (find) {
       return res.status(200).send(find);
-    } else {
-      return res.status(500).send();
     }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -57,15 +54,11 @@ router.get("/findAll", async (req, res) => {
 
 router.get("/findAllByAdmin", async (req, res) => {
   try {
-    const find = await findAllSiteByAdmin(
-      req.body.username,
-      req.body.password
-    );
+    const find = await findAllSiteByAdmin(req.body.username, req.body.password);
     if (find) {
       return res.status(200).send(find);
-    } else {
-      return res.status(500).send();
     }
+    return res.status(500).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -123,9 +116,8 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
       );
       if (update) {
         return res.status(200).send(update);
-      } else {
-        return res.status(500).send({ error: "Insert failed!" });
       }
+      return res.status(500).send({ error: "Insert failed!" });
     }
     return res.status(500).send({ error: "Post not exist!" });
   } catch (error) {
