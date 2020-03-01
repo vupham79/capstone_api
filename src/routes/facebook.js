@@ -18,7 +18,6 @@ router.get("/pages", async (req, res) => {
   }
 });
 
-//authenticate
 router.get("/getSiteInfo", async (req, res) => {
   try {
     const data = await findOneSiteByAccessToken(

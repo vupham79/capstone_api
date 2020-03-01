@@ -111,7 +111,8 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
           title: name && name,
           color: color && color,
           navItems: navItems && navItems,
-          theme: new mongoose.Types.ObjectId(findTheme._id)
+          theme: new mongoose.Types.ObjectId(findTheme._id),
+          sitePath: name ? name : ""
         }
       );
       if (update) {
