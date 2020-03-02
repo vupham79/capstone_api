@@ -1,21 +1,16 @@
 import { Admin } from "../models";
 
 export async function loginAdmin(username, password) {
-  const login = await Admin.findOne({ username: username, password: password });
-  if (login) {
-    return login;
-  }
-  return false;
+  return await Admin.findOne({ username: username, password: password });
 }
 
 export async function editAdmin(username, password) {
-  const edit = await Admin.updateOne(
+  return await Admin.updateOne(
     { username: username },
     {
       password: password
     }
   );
-  return edit;
 }
 
 export async function findAllAdmin() {
