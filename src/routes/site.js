@@ -430,7 +430,6 @@ router.patch("/syncData", authenticate, async (req, res) => {
               idPostList.forEach(existedPost => {
                 existedPostList.push(existedPost.id);
               });
-              console.log(existedPostList);
               let currentPostList = [];
               let newPostList = [];
               postsList.forEach(post => {
@@ -440,8 +439,6 @@ router.patch("/syncData", authenticate, async (req, res) => {
                   newPostList.push(post);
                 }
               });
-              console.log("Current post: " + currentPostList.length);
-              console.log("New post list: " + newPostList.length);
 
               await Post.create(newPostList, async (error, docs) => {
                 if (error) {
