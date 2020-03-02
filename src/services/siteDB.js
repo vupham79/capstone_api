@@ -120,13 +120,13 @@ export async function findOneSiteByAccessToken(id, body) {
     id: id,
     accessToken: body.accessToken ? body.accessToken : ""
   }).populate({
-    path: "theme"
+    path: "theme posts"
   });
 }
 
 export async function findOneSite(id) {
   return await Site.findOne({ id: id }).populate({
-    path: "theme"
+    path: "theme posts"
   });
 }
 
