@@ -92,10 +92,10 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
   try {
     const findTheme = await Theme.findOne({ id: theme });
     if (findTheme) {
-      await activePost({
-        activeList: activeList && activeList.length > 0 && activeList,
-        deactiveList: deactiveList && activeList.length > 0 && deactiveList
-      });
+      // await activePost({
+      //   activeList: activeList && activeList.length > 0 && activeList,
+      //   deactiveList: deactiveList && deactiveList.length > 0 && deactiveList
+      // });
       const update = await Site.updateOne(
         { id: pageId },
         {
