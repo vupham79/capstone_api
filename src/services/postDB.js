@@ -34,6 +34,26 @@ export async function editPost(id, body) {
   return edit;
 }
 
+export async function activePost(body) {
+  await Post.updateMany(
+    {
+      id: { $in: body.activeList.map(post => post.id) }
+    },
+    {
+      isActive: true
+    }
+  );
+  await Post.updateMany(
+    {
+      id: { $in: body.deactiveList.map(post => post.id) }
+    },
+    {
+      isActive: false
+    }
+  );
+  return body;
+}
+
 export async function findAllPost() {
   return await Post.find();
 }

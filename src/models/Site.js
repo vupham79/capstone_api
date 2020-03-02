@@ -88,6 +88,10 @@ const SiteSchema = new mongoose.Schema(
       type: String,
       default: ""
     },
+    about: {
+      type: String,
+      default: ""
+    },
     posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
     theme: { type: Schema.Types.ObjectId, ref: "Theme" }
   },

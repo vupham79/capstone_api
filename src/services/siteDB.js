@@ -76,12 +76,14 @@ export async function insertSite(pageId, body) {
     categories: body.categories,
     url: body.url,
     sitePath: body.sitePath,
-    isPublish: body.isPublish
+    isPublish: body.isPublish,
+    about: body.about
   });
   return insert;
 }
 
 export async function editSite(id, body) {
+  console.log(id);
   const update = await Site.updateOne(
     { id: id },
     {
@@ -92,7 +94,8 @@ export async function editSite(id, body) {
       cover: body.cover,
       posts: body.posts,
       categories: body.categories,
-      sitePath: body.sitePath
+      sitePath: body.sitePath,
+      about: body.about
     }
   );
   return update;
@@ -139,23 +142,6 @@ export async function findAllSiteByUser(id, accessToken) {
     });
   if (sites) {
     return sites;
-  }
-  return false;
-}
-
-export async function findAllSiteByAdmin(username, password) {
-  const admin = await Admin.findOne({
-    username: username,
-    password: password
-  });
-  if (admin) {
-    const users = await User.find()
-      .select("id displayName sites")
-      .populate({
-        path: "sites",
-        select: ""
-      });
-    return users;
   }
   return false;
 }

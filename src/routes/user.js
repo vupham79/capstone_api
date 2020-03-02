@@ -17,7 +17,7 @@ router.get("/create", async (req, res) => {
     if (user) {
       return res.status(200).send(user);
     }
-    return res.status(500).send();
+    return res.status(204).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -29,7 +29,7 @@ router.post("/insert/:id", async (req, res) => {
     if (insert) {
       return res.status(200).send(insert);
     }
-    return res.status(500).send();
+    return res.status(204).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -41,7 +41,7 @@ router.patch("/update/:id", async (req, res) => {
     if (update) {
       return res.status(200).send(update);
     }
-    return res.status(500).send();
+    return res.status(204).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -53,7 +53,7 @@ router.patch("/deactivate/:id", async (req, res) => {
     if (update) {
       return res.status(200).send(update);
     }
-    return res.status(500).send();
+    return res.status(204).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -65,7 +65,7 @@ router.patch("/activate/:id", async (req, res) => {
     if (update) {
       return res.status(200).send(update);
     }
-    return res.status(500).send();
+    return res.status(204).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -77,7 +77,7 @@ router.get("/find/:id", async (req, res) => {
     if (find) {
       return res.status(200).send(find);
     }
-    return res.status(500).send();
+    return res.status(204).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -89,7 +89,7 @@ router.get("/findAll", async (req, res) => {
     if (find) {
       return res.status(200).send(find);
     }
-    return res.status(500).send();
+    return res.status(204).send();
   } catch (error) {
     return res.status(500).send({ error });
   }

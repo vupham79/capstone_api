@@ -7,9 +7,9 @@ import {
   findAllSiteByUser,
   findOneSite,
   insertSite,
-  editSite,
-  findAllSiteByAdmin
+  editSite
 } from "../services/siteDB";
+import { activePost } from "../services/postDB";
 import { Site, Post, User, Theme } from "../models";
 const router = Router();
 
@@ -19,7 +19,7 @@ router.get("/find/:id", async (req, res) => {
     if (find) {
       return res.status(200).send(find);
     }
-    return res.status(500).send();
+    return res.status(204).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -34,7 +34,7 @@ router.get("/findAllByUser", async (req, res) => {
     if (find) {
       return res.status(200).send(find);
     }
-    return res.status(500).send();
+    return res.status(204).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -46,19 +46,7 @@ router.get("/findAll", async (req, res) => {
     if (find) {
       return res.status(200).send(find);
     }
-    return res.status(500).send();
-  } catch (error) {
-    return res.status(500).send({ error });
-  }
-});
-
-router.get("/findAllByAdmin", async (req, res) => {
-  try {
-    const find = await findAllSiteByAdmin(req.body.username, req.body.password);
-    if (find) {
-      return res.status(200).send(find);
-    }
-    return res.status(500).send();
+    return res.status(204).send();
   } catch (error) {
     return res.status(500).send({ error });
   }
@@ -97,11 +85,17 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
     pageId,
     theme,
     name,
-    color
+    color,
+    activeList,
+    deactiveList
   } = req.body;
   try {
     const findTheme = await Theme.findOne({ id: theme });
     if (findTheme) {
+      await activePost({
+        activeList: activeList && activeList.length > 0 && activeList,
+        deactiveList: deactiveList && activeList.length > 0 && deactiveList
+      });
       const update = await Site.updateOne(
         { id: pageId },
         {
@@ -198,9 +192,8 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                 categories: data.category_list ? data.category_list : [],
                 url: req.body.pageUrl ? req.body.pageUrl : "",
                 isPublish: req.body.isPublish,
-                sitePath: data.name ? data.name : ""
-              }).catch(error => {
-                return res.status(500).send({ error });
+                sitePath: data.name ? data.name : "",
+                about: data.about ? data.about : ""
               });
               await User.findOne({ id: req.body.userId })
                 .select("sites")
@@ -294,11 +287,12 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                       });
                     }
                   });
-                const postIdList = [];
+
                 await Post.insertMany(postsList, async (error, docs) => {
                   if (error) {
                     return error;
                   } else {
+                    const postIdList = [];
                     docs.forEach(doc => {
                       postIdList.push(doc._id);
                     });
@@ -308,6 +302,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                     );
                   }
                 });
+
                 return res.status(200).send(insert);
               } else {
                 return res.status(500).send({ error: "Insert site failed!" });
@@ -338,6 +333,18 @@ router.patch("/syncData", authenticate, async (req, res) => {
           .then(_session => {
             session = _session;
             session.withTransaction(async () => {
+              const update = await editSite(req.body.pageId, {
+                phone: data.phone ? data.phone : "",
+                longitude: data.location ? data.location.longitude : "",
+                latitude: data.location ? data.location.latitude : "",
+                address: data.single_line_address
+                  ? data.single_line_address
+                  : "",
+                cover: data.cover ? [data.cover.source] : [],
+                categories: data.category_list ? data.category_list : [],
+                sitePath: data.name ? data.name : "",
+                about: data.about ? data.about : ""
+              });
               data.posts &&
                 data.posts.data.forEach(post => {
                   if (
@@ -417,28 +424,47 @@ router.patch("/syncData", authenticate, async (req, res) => {
                     });
                   }
                 });
-              var theme = await Post.findOne({
-                "categories.name": req.body.category
+
+              let idPostList = await Post.find().select("id");
+              let existedPostList = [];
+              idPostList.forEach(existedPost => {
+                existedPostList.push(existedPost.id);
               });
-              if (!theme) {
-                var theme = await Post.findOne();
-              }
-              const insert = await editSite(req.body.pageId, {
-                phone: data.phone ? data.phone : "",
-                longitude: data.location ? data.location.longitude : "",
-                latitude: data.location ? data.location.latitude : "",
-                address: data.single_line_address
-                  ? data.single_line_address
-                  : "",
-                posts: postsList && postsList,
-                cover: data.cover ? [data.cover.source] : [],
-                categories: data.category_list ? data.category_list : [],
-                sitePath: data.name ? data.name : ""
-              }).catch(error => ("Insert error: ", error));
-              if (insert) {
-                return res.status(200).send(insert);
+              let currentPostList = [];
+              let newPostList = [];
+              postsList.forEach(post => {
+                if (existedPostList.includes(post.id)) {
+                  currentPostList.push(post);
+                } else {
+                  newPostList.push(post);
+                }
+              });
+
+              await Post.create(newPostList, async (error, docs) => {
+                if (error) {
+                  console.log(error);
+                } else {
+                  let postIdList = [];
+                  if (docs) {
+                    docs.forEach(doc => {
+                      postIdList.push(doc._id);
+                    });
+                    await Site.updateOne(
+                      { id: req.body.pageId },
+                      { posts: existedPostList.concat(postIdList) }
+                    );
+                  }
+                }
+              });
+
+              currentPostList.forEach(async currentPost => {
+                await Post.updateOne({ id: currentPost.id }, currentPost);
+              });
+
+              if (update) {
+                return res.status(200).send(update);
               } else {
-                return res.status(500).send({ error: "Insert failed!" });
+                return res.status(500).send({ error: "Edit failed!" });
               }
             });
           });
