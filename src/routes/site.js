@@ -138,7 +138,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
       pageId,
       accessToken,
       isPublish,
-      sitePath
+      sitepath
     } = req.body;
     const data = await getPageData({
       pageId: pageId ? pageId : "",
@@ -209,7 +209,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                 categories: data.category_list ? data.category_list : [],
                 url: pageUrl,
                 isPublish: isPublish,
-                sitePath: sitePath,
+                sitePath: sitepath,
                 about: data.about ? data.about : ""
               });
               await User.findOne({ id: userId })
@@ -459,7 +459,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
                   console.log(error);
                 } else {
                   let postIdList = [];
-                  if (docs) {
+                  if (docs && docs.length > 0) {
                     docs.forEach(doc => {
                       postIdList.push(doc._id);
                     });

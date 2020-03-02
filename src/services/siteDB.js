@@ -91,9 +91,7 @@ export async function editSite(id, body) {
       latitude: body.latitude,
       address: body.address,
       cover: body.cover,
-      posts: body.posts,
       categories: body.categories,
-      sitePath: body.sitePath,
       about: body.about
     }
   );
