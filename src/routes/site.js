@@ -287,11 +287,12 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                       });
                     }
                   });
-                const postIdList = [];
+
                 await Post.insertMany(postsList, async (error, docs) => {
                   if (error) {
                     return error;
                   } else {
+                    const postIdList = [];
                     docs.forEach(doc => {
                       postIdList.push(doc._id);
                     });
@@ -301,6 +302,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                     );
                   }
                 });
+
                 return res.status(200).send(insert);
               } else {
                 return res.status(500).send({ error: "Insert site failed!" });
@@ -423,19 +425,43 @@ router.patch("/syncData", authenticate, async (req, res) => {
                   }
                 });
 
-              await Post.create(postsList, async (error, docs) => {
+              let idPostList = await Post.find().select("id");
+              let existedPostList = [];
+              idPostList.forEach(existedPost => {
+                existedPostList.push(existedPost.id);
+              });
+              console.log(existedPostList);
+              let currentPostList = [];
+              let newPostList = [];
+              postsList.forEach(post => {
+                if (existedPostList.includes(post.id)) {
+                  currentPostList.push(post);
+                } else {
+                  newPostList.push(post);
+                }
+              });
+              console.log("Current post: " + currentPostList.length);
+              console.log("New post list: " + newPostList.length);
+
+              await Post.create(newPostList, async (error, docs) => {
                 if (error) {
                   console.log(error);
                 } else {
                   let postIdList = [];
-                  docs.forEach(doc => {
-                    postIdList.push(doc._id);
-                  });
-                  await Site.updateOne(
-                    { id: req.body.pageId },
-                    { posts: postIdList }
-                  );
+                  if (docs) {
+                    docs.forEach(doc => {
+                      postIdList.push(doc._id);
+                    });
+                    await Site.updateOne(
+                      { id: req.body.pageId },
+                      { posts: existedPostList.concat(postIdList) }
+                    );
+                  }
                 }
+              });
+
+              currentPostList.forEach(async currentPost => {
+                await Post.updateOne({ id: currentPost.id }, currentPost);
               });
 
               if (update) {

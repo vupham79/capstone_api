@@ -51,7 +51,6 @@ export async function activePost(body) {
       isActive: false
     }
   );
-  console.log(body);
   return body;
 }
 
