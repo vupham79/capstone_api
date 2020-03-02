@@ -9,7 +9,7 @@ import {
   insertSite,
   editSite
 } from "../services/siteDB";
-import { activePost } from "../services/postDB";
+import { activePost, deactivePost } from "../services/postDB";
 import { Site, Post, User, Theme } from "../models";
 const router = Router();
 
@@ -76,6 +76,22 @@ router.patch("/publish", async (req, res) => {
   }
 });
 
+router.patch("/activePost", async (req, res) => {
+  const { activeList, deactiveList } = req.body;
+  try {
+    const update = await activePost({
+      activeList: activeList && activeList.length > 0 && activeList,
+      deactiveList: deactiveList && deactiveList.length > 0 && deactiveList
+    });
+    if (update) {
+      return res.status(200).send(update);
+    }
+    return res.status(500).send({ error: "Update failed!" });
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+});
+
 router.patch("/saveDesign", authenticate, async (req, res) => {
   const {
     logo,
@@ -85,17 +101,11 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
     pageId,
     theme,
     name,
-    color,
-    activeList,
-    deactiveList
+    color
   } = req.body;
   try {
     const findTheme = await Theme.findOne({ id: theme });
     if (findTheme) {
-      // await activePost({
-      //   activeList: activeList && activeList.length > 0 && activeList,
-      //   deactiveList: deactiveList && deactiveList.length > 0 && deactiveList
-      // });
       const update = await Site.updateOne(
         { id: pageId },
         {
@@ -112,9 +122,9 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
       if (update) {
         return res.status(200).send(update);
       }
-      return res.status(500).send({ error: "Insert failed!" });
+      return res.status(500).send({ error: "Save failed!" });
     }
-    return res.status(500).send({ error: "Post not exist!" });
+    return res.status(500).send({ error: "Theme not exist!" });
   } catch (error) {
     return res.status(500).send({ error });
   }
