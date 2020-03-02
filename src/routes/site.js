@@ -1,6 +1,6 @@
 import { Router } from "express";
 import mongoose from "mongoose";
-import { getPageData } from "../services/fbPage";
+import { getPageData, getSyncData } from "../services/fbPage";
 import { authenticate } from "../services/middleware";
 import {
   findAllSite,
@@ -94,7 +94,6 @@ router.patch("/activePost", async (req, res) => {
 
 router.patch("/saveDesign", authenticate, async (req, res) => {
   const {
-    logo,
     fontBody,
     fontTitle,
     navItems,
@@ -109,7 +108,6 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
       const update = await Site.updateOne(
         { id: pageId },
         {
-          logo: logo && logo,
           fontTitle: fontTitle && fontTitle,
           fontBody: fontBody && fontBody,
           title: name && name,
@@ -133,9 +131,18 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
 router.post("/createNewSite", authenticate, async (req, res) => {
   try {
     const postsList = [];
+    const {
+      userId,
+      category,
+      pageUrl,
+      pageId,
+      accessToken,
+      isPublish,
+      sitePath
+    } = req.body;
     const data = await getPageData({
-      pageId: req.body.pageId ? req.body.pageId : "",
-      access_token: req.body.accessToken ? req.body.accessToken : ""
+      pageId: pageId ? pageId : "",
+      access_token: accessToken ? accessToken : ""
     });
     const defaultNavItems = [
       {
@@ -170,7 +177,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
       }
     ];
     if (data) {
-      const siteExist = await findOneSite(req.body.pageId);
+      const siteExist = await findOneSite(pageId);
       if (!siteExist) {
         let session;
         return Site.createCollection()
@@ -179,12 +186,12 @@ router.post("/createNewSite", authenticate, async (req, res) => {
             session = _session;
             session.withTransaction(async () => {
               var theme = await Theme.findOne({
-                "categories.name": req.body.category
+                "categories.name": category
               });
               if (!theme) {
                 var theme = await Theme.findOne();
               }
-              const insert = await insertSite(req.body.pageId, {
+              const insert = await insertSite(pageId, {
                 phone: data.phone ? data.phone : "",
                 longitude: data.location ? data.location.longitude : "",
                 latitude: data.location ? data.location.latitude : "",
@@ -200,12 +207,12 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                 theme: new mongoose.Types.ObjectId(theme._id),
                 cover: data.cover ? [data.cover.source] : [],
                 categories: data.category_list ? data.category_list : [],
-                url: req.body.pageUrl ? req.body.pageUrl : "",
-                isPublish: req.body.isPublish,
-                sitePath: data.name ? data.name : "",
+                url: pageUrl,
+                isPublish: isPublish,
+                sitePath: sitePath,
                 about: data.about ? data.about : ""
               });
-              await User.findOne({ id: req.body.userId })
+              await User.findOne({ id: userId })
                 .select("sites")
                 .then(async result => {
                   let siteList = result.sites;
@@ -306,10 +313,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                     docs.forEach(doc => {
                       postIdList.push(doc._id);
                     });
-                    await Site.updateOne(
-                      { id: req.body.pageId },
-                      { posts: postIdList }
-                    );
+                    await Site.updateOne({ id: pageId }, { posts: postIdList });
                   }
                 });
 
@@ -329,13 +333,14 @@ router.post("/createNewSite", authenticate, async (req, res) => {
 
 router.patch("/syncData", authenticate, async (req, res) => {
   try {
+    const { pageId, accessToken } = req.body;
     let postsList = [];
     const data = await getPageData({
-      pageId: req.body.pageId ? req.body.pageId : "",
-      access_token: req.body.accessToken ? req.body.accessToken : ""
+      pageId: pageId ? pageId : "",
+      access_token: accessToken ? accessToken : ""
     });
     if (data) {
-      const siteExist = await findOneSite(req.body.pageId);
+      const siteExist = await findOneSite(pageId);
       if (siteExist) {
         let session;
         return Site.createCollection()
@@ -343,7 +348,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
           .then(_session => {
             session = _session;
             session.withTransaction(async () => {
-              const update = await editSite(req.body.pageId, {
+              const update = await editSite(pageId, {
                 phone: data.phone ? data.phone : "",
                 longitude: data.location ? data.location.longitude : "",
                 latitude: data.location ? data.location.latitude : "",
@@ -352,7 +357,6 @@ router.patch("/syncData", authenticate, async (req, res) => {
                   : "",
                 cover: data.cover ? [data.cover.source] : [],
                 categories: data.category_list ? data.category_list : [],
-                sitePath: data.name ? data.name : "",
                 about: data.about ? data.about : ""
               });
               data.posts &&
@@ -460,7 +464,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
                       postIdList.push(doc._id);
                     });
                     await Site.updateOne(
-                      { id: req.body.pageId },
+                      { id: pageId },
                       { posts: existedPostList.concat(postIdList) }
                     );
                   }
@@ -470,7 +474,6 @@ router.patch("/syncData", authenticate, async (req, res) => {
               currentPostList.forEach(async currentPost => {
                 await Post.updateOne({ id: currentPost.id }, currentPost);
               });
-
               if (update) {
                 return res.status(200).send(update);
               } else {

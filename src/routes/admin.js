@@ -10,7 +10,8 @@ const router = Router();
 
 router.post("/login", async (req, res) => {
   try {
-    const login = await loginAdmin(req.body.username, req.body.password);
+    const { username, password } = req.body;
+    const login = await loginAdmin(username, password);
     if (login) {
       return res.status(200).send(login);
     }
@@ -22,7 +23,8 @@ router.post("/login", async (req, res) => {
 
 router.patch("/update", async (req, res) => {
   try {
-    const update = await editAdmin(req.body.username, req.body.password);
+    const { username, password } = req.body;
+    const update = await editAdmin(username, password);
     if (update) {
       return res.status(200).send(update);
     }
@@ -34,7 +36,8 @@ router.patch("/update", async (req, res) => {
 
 router.get("/find", async (req, res) => {
   try {
-    const find = await findOneAdmin(req.body.username);
+    const { username } = req.body;
+    const find = await findOneAdmin(username);
     if (find) {
       return res.status(200).send(find);
     }

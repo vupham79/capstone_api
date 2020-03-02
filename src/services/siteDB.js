@@ -83,7 +83,6 @@ export async function insertSite(pageId, body) {
 }
 
 export async function editSite(id, body) {
-  console.log(id);
   const update = await Site.updateOne(
     { id: id },
     {
