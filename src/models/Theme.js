@@ -4,34 +4,33 @@ const ThemeSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      default: "",
       unique: [true, "Id already existed!"]
     },
     name: {
       type: String,
-      default: ""
+      default: null
     },
     fontTitle: {
       type: String,
-      default: ""
+      default: null
     },
     fontBody: {
       type: String,
-      default: ""
+      default: null
     },
     mainColor: {
       type: String,
-      default: ""
+      default: null
     },
     categories: [
       {
         id: {
           type: String,
-          default: ""
+          default: null
         },
         name: {
           type: String,
-          default: ""
+          default: null
         }
       }
     ]

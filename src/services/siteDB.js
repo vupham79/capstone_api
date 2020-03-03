@@ -49,7 +49,7 @@ export async function createSite() {
       ],
       isPublish: false,
       cover: ["https://i.ibb.co/gVpcW78/pv-featured-images.jpg"],
-      posts: []
+      posts: null
     }
   ]);
   return create.populate({
@@ -108,14 +108,14 @@ export async function deleteSite(id) {
 
 export async function findAllSite() {
   return await Site.find().populate({
-    path: "theme"
+    path: "theme posts"
   });
 }
 
 export async function findOneSiteByAccessToken(id, body) {
   return await Site.findOne({
     id: id,
-    accessToken: body.accessToken ? body.accessToken : ""
+    accessToken: body.accessToken
   }).populate({
     path: "theme posts"
   });
@@ -135,9 +135,10 @@ export async function findAllSiteByUser(id, accessToken) {
     .select("sites")
     .populate({
       path: "sites",
-      select: "categories id title isPublish logo"
+      select: "id title isPublish logo"
     });
   if (sites) {
+    console.log(sites);
     return sites;
   }
   return false;

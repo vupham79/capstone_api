@@ -5,6 +5,7 @@ export async function insertPost(body) {
     id: body.id,
     title: body.title,
     message: body.message,
+    createdTime: body.createdTime,
     attachments: body.attachments,
     isActive: body.isActive
   });
