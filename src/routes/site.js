@@ -453,19 +453,24 @@ router.patch("/syncData", authenticate, async (req, res) => {
                   newPostList.push(post);
                 }
               });
-
               await Post.create(newPostList, async (error, docs) => {
                 if (error) {
                   console.log(error);
                 } else {
                   let postIdList = [];
+                  let existedPostIdList = [];
                   if (docs && docs.length > 0) {
                     docs.forEach(doc => {
-                      postIdList.push(doc._id);
+                      postIdList.push(new mongoose.Types.ObjectId(doc._id));
+                    });
+                    currentPostList.forEach(currentPost => {
+                      existedPostIdList.push(
+                        new mongoose.Types.ObjectId(currentPost._id)
+                      );
                     });
                     await Site.updateOne(
                       { id: pageId },
-                      { posts: existedPostList.concat(postIdList) }
+                      { posts: existedPostIdList.concat(postIdList) }
                     );
                   }
                 }
