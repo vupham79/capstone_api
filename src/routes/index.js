@@ -1,6 +1,5 @@
 import auth from "./auth";
 import facebook from "./facebook";
-import readColor from "./readColor";
 import site from "./site";
 import theme from "./theme";
 import user from "./user";
@@ -13,7 +12,6 @@ export default app => {
   app.use("/auth", auth);
   app.use("/site", site);
   app.use("/facebook", facebook);
-  app.use("/readColor", readColor);
   app.use("/admin", admin);
   app.use("/post", post);
 };
