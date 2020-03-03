@@ -4,24 +4,23 @@ const UserSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      default: "",
       unique: [true, "Id already existed!"]
     },
     picture: {
       type: String,
-      default: ""
+      default: null
     },
     displayName: {
       type: String,
-      default: ""
+      default: null
     },
     email: {
       type: String,
-      default: ""
+      default: null
     },
     accessToken: {
       type: String,
-      default: ""
+      default: null
     },
     isActivated: {
       type: Boolean,

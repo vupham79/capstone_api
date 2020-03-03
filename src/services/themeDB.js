@@ -1,24 +1,24 @@
 import { Theme, Admin } from "../models";
 
-// export async function insertTheme(id, body) {
-//   return await Theme.collection.insertOne({
-//     id: id,
-//     name: body.name ? body.name : "",
-//     fontTitle: body.fontTitle ? body.fontTitle : "",
-//     mainColor: body.color ? body.color : "",
-//     categories: body.categories ? body.categories : ""
-//   });
-// }
+export async function insertTheme(id, body) {
+  return await Theme.collection.insertOne({
+    id: id,
+    name: body.name,
+    fontTitle: body.fontTitle,
+    mainColor: body.color,
+    categories: body.categories
+  });
+}
 
 export async function editTheme(id, body) {
   const edit = await Theme.updateOne(
     { id: id },
     {
-      name: body.name ? body.name : "",
-      fontTitle: body.fontTitle ? body.fontTitle : "",
-      fontBody: body.fontBody ? body.fontBody : "",
-      mainColor: body.color ? body.color : "",
-      categories: body.categories ? body.categories : ""
+      name: body.name,
+      fontTitle: body.fontTitle,
+      fontBody: body.fontBody,
+      mainColor: body.color,
+      categories: body.categories
     }
   );
   return edit;

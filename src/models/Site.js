@@ -4,48 +4,47 @@ const SiteSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      default: "",
       unique: [true, "Id already existed!"]
     },
     phone: {
       type: String,
-      default: ""
+      default: null
     },
     longitude: {
       type: String,
-      default: ""
+      default: null
     },
     latitude: {
       type: String,
-      default: ""
+      default: null
     },
     color: {
       type: String,
-      default: ""
+      default: null
     },
     logo: {
       type: String,
-      default: ""
+      default: null
     },
     fontTitle: {
       type: String,
-      default: ""
+      default: null
     },
     fontBody: {
       type: String,
-      default: ""
+      default: null
     },
     title: {
       type: String,
-      default: ""
+      default: null
     },
     address: {
       type: String,
-      default: ""
+      default: null
     },
     color: {
       type: String,
-      default: ""
+      default: null
     },
     navItems: [
       {
@@ -67,30 +66,34 @@ const SiteSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
-    cover: [{ type: String, default: "" }],
+    cover: [{ type: String, default: null }],
     categories: [
       {
         id: {
           type: String,
-          default: ""
+          default: null
         },
         name: {
           type: String,
-          default: ""
+          default: null
         }
       }
     ],
     url: {
       type: String,
-      default: ""
+      default: null
     },
     sitePath: {
       type: String,
-      default: ""
+      default: null
     },
     about: {
       type: String,
-      default: ""
+      default: null
+    },
+    genre: {
+      type: String,
+      default: null
     },
     posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
     theme: { type: Schema.Types.ObjectId, ref: "Theme" }

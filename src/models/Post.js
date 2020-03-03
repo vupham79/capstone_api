@@ -4,15 +4,15 @@ const PostSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      default: ""
+      unique: [true, "Id already existed!"]
     },
     title: {
       type: String,
-      default: ""
+      default: null
     },
     message: {
       type: String,
-      default: ""
+      default: null
     },
     attachments: {
       media_type: String,
@@ -22,6 +22,10 @@ const PostSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true
+    },
+    createdTime: {
+      type: String,
+      default: null
     }
   },
   {

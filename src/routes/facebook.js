@@ -6,9 +6,7 @@ const router = Router();
 
 router.get("/pages", async (req, res) => {
   try {
-    const data = await getUserPages(
-      req.query.access_token ? req.query.access_token : ""
-    );
+    const data = await getUserPages(req.query.access_token);
     if (data && data.accounts) {
       return res.status(200).send(data.accounts.data);
     }
@@ -21,8 +19,8 @@ router.get("/pages", async (req, res) => {
 router.get("/getSiteInfo", async (req, res) => {
   try {
     const data = await findOneSiteByAccessToken(
-      req.params.pageId ? req.params.pageId : "",
-      req.params.accessToken ? req.params.accessToken : ""
+      req.params.pageId,
+      req.params.accessToken
     );
     if (data) {
       return res.status(200).send(data);

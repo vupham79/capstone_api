@@ -20,13 +20,13 @@ export async function createUser() {
 export async function insertUser(id, body) {
   const insert = await User.collection.insertOne({
     id: id,
-    displayName: body.displayName ? body.displayName : "",
-    email: body.email ? body.email : "",
-    phone: body.phone ? body.phone : "",
-    accessToken: body.accessToken ? body.accessToken : "",
-    picture: body.picture ? body.picture : "",
+    displayName: body.displayName,
+    email: body.email,
+    phone: body.phone,
+    accessToken: body.accessToken,
+    picture: body.picture,
     isActivated: true,
-    sites: body.sites ? body.sites : []
+    sites: body.sites ? body.sites : null
   });
   return insert;
 }
@@ -35,11 +35,11 @@ export async function editUser(id, body) {
   const update = await User.updateOne(
     { id: id },
     {
-      displayName: body.displayName ? body.displayName : "",
-      email: body.email ? body.email : "",
-      phone: body.phone ? body.phone : "",
-      accessToken: body.accessToken ? body.accessToken : "",
-      picture: body.picture ? body.picture : ""
+      displayName: body.displayName,
+      email: body.email,
+      phone: body.phone,
+      accessToken: body.accessToken,
+      picture: body.picture
     }
   );
   return update;
@@ -71,7 +71,7 @@ export async function activateUser(id) {
 }
 
 export async function findAllUser() {
-  return await User.find();
+  return await User.find().populate({ path: "sites" });
 }
 
 export async function findOneUser(id) {
