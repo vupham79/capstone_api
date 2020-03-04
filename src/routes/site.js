@@ -3,20 +3,20 @@ import mongoose from "mongoose";
 import { getPageData, getSyncData } from "../services/fbPage";
 import { authenticate } from "../services/middleware";
 import {
-  findAllSite,
   findAllSiteByUser,
   findOneSite,
   insertSite,
-  editSite
+  editSite,
+  findSiteBySitepath
 } from "../services/siteDB";
 import { findAllUser } from "../services/userDB";
 import { activePost } from "../services/postDB";
 import { Site, Post, User, Theme } from "../models";
 const router = Router();
 
-router.get("/find/:id", async (req, res) => {
+router.get("/find/:sitepath", async (req, res) => {
   try {
-    const find = await findOneSite(req.params.id);
+    const find = await findSiteBySitepath(req.params.sitepath);
     if (find) {
       return res.status(200).send(find);
     }
@@ -27,7 +27,6 @@ router.get("/find/:id", async (req, res) => {
 });
 
 router.get("/findAllByUser", async (req, res) => {
-  console.log("abc");
   try {
     const find = await findAllSiteByUser(
       req.query.userId,
@@ -44,9 +43,7 @@ router.get("/findAllByUser", async (req, res) => {
 
 router.get("/findAll", async (req, res) => {
   try {
-    console.log("abc");
     const find = await findAllUser();
-    console.log(find);
     if (find) {
       return res.status(200).send(find);
     }
@@ -116,9 +113,8 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
           fontBody: fontBody,
           title: name,
           color: color,
-          navItems: navItems.length === 0 ? navItems : null,
-          theme: new mongoose.Types.ObjectId(findTheme._id),
-          sitePath: name
+          navItems: navItems.length > 0 ? navItems : null,
+          theme: new mongoose.Types.ObjectId(findTheme._id)
         }
       );
       if (update) {
@@ -227,7 +223,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                 theme: new mongoose.Types.ObjectId(theme._id),
                 cover: data.cover ? [data.cover.source] : null,
                 categories:
-                  data.category_list.length === 0 ? data.category_list : null,
+                  data.category_list.length > 0 ? data.category_list : null,
                 url: pageUrl,
                 isPublish: isPublish,
                 sitePath: sitepath,
@@ -472,7 +468,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
                 },
                 async (error, result) => {
                   if (error) {
-                    // console.log(error);
+                    console.log(error);
                   }
                   if (!result) {
                     const site = await Site.findOne({ id: pageId })

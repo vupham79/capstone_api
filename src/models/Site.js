@@ -81,11 +81,11 @@ const SiteSchema = new mongoose.Schema(
     ],
     url: {
       type: String,
-      default: null
+      required: true
     },
     sitePath: {
       type: String,
-      default: null
+      required: true
     },
     about: {
       type: String,

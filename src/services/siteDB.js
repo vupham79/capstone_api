@@ -135,11 +135,16 @@ export async function findAllSiteByUser(id, accessToken) {
     .select("sites")
     .populate({
       path: "sites",
-      select: "id title isPublish logo"
+      select: "id title isPublish logo categories sitePath"
     });
   if (sites) {
-    console.log(sites);
     return sites;
   }
   return false;
+}
+
+export async function findSiteBySitepath(sitepath) {
+  return await Site.findOne({ sitePath: sitepath }).populate({
+    path: "theme posts"
+  });
 }
