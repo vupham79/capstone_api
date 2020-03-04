@@ -14,6 +14,18 @@ import { activePost } from "../services/postDB";
 import { Site, Post, User, Theme } from "../models";
 const router = Router();
 
+router.get("/find", async (req, res) => {
+  try {
+    const find = await findOneSite(req.query.id);
+    if (find) {
+      return res.status(200).send(find);
+    }
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+});
+
 router.get("/find/:sitepath", async (req, res) => {
   try {
     const find = await findSiteBySitepath(req.params.sitepath);
