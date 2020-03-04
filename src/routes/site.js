@@ -330,7 +330,10 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                     docs.forEach(doc => {
                       postIdList.push(doc._id);
                     });
-                    await Site.updateOne({ id: pageId }, { posts: postIdList });
+                    await Site.updateOne(
+                      { id: pageId },
+                      { posts: postIdList.length > 0 ? postIdList : null }
+                    );
                   }
                 });
                 //return
@@ -490,7 +493,6 @@ router.patch("/syncData", authenticate, async (req, res) => {
                         await Post.updateOne({ id: post.id }, post);
                       }
                     });
-                    console.log(newPostList);
                     await Post.create(newPostList, async (err, docs) => {
                       if (err) {
                         console.log(err);
@@ -505,7 +507,12 @@ router.patch("/syncData", authenticate, async (req, res) => {
                         await Site.updateOne(
                           { id: pageId },
                           {
-                            $push: { posts: newPostObjIdList }
+                            $push: {
+                              posts:
+                                newPostObjIdList.length > 0
+                                  ? newPostObjIdList
+                                  : null
+                            }
                           }
                         );
                       }

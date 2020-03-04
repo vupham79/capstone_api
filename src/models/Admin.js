@@ -4,11 +4,12 @@ const AdminSchema = new mongoose.Schema(
   {
     username: {
       type: String,
-      unique: [true, "Username already existed!"]
+      unique: [true, "Username already existed!"],
+      required: true
     },
     password: {
       type: String,
-      default: null
+      required: true
     }
   },
   {
