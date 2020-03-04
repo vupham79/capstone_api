@@ -249,7 +249,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                 sitePath: sitepath,
                 about: data.about,
                 genre: data.genre,
-                galleries: galleries
+                galleries: galleries.length > 0 ? galleries : null
               });
               //find user
               await User.findOne({ id: userId })
@@ -405,7 +405,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
                 categories: data.category_list,
                 about: data.about,
                 genre: data.genre,
-                galleries: galleries
+                galleries: galleries.length > 0 ? galleries : null
               });
               data.posts &&
                 data.posts.data.forEach(post => {
