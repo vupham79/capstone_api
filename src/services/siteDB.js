@@ -1,61 +1,61 @@
 import mongoose from "mongoose";
 import { Site, User, Admin } from "../models";
 
-export async function createSite() {
-  const UserResult = await User.findOne({ id: "1" });
-  const create = await Site.create([
-    {
-      id: "1",
-      phone: "0907419552",
-      longitude: "106.676089",
-      latitude: "106.676089",
-      color: "red",
-      logo: "https://i.ibb.co/gVpcW78/pv-featured-images.jpg",
-      fontTitle: "Arial",
-      fontBody: "Times New Roman",
-      title: "Pianissimo",
-      address: "689/7/10 Huong Lo 2",
-      navItems: [
-        {
-          id: "109919550538707",
-          name: "Home",
-          order: 1
-        },
-        {
-          id: "109919550538707",
-          name: "About",
-          order: 2
-        },
-        {
-          id: "109919550538707",
-          name: "Gallery",
-          order: 3
-        },
-        {
-          id: "109919550538707",
-          name: "Event",
-          order: 4
-        },
-        {
-          id: "109919550538707",
-          name: "Contact",
-          order: 5
-        },
-        {
-          id: "109919550538707",
-          name: "News",
-          order: 6
-        }
-      ],
-      isPublish: false,
-      cover: ["https://i.ibb.co/gVpcW78/pv-featured-images.jpg"],
-      posts: null
-    }
-  ]);
-  return create.populate({
-    path: "theme"
-  });
-}
+// export async function createSite() {
+//   const UserResult = await User.findOne({ id: "1" });
+//   const create = await Site.create([
+//     {
+//       id: "1",
+//       phone: "0907419552",
+//       longitude: "106.676089",
+//       latitude: "106.676089",
+//       color: "red",
+//       logo: "https://i.ibb.co/gVpcW78/pv-featured-images.jpg",
+//       fontTitle: "Arial",
+//       fontBody: "Times New Roman",
+//       title: "Pianissimo",
+//       address: "689/7/10 Huong Lo 2",
+//       navItems: [
+//         {
+//           id: "109919550538707",
+//           name: "Home",
+//           order: 1
+//         },
+//         {
+//           id: "109919550538707",
+//           name: "About",
+//           order: 2
+//         },
+//         {
+//           id: "109919550538707",
+//           name: "Gallery",
+//           order: 3
+//         },
+//         {
+//           id: "109919550538707",
+//           name: "Event",
+//           order: 4
+//         },
+//         {
+//           id: "109919550538707",
+//           name: "Contact",
+//           order: 5
+//         },
+//         {
+//           id: "109919550538707",
+//           name: "News",
+//           order: 6
+//         }
+//       ],
+//       isPublish: false,
+//       cover: ["https://i.ibb.co/gVpcW78/pv-featured-images.jpg"],
+//       posts: null
+//     }
+//   ]);
+//   return create.populate({
+//     path: "theme"
+//   });
+// }
 
 export async function insertSite(pageId, body) {
   const insert = await Site.create({
@@ -77,7 +77,8 @@ export async function insertSite(pageId, body) {
     url: body.url,
     sitePath: body.sitePath,
     isPublish: body.isPublish,
-    about: body.about
+    about: body.about,
+    galleries: body.galleries
   });
   return insert;
 }
@@ -92,7 +93,8 @@ export async function editSite(id, body) {
       address: body.address,
       cover: body.cover,
       categories: body.categories,
-      about: body.about
+      about: body.about,
+      galleries: body.galleries
     }
   );
   return update;

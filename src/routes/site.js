@@ -142,6 +142,7 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
 
 router.post("/createNewSite", authenticate, async (req, res) => {
   try {
+    let galleries = [];
     const postsList = [];
     const {
       userId,
@@ -170,6 +171,12 @@ router.post("/createNewSite", authenticate, async (req, res) => {
     }).catch(error => {
       return res.status(500).send({ error: "This facebook page not existed!" });
     });
+    //gallery albums
+    data.albums &&
+      data.albums.data &&
+      data.albums.data.forEach(album => {
+        galleries.push(album.picture.data.url);
+      });
     //default nav items
     const defaultNavItems = [
       {
@@ -214,6 +221,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
           .then(_session => {
             session = _session;
             session.withTransaction(async () => {
+              //find theme
               var theme = await Theme.findOne({
                 "categories.name": category
               });
@@ -240,7 +248,8 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                 isPublish: isPublish,
                 sitePath: sitepath,
                 about: data.about,
-                genre: data.genre
+                genre: data.genre,
+                galleries: galleries
               });
               //find user
               await User.findOne({ id: userId })
@@ -365,12 +374,19 @@ router.post("/createNewSite", authenticate, async (req, res) => {
 
 router.patch("/syncData", authenticate, async (req, res) => {
   try {
-    const { pageId, accessToken } = req.body;
     let postsList = [];
+    let galleries = [];
+    const { pageId, accessToken } = req.body;
     const data = await getSyncData({
       pageId: pageId,
       access_token: accessToken
     });
+    //gallery albums
+    data.albums &&
+      data.albums.data &&
+      data.albums.data.forEach(album => {
+        galleries.push(album.picture.data.url);
+      });
     if (data) {
       const siteExist = await findOneSite(pageId);
       if (siteExist) {
@@ -388,7 +404,8 @@ router.patch("/syncData", authenticate, async (req, res) => {
                 cover: data.cover ? [data.cover.source] : null,
                 categories: data.category_list,
                 about: data.about,
-                genre: data.genre
+                genre: data.genre,
+                galleries: galleries
               });
               data.posts &&
                 data.posts.data.forEach(post => {
@@ -483,7 +500,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
                 },
                 async (error, result) => {
                   if (error) {
-                    console.log(error);
+                    // console.log(error);
                   }
                   if (!result) {
                     const site = await Site.findOne({ id: pageId })

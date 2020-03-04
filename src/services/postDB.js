@@ -22,18 +22,18 @@ export async function insertAllPost(body) {
   });
 }
 
-export async function editPost(id, body) {
-  const edit = await Post.updateOne(
-    { id: id },
-    {
-      title: body.title,
-      message: body.message,
-      attachments: body.attachments,
-      isActive: body.isActive
-    }
-  );
-  return edit;
-}
+// export async function editPost(id, body) {
+//   const edit = await Post.updateOne(
+//     { id: id },
+//     {
+//       title: body.title,
+//       message: body.message,
+//       attachments: body.attachments,
+//       isActive: body.isActive
+//     }
+//   );
+//   return edit;
+// }
 
 export async function activePost(body) {
   await Post.updateMany(

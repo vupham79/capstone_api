@@ -15,7 +15,7 @@ export async function getSyncData({ pageId, access_token }) {
     params: {
       fields:
         "cover,phone,category_list,about,genre," +
-        "location,single_line_address," +
+        "location,single_line_address,albums{picture}," +
         "posts{message,created_time,attachments{title,media_type,subattachments,media}}",
       locale: "en_US ",
       access_token
@@ -30,7 +30,7 @@ export async function getPageData({ pageId, access_token }) {
     params: {
       fields:
         "name,cover,phone,category_list,picture,about,genre," +
-        "location,single_line_address," +
+        "location,single_line_address,albums{picture}," +
         "posts{message,created_time,attachments{title,media_type,subattachments,media}}",
       locale: "en_US ",
       access_token
