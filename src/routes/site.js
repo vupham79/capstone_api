@@ -27,7 +27,6 @@ router.get("/find/:id", async (req, res) => {
 });
 
 router.get("/findAllByUser", async (req, res) => {
-  console.log("abc");
   try {
     const find = await findAllSiteByUser(
       req.query.userId,
@@ -44,9 +43,7 @@ router.get("/findAllByUser", async (req, res) => {
 
 router.get("/findAll", async (req, res) => {
   try {
-    console.log("abc");
     const find = await findAllUser();
-    console.log(find);
     if (find) {
       return res.status(200).send(find);
     }
@@ -116,7 +113,7 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
           fontBody: fontBody,
           title: name,
           color: color,
-          navItems: navItems.length === 0 ? navItems : null,
+          navItems: navItems.length > 0 ? navItems : null,
           theme: new mongoose.Types.ObjectId(findTheme._id),
           sitePath: name
         }
@@ -227,7 +224,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                 theme: new mongoose.Types.ObjectId(theme._id),
                 cover: data.cover ? [data.cover.source] : null,
                 categories:
-                  data.category_list.length === 0 ? data.category_list : null,
+                  data.category_list.length > 0 ? data.category_list : null,
                 url: pageUrl,
                 isPublish: isPublish,
                 sitePath: sitepath,
@@ -334,7 +331,10 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                     docs.forEach(doc => {
                       postIdList.push(doc._id);
                     });
-                    await Site.updateOne({ id: pageId }, { posts: postIdList });
+                    await Site.updateOne(
+                      { id: pageId },
+                      { posts: postIdList.length > 0 ? postIdList : null }
+                    );
                   }
                 });
                 //return
@@ -494,7 +494,6 @@ router.patch("/syncData", authenticate, async (req, res) => {
                         await Post.updateOne({ id: post.id }, post);
                       }
                     });
-                    console.log(newPostList);
                     await Post.create(newPostList, async (err, docs) => {
                       if (err) {
                         console.log(err);
@@ -509,7 +508,12 @@ router.patch("/syncData", authenticate, async (req, res) => {
                         await Site.updateOne(
                           { id: pageId },
                           {
-                            $push: { posts: newPostObjIdList }
+                            $push: {
+                              posts:
+                                newPostObjIdList.length > 0
+                                  ? newPostObjIdList
+                                  : null
+                            }
                           }
                         );
                       }

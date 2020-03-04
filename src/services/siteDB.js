@@ -138,7 +138,6 @@ export async function findAllSiteByUser(id, accessToken) {
       select: "id title isPublish logo"
     });
   if (sites) {
-    console.log(sites);
     return sites;
   }
   return false;

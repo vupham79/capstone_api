@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import Category from "./Category";
 import Site from "./Site";
 import Theme from "./Theme";
 import User from "./User";
@@ -23,4 +22,4 @@ const connectDb = () => {
     });
 };
 
-export { connectDb, User, Theme, Site, Category, Admin, Post, mongoose };
+export { connectDb, User, Theme, Site, Admin, Post, mongoose };
