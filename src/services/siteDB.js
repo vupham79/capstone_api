@@ -95,8 +95,7 @@ export async function editSite(id, body) {
       cover: body.cover,
       categories: body.categories,
       about: body.about,
-      galleries: body.galleries,
-      events: body.events
+      galleries: body.galleries
     }
   );
   return update;
@@ -130,10 +129,7 @@ export async function findOneSiteByAccessToken(id, body) {
 
 export async function findOneSite(id) {
   return await Site.findOne({ id: id }).populate({
-    path: "theme posts events",
-    populate: {
-      path: "events.place"
-    }
+    path: "theme posts events"
   });
 }
 

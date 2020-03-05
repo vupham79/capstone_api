@@ -19,7 +19,6 @@ router.get("/find", async (req, res) => {
   try {
     const find = await findOneSite(req.query.id);
     if (find) {
-      console.log(find);
       return res.status(200).send(find);
     }
     return res.status(204).send();
@@ -461,6 +460,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
                 genre: data.genre,
                 galleries: galleries.length > 0 ? galleries : null
               });
+
               //post list
               data.posts &&
                 data.posts.data.forEach(post => {
@@ -678,7 +678,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
                     //create new event and save new event into site
                     await Event.create(newEventList, async (err, docs) => {
                       if (err) {
-                        // console.log(err);
+                        console.log(err);
                       }
                       if (docs) {
                         //save new event
