@@ -11,7 +11,8 @@ import {
 } from "../services/siteDB";
 import { findAllUser } from "../services/userDB";
 import { activePost } from "../services/postDB";
-import { Site, Post, User, Theme } from "../models";
+import { insertEvent } from "../services/eventDB";
+import { Site, Post, User, Theme, Event } from "../models";
 const router = Router();
 
 router.get("/find", async (req, res) => {
@@ -125,7 +126,7 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
           fontBody: fontBody,
           title: name,
           color: color,
-          navItems: navItems.length > 0 ? navItems : null,
+          navItems: navItems && navItems.length > 0 ? navItems : null,
           theme: new mongoose.Types.ObjectId(findTheme._id)
         }
       );
@@ -142,6 +143,7 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
 
 router.post("/createNewSite", authenticate, async (req, res) => {
   try {
+    let eventList = [];
     let galleries = [];
     const postsList = [];
     const {
@@ -171,12 +173,6 @@ router.post("/createNewSite", authenticate, async (req, res) => {
     }).catch(error => {
       return res.status(500).send({ error: "This facebook page not existed!" });
     });
-    //gallery albums
-    data.albums &&
-      data.albums.data &&
-      data.albums.data.forEach(album => {
-        galleries.push(album.picture.data.url);
-      });
     //default nav items
     const defaultNavItems = [
       {
@@ -221,6 +217,15 @@ router.post("/createNewSite", authenticate, async (req, res) => {
           .then(_session => {
             session = _session;
             session.withTransaction(async () => {
+              //gallery albums
+              data.albums &&
+                data.albums.data &&
+                data.albums.data.forEach(album => {
+                  galleries.push({
+                    url: album.picture.data.url,
+                    target: album.link
+                  });
+                });
               //find theme
               var theme = await Theme.findOne({
                 "categories.name": category
@@ -243,7 +248,9 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                 theme: new mongoose.Types.ObjectId(theme._id),
                 cover: data.cover ? [data.cover.source] : null,
                 categories:
-                  data.category_list.length > 0 ? data.category_list : null,
+                  data.category_list && data.category_list.length > 0
+                    ? data.category_list
+                    : null,
                 url: pageUrl,
                 isPublish: isPublish,
                 sitePath: sitepath,
@@ -357,6 +364,64 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                     );
                   }
                 });
+                //event list
+                data.events &&
+                  data.events.data &&
+                  data.events.data.forEach(event => {
+                    //set place
+                    let place = {
+                      name: null,
+                      street: null,
+                      city: null,
+                      country: null
+                    };
+                    if (event.place) {
+                      place.name = event.place.name;
+                      if (event.place.location) {
+                        place.street =
+                          event.place.location.street !== undefined
+                            ? event.place.location.street
+                            : null;
+                        place.city =
+                          event.place.location.city !== undefined
+                            ? event.place.location.city
+                            : null;
+                        place.country =
+                          event.place.location.country !== undefined
+                            ? event.place.location.country
+                            : null;
+                      }
+                    } else {
+                      place = null;
+                    }
+                    //event list
+                    eventList.push({
+                      id: event.id,
+                      name: event.name,
+                      description: event.description,
+                      cover: event.cover ? event.cover.source : null,
+                      startTime: event.start_time,
+                      endTime: event.end_time,
+                      place: place,
+                      isCanceled: event.is_canceled,
+                      url: "facebook.com/" + event.id
+                    });
+                  });
+                await Event.insertMany(eventList, async (error, docs) => {
+                  if (error) {
+                    return error;
+                  } else {
+                    const eventIdList = [];
+                    docs.forEach(doc => {
+                      eventIdList.push(doc._id);
+                    });
+                    await Site.updateOne(
+                      { id: pageId },
+                      { events: eventIdList.length > 0 ? eventIdList : null }
+                    );
+                  }
+                });
+
                 //return
                 return res.status(200).send(insert);
               } else {
@@ -374,6 +439,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
 
 router.patch("/syncData", authenticate, async (req, res) => {
   try {
+    let eventList = [];
     let postsList = [];
     let galleries = [];
     const { pageId, accessToken } = req.body;
@@ -381,12 +447,6 @@ router.patch("/syncData", authenticate, async (req, res) => {
       pageId: pageId,
       access_token: accessToken
     });
-    //gallery albums
-    data.albums &&
-      data.albums.data &&
-      data.albums.data.forEach(album => {
-        galleries.push(album.picture.data.url);
-      });
     if (data) {
       const siteExist = await findOneSite(pageId);
       if (siteExist) {
@@ -396,6 +456,16 @@ router.patch("/syncData", authenticate, async (req, res) => {
           .then(_session => {
             session = _session;
             session.withTransaction(async () => {
+              //gallery albums
+              data.albums &&
+                data.albums.data &&
+                data.albums.data.forEach(album => {
+                  galleries.push({
+                    url: album.picture.data.url,
+                    target: album.link
+                  });
+                });
+              //update site
               const update = await editSite(pageId, {
                 phone: data.phone,
                 longitude: data.location ? data.location.longitude : null,
@@ -407,6 +477,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
                 genre: data.genre,
                 galleries: galleries.length > 0 ? galleries : null
               });
+              //post list
               data.posts &&
                 data.posts.data.forEach(post => {
                   if (
@@ -485,7 +556,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
                     });
                   }
                 });
-
+              //post Id list
               let postIdList = [];
               postsList.forEach(post => {
                 postIdList.push(post.id);
@@ -503,6 +574,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
                     // console.log(error);
                   }
                   if (!result) {
+                    //find existed post id
                     const site = await Site.findOne({ id: pageId })
                       .select("posts")
                       .populate("posts");
@@ -514,6 +586,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
                       );
                       existedPostIdList.push(existedPost.id);
                     });
+                    //update existing post
                     let newPostList = [];
                     postsList.forEach(async post => {
                       if (!existedPostIdList.includes(post.id)) {
@@ -522,11 +595,13 @@ router.patch("/syncData", authenticate, async (req, res) => {
                         await Post.updateOne({ id: post.id }, post);
                       }
                     });
+                    //create new post and save new post into site
                     await Post.create(newPostList, async (err, docs) => {
                       if (err) {
                         console.log(err);
                       }
                       if (docs) {
+                        //save new post
                         let newPostObjIdList = [];
                         docs.forEach(post => {
                           newPostObjIdList.push(
@@ -540,6 +615,119 @@ router.patch("/syncData", authenticate, async (req, res) => {
                               posts:
                                 newPostObjIdList.length > 0
                                   ? newPostObjIdList
+                                  : null
+                            }
+                          }
+                        );
+                      }
+                    });
+                  }
+                }
+              );
+
+              //event list
+              data.events &&
+                data.events.data &&
+                data.events.data.forEach(event => {
+                  //set place
+                  let place = {
+                    name: null,
+                    street: null,
+                    city: null,
+                    country: null
+                  };
+                  if (event.place) {
+                    place.name = event.place.name;
+                    if (event.place.location) {
+                      place.street =
+                        event.place.location.street !== undefined
+                          ? event.place.location.street
+                          : null;
+                      place.city =
+                        event.place.location.city !== undefined
+                          ? event.place.location.city
+                          : null;
+                      place.country =
+                        event.place.location.country !== undefined
+                          ? event.place.location.country
+                          : null;
+                    }
+                  } else {
+                    place = null;
+                  }
+                  //event list
+                  eventList.push({
+                    id: event.id,
+                    name: event.name,
+                    description: event.description,
+                    cover: event.cover ? event.cover.source : null,
+                    startTime: event.start_time,
+                    endTime: event.end_time,
+                    place: place,
+                    isCanceled: event.is_canceled,
+                    url: "facebook.com/" + event.id
+                  });
+                });
+
+              //event Id list
+              let eventIdList = [];
+              eventList.forEach(event => {
+                eventIdList.push(event.id);
+              });
+              //insert and update event
+              await Event.findOneAndUpdate(
+                { id: { $in: eventIdList } },
+                eventList,
+                {
+                  upsert: true,
+                  useFindAndModify: false
+                },
+                async (error, result) => {
+                  if (error) {
+                    // console.log(error);
+                  }
+                  if (!result) {
+                    //find existed event id
+                    const site = await Site.findOne({ id: pageId })
+                      .select("events")
+                      .populate("events");
+                    let existedEventObjIdList = [];
+                    let existedEventIdList = [];
+                    site.events.forEach(existedEvent => {
+                      existedEventObjIdList.push(
+                        new mongoose.Types.ObjectId(existedEvent._id)
+                      );
+                      existedEventIdList.push(existedEvent.id);
+                    });
+                    //update existing event
+                    let newEventList = [];
+                    eventList.forEach(async event => {
+                      if (!existedEventIdList.includes(event.id)) {
+                        newEventList.push(event);
+                      } else {
+                        await Event.updateOne({ id: event.id }, event);
+                      }
+                    });
+                    //create new event and save new event into site
+                    await Event.create(newEventList, async (err, docs) => {
+                      if (err) {
+                        // console.log(err);
+                      }
+                      if (docs) {
+                        //save new event
+                        let newEventObjList = [];
+                        docs.forEach(event => {
+                          newEventObjList.push(
+                            new mongoose.Types.ObjectId(event._id)
+                          );
+                        });
+                        await Site.updateOne(
+                          { id: pageId },
+                          {
+                            $push: {
+                              events:
+                                newEventObjList.length > 0
+                                  ? newEventObjList
                                   : null
                             }
                           }

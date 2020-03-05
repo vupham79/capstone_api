@@ -97,12 +97,19 @@ const SiteSchema = new mongoose.Schema(
     },
     galleries: [
       {
-        type: String,
-        default: null
+        url: {
+          type: String,
+          default: null
+        },
+        target: {
+          type: String,
+          default: null
+        }
       }
     ],
     posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
-    theme: { type: Schema.Types.ObjectId, ref: "Theme" }
+    theme: { type: Schema.Types.ObjectId, ref: "Theme" },
+    events: [{ type: Schema.Types.ObjectId, ref: "Event" }]
   },
   {
     timestamps: true

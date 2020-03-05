@@ -15,9 +15,10 @@ export async function getSyncData({ pageId, access_token }) {
     params: {
       fields:
         "cover,phone,category_list,about,genre," +
-        "location,single_line_address,albums{picture}," +
-        "posts{message,created_time,attachments{title,media_type,subattachments,media}}",
-      locale: "en_US ",
+        "location,single_line_address,albums{picture,link}," +
+        "posts{message,created_time,attachments{title,media_type,subattachments,media}}," +
+        "events{id,name,description,place,is_canceled,end_time,start_time,cover}",
+      locale: "en_US",
       access_token
     },
     url: process.env.facebookAPI + pageId
@@ -30,9 +31,10 @@ export async function getPageData({ pageId, access_token }) {
     params: {
       fields:
         "name,cover,phone,category_list,picture,about,genre," +
-        "location,single_line_address,albums{picture}," +
-        "posts{message,created_time,attachments{title,media_type,subattachments,media}}",
-      locale: "en_US ",
+        "location,single_line_address,albums{picture,link}," +
+        "posts{message,created_time,attachments{title,media_type,subattachments,media}}," +
+        "events{id,name,description,place,is_canceled,end_time,start_time,cover}",
+      locale: "en_US",
       access_token
     },
     url: process.env.facebookAPI + pageId
