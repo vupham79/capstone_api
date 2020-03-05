@@ -9,7 +9,7 @@ export async function insertEvent(id, body) {
     cover: body.cover,
     startTime: body.startTime,
     endTime: body.endTime,
-    location: body.location,
+    place: body.place,
     isCanceled: body.isCanceled,
     url: body.url
   });
@@ -25,7 +25,7 @@ export async function editEvent(id, body) {
       cover: body.cover,
       startTime: body.startTime,
       endTime: body.endTime,
-      location: body.location,
+      place: body.place,
       isCanceled: body.isCanceled,
       url: body.url
     }

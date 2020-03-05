@@ -78,7 +78,8 @@ export async function insertSite(pageId, body) {
     sitePath: body.sitePath,
     isPublish: body.isPublish,
     about: body.about,
-    galleries: body.galleries
+    galleries: body.galleries,
+    events: body.events
   });
   return insert;
 }
@@ -94,7 +95,8 @@ export async function editSite(id, body) {
       cover: body.cover,
       categories: body.categories,
       about: body.about,
-      galleries: body.galleries
+      galleries: body.galleries,
+      events: body.events
     }
   );
   return update;
@@ -110,7 +112,10 @@ export async function deleteSite(id) {
 
 export async function findAllSite() {
   return await Site.find().populate({
-    path: "theme posts"
+    path: "theme posts events",
+    populate: {
+      path: "events.place"
+    }
   });
 }
 
@@ -119,13 +124,16 @@ export async function findOneSiteByAccessToken(id, body) {
     id: id,
     accessToken: body.accessToken
   }).populate({
-    path: "theme posts"
+    path: "theme posts events"
   });
 }
 
 export async function findOneSite(id) {
   return await Site.findOne({ id: id }).populate({
-    path: "theme posts"
+    path: "theme posts events",
+    populate: {
+      path: "events.place"
+    }
   });
 }
 
@@ -147,6 +155,6 @@ export async function findAllSiteByUser(id, accessToken) {
 
 export async function findSiteBySitepath(sitepath) {
   return await Site.findOne({ sitePath: sitepath }).populate({
-    path: "theme posts"
+    path: "theme posts events"
   });
 }

@@ -19,6 +19,7 @@ router.get("/find", async (req, res) => {
   try {
     const find = await findOneSite(req.query.id);
     if (find) {
+      console.log(find);
       return res.status(200).send(find);
     }
     return res.status(204).send();
@@ -315,23 +316,6 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                       });
                     } else if (
                       post.attachments &&
-                      post.attachments.data[0].media_type === "event"
-                    ) {
-                      postsList.push({
-                        id: post.id,
-                        message: post.message,
-                        title: post.attachments.data[0].title,
-                        isActive: true,
-                        createdTime: post.created_time,
-                        attachments: {
-                          id: post.id,
-                          media_type: "event",
-                          images: [post.attachments.data[0].media.image.src],
-                          video: null
-                        }
-                      });
-                    } else if (
-                      post.attachments &&
                       post.attachments.data[0].media_type === "video"
                     ) {
                       postsList.push({
@@ -516,23 +500,6 @@ router.patch("/syncData", authenticate, async (req, res) => {
                       attachments: {
                         id: post.id,
                         media_type: "photo",
-                        images: [post.attachments.data[0].media.image.src],
-                        video: null
-                      }
-                    });
-                  } else if (
-                    post.attachments &&
-                    post.attachments.data[0].media_type === "event"
-                  ) {
-                    postsList.push({
-                      id: post.id,
-                      title: post.attachments.data[0].title,
-                      message: post.message,
-                      createdTime: post.created_time,
-                      isActive: true,
-                      attachments: {
-                        id: post.id,
-                        media_type: "event",
                         images: [post.attachments.data[0].media.image.src],
                         video: null
                       }
