@@ -160,7 +160,9 @@ router.post("/createNewSite", authenticate, async (req, res) => {
       return res.status(500).send({ error: "Sitepath must not be empty!" });
     }
     //existed site path
-    const isExistedSitePath = await Site.findOne({ sitePath: sitepath });
+    const isExistedSitePath = await Site.findOne({
+      sitePath: sitepath.toLowerCase()
+    });
     if (isExistedSitePath) {
       return res
         .status(500)

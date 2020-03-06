@@ -75,7 +75,7 @@ export async function insertSite(pageId, body) {
     posts: body.posts,
     categories: body.categories,
     url: body.url,
-    sitePath: body.sitePath,
+    sitePath: body.sitePath.toLowerCase(),
     isPublish: body.isPublish,
     about: body.about,
     galleries: body.galleries,
@@ -150,7 +150,7 @@ export async function findAllSiteByUser(id, accessToken) {
 }
 
 export async function findSiteBySitepath(sitepath) {
-  return await Site.findOne({ sitePath: sitepath }).populate({
+  return await Site.findOne({ sitePath: sitepath.toLowerCase() }).populate({
     path: "theme posts events"
   });
 }
