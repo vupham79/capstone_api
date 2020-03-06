@@ -146,7 +146,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
     let eventList = [];
     let galleryList = [];
     const postsList = [];
-    const {
+    let {
       userId,
       category,
       pageUrl,
@@ -156,9 +156,14 @@ router.post("/createNewSite", authenticate, async (req, res) => {
       sitepath
     } = req.body;
     //site path is empty, undefined or null
-    if (!sitepath) {
+    if (
+      !sitepath ||
+      sitepath === undefined ||
+      sitepath.replace(/\s/g, "") === ""
+    ) {
       return res.status(400).send({ error: "Sitepath must not be empty!" });
     }
+    sitepath = sitepath.replace(/\s/g, "");
     //existed site path
     const isExistedSitePath = await Site.findOne({
       sitePath: sitepath.toLowerCase()
@@ -210,6 +215,11 @@ router.post("/createNewSite", authenticate, async (req, res) => {
     ];
     //if fb api data existed
     if (data) {
+      if (data.statusCode !== undefined) {
+        return res
+          .status(400)
+          .send({ error: "Facebook page data not existed!" });
+      }
       const siteExist = await findOneSite(pageId);
       //if site not existed
       if (!siteExist) {
@@ -425,6 +435,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
       }
       return res.status(400).send({ error: "Site existed!" });
     }
+    return res.status(400).send({ error: "Facebook page data not existed!" });
   } catch (error) {
     return res.status(400).send({ error });
   }
@@ -731,6 +742,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
       }
       return res.status(400).send({ error: "Site not existed!" });
     }
+    return res.status(400).send({ error: "Facebook page data not existed!" });
   } catch (error) {
     return res.status(400).send({ error });
   }
