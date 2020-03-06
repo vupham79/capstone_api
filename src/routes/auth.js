@@ -10,9 +10,9 @@ router.post("/", async (req, res) => {
     if (data) {
       return res.status(200).send("Success");
     }
-    return res.status(500).send("Failed");
+    return res.status(400).send("Failed");
   } catch (error) {
-    return res.status(500).send({ error });
+    return res.status(400).send({ error });
   }
 });
 

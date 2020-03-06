@@ -16,7 +16,7 @@ export async function getSyncData({ pageId, access_token }) {
       fields:
         "cover,phone,category_list,about,genre," +
         "location,single_line_address,albums{picture,link}," +
-        "posts{message,created_time,attachments{title,media_type,subattachments,media}}," +
+        "posts{message,created_time,attachments{title,media_type,subattachments,media,target}}," +
         "events{id,name,description,place,is_canceled,end_time,start_time,cover}",
       locale: "en_US",
       access_token
@@ -32,7 +32,7 @@ export async function getPageData({ pageId, access_token }) {
       fields:
         "name,cover,phone,category_list,picture,about,genre," +
         "location,single_line_address,albums{picture,link}," +
-        "posts{message,created_time,attachments{title,media_type,subattachments,media}}," +
+        "posts{message,created_time,attachments{title,media_type,subattachments,media,target}}," +
         "events{id,name,description,place,is_canceled,end_time,start_time,cover}",
       locale: "en_US",
       access_token

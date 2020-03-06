@@ -78,7 +78,6 @@ export async function insertSite(pageId, body) {
     sitePath: body.sitePath.toLowerCase(),
     isPublish: body.isPublish,
     about: body.about,
-    galleries: body.galleries,
     events: body.events
   });
   return insert;
@@ -94,8 +93,7 @@ export async function editSite(id, body) {
       address: body.address,
       cover: body.cover,
       categories: body.categories,
-      about: body.about,
-      galleries: body.galleries
+      about: body.about
     }
   );
   return update;

@@ -10,7 +10,7 @@ const router = Router();
 //     }
 //     return res.status(204).send();
 //   } catch (error) {
-//     return res.status(500).send({ error });
+//     return res.status(400).send({ error });
 //   }
 // });
 
@@ -22,7 +22,7 @@ const router = Router();
 //     }
 //     return res.status(204).send();
 //   } catch (error) {
-//     return res.status(500).send({ error });
+//     return res.status(400).send({ error });
 //   }
 // });
 
@@ -34,7 +34,7 @@ const router = Router();
 //     }
 //     return res.status(204).send();
 //   } catch (error) {
-//     return res.status(500).send({ error });
+//     return res.status(400).send({ error });
 //   }
 // });
 
@@ -46,7 +46,7 @@ const router = Router();
 //     }
 //     return res.status(204).send();
 //   } catch (error) {
-//     return res.status(500).send({ error });
+//     return res.status(400).send({ error });
 //   }
 // });
 

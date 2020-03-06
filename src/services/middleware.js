@@ -6,6 +6,6 @@ export async function authenticate(req, res, next) {
   // if (user) {
   next();
   // } else {
-  //   return res.status(500).send("Not authenticated!");
+  //   return res.status(400).send("Not authenticated!");
   // }
 }

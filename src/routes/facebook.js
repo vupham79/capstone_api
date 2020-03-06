@@ -9,9 +9,9 @@ router.get("/pages", async (req, res) => {
     if (data && data.accounts) {
       return res.status(200).send(data.accounts.data);
     }
-    return res.status(500).send("No data found!");
+    return res.status(400).send("No data found!");
   } catch (error) {
-    return res.status(500).send({ error });
+    return res.status(400).send({ error });
   }
 });
 
@@ -24,9 +24,9 @@ router.get("/pages", async (req, res) => {
 //     if (data) {
 //       return res.status(200).send(data);
 //     }
-//     return res.status(500).send("No data found!");
+//     return res.status(400).send("No data found!");
 //   } catch (error) {
-//     return res.status(500).send({ error });
+//     return res.status(400).send({ error });
 //   }
 // });
 

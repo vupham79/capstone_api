@@ -23,7 +23,7 @@ router.get("/find", async (req, res) => {
     }
     return res.status(204).send();
   } catch (error) {
-    return res.status(500).send({ error });
+    return res.status(400).send({ error });
   }
 });
 
@@ -35,7 +35,7 @@ router.get("/find/:sitepath", async (req, res) => {
     }
     return res.status(204).send();
   } catch (error) {
-    return res.status(500).send({ error });
+    return res.status(400).send({ error });
   }
 });
 
@@ -50,7 +50,7 @@ router.get("/findAllByUser", async (req, res) => {
     }
     return res.status(204).send();
   } catch (error) {
-    return res.status(500).send({ error });
+    return res.status(400).send({ error });
   }
 });
 
@@ -62,7 +62,7 @@ router.get("/findAll", async (req, res) => {
     }
     return res.status(204).send();
   } catch (error) {
-    return res.status(500).send({ error });
+    return res.status(400).send({ error });
   }
 });
 
@@ -82,11 +82,11 @@ router.patch("/publish", async (req, res) => {
       if (publish) {
         return res.status(200).send(publish);
       }
-      return res.status(500).send({ error: "Action failed!" });
+      return res.status(400).send({ error: "Action failed!" });
     }
-    return res.status(500).send({ error: "Can't find any result!" });
+    return res.status(400).send({ error: "Can't find any result!" });
   } catch (error) {
-    return res.status(500).send({ error });
+    return res.status(400).send({ error });
   }
 });
 
@@ -100,9 +100,9 @@ router.patch("/activePost", async (req, res) => {
     if (update) {
       return res.status(200).send(update);
     }
-    return res.status(500).send({ error: "Update failed!" });
+    return res.status(400).send({ error: "Update failed!" });
   } catch (error) {
-    return res.status(500).send({ error });
+    return res.status(400).send({ error });
   }
 });
 
@@ -133,18 +133,18 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
       if (update) {
         return res.status(200).send(update);
       }
-      return res.status(500).send({ error: "Save failed!" });
+      return res.status(400).send({ error: "Save failed!" });
     }
-    return res.status(500).send({ error: "Theme not exist!" });
+    return res.status(400).send({ error: "Theme not exist!" });
   } catch (error) {
-    return res.status(500).send({ error });
+    return res.status(400).send({ error });
   }
 });
 
 router.post("/createNewSite", authenticate, async (req, res) => {
   try {
     let eventList = [];
-    let galleries = [];
+    let galleryList = [];
     const postsList = [];
     const {
       userId,
@@ -157,7 +157,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
     } = req.body;
     //site path is empty, undefined or null
     if (!sitepath) {
-      return res.status(500).send({ error: "Sitepath must not be empty!" });
+      return res.status(400).send({ error: "Sitepath must not be empty!" });
     }
     //existed site path
     const isExistedSitePath = await Site.findOne({
@@ -165,7 +165,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
     });
     if (isExistedSitePath) {
       return res
-        .status(500)
+        .status(400)
         .send({ error: "A website with this sitepath already existed!" });
     }
     //get page data
@@ -173,7 +173,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
       pageId: pageId,
       access_token: accessToken
     }).catch(error => {
-      return res.status(500).send({ error: "This facebook page not existed!" });
+      return res.status(400).send({ error: "This facebook page not existed!" });
     });
     //default nav items
     const defaultNavItems = [
@@ -219,15 +219,6 @@ router.post("/createNewSite", authenticate, async (req, res) => {
           .then(_session => {
             session = _session;
             session.withTransaction(async () => {
-              //gallery albums
-              data.albums &&
-                data.albums.data &&
-                data.albums.data.forEach(album => {
-                  galleries.push({
-                    url: album.picture.data.url,
-                    target: album.link
-                  });
-                });
               //find theme
               var theme = await Theme.findOne({
                 "categories.name": category
@@ -257,8 +248,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                 isPublish: isPublish,
                 sitePath: sitepath,
                 about: data.about,
-                genre: data.genre,
-                galleries: galleries.length > 0 ? galleries : null
+                genre: data.genre
               });
               //find user
               await User.findOne({ id: userId })
@@ -283,6 +273,10 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                       post.attachments.data[0].subattachments.data.forEach(
                         subAttachment => {
                           subAttachmentList.push(subAttachment.media.image.src);
+                          galleryList.push({
+                            url: subAttachment.media.image.src,
+                            target: subAttachment.target.url
+                          });
                         }
                       );
                       postsList.push({
@@ -302,6 +296,10 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                       post.attachments &&
                       post.attachments.data[0].media_type === "photo"
                     ) {
+                      galleryList.push({
+                        url: post.attachments.data[0].media.image.src,
+                        target: post.attachments.data[0].target.url
+                      });
                       postsList.push({
                         id: post.id,
                         message: post.message,
@@ -334,6 +332,12 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                       });
                     }
                   });
+                await Site.updateOne(
+                  { id: pageId },
+                  {
+                    galleries: galleryList.length > 0 ? galleryList : null
+                  }
+                );
                 //insert port and update site's posts
                 await Post.insertMany(postsList, async (error, docs) => {
                   if (error) {
@@ -345,7 +349,9 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                     });
                     await Site.updateOne(
                       { id: pageId },
-                      { posts: postIdList.length > 0 ? postIdList : null }
+                      {
+                        posts: postIdList.length > 0 ? postIdList : null
+                      }
                     );
                   }
                 });
@@ -402,7 +408,9 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                     });
                     await Site.updateOne(
                       { id: pageId },
-                      { events: eventIdList.length > 0 ? eventIdList : null }
+                      {
+                        events: eventIdList.length > 0 ? eventIdList : null
+                      }
                     );
                   }
                 });
@@ -410,23 +418,23 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                 //return
                 return res.status(200).send(insert);
               } else {
-                return res.status(500).send({ error: "Insert site failed!" });
+                return res.status(400).send({ error: "Insert site failed!" });
               }
             });
           });
       }
-      return res.status(500).send({ error: "Site existed!" });
+      return res.status(400).send({ error: "Site existed!" });
     }
   } catch (error) {
-    return res.status(500).send({ error });
+    return res.status(400).send({ error });
   }
 });
 
 router.patch("/syncData", authenticate, async (req, res) => {
   try {
     let eventList = [];
+    let galleryList = [];
     let postsList = [];
-    let galleries = [];
     const { pageId, accessToken } = req.body;
     const data = await getSyncData({
       pageId: pageId,
@@ -441,15 +449,6 @@ router.patch("/syncData", authenticate, async (req, res) => {
           .then(_session => {
             session = _session;
             session.withTransaction(async () => {
-              //gallery albums
-              data.albums &&
-                data.albums.data &&
-                data.albums.data.forEach(album => {
-                  galleries.push({
-                    url: album.picture.data.url,
-                    target: album.link
-                  });
-                });
               //update site
               const update = await editSite(pageId, {
                 phone: data.phone,
@@ -459,8 +458,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
                 cover: data.cover ? [data.cover.source] : null,
                 categories: data.category_list,
                 about: data.about,
-                genre: data.genre,
-                galleries: galleries.length > 0 ? galleries : null
+                genre: data.genre
               });
 
               //post list
@@ -474,6 +472,11 @@ router.patch("/syncData", authenticate, async (req, res) => {
                     post.attachments.data[0].subattachments.data.forEach(
                       subAttachment => {
                         subAttachmentList.push(subAttachment.media.image.src);
+
+                        galleryList.push({
+                          url: subAttachment.media.image.src,
+                          target: subAttachment.target.url
+                        });
                       }
                     );
                     postsList.push({
@@ -506,6 +509,10 @@ router.patch("/syncData", authenticate, async (req, res) => {
                         video: null
                       }
                     });
+                    galleryList.push({
+                      url: post.attachments.data[0].media.image.src,
+                      target: post.attachments.data[0].target.url
+                    });
                   } else if (
                     post.attachments &&
                     post.attachments.data[0].media_type === "video"
@@ -525,6 +532,13 @@ router.patch("/syncData", authenticate, async (req, res) => {
                     });
                   }
                 });
+              //update galleries
+              await Site.updateOne(
+                { id: pageId },
+                {
+                  galleries: galleryList.length > 0 ? galleryList : null
+                }
+              );
               //post Id list
               let postIdList = [];
               postsList.forEach(post => {
@@ -710,15 +724,15 @@ router.patch("/syncData", authenticate, async (req, res) => {
               if (update) {
                 return res.status(200).send(update);
               } else {
-                return res.status(500).send({ error: "Edit failed!" });
+                return res.status(400).send({ error: "Edit failed!" });
               }
             });
           });
       }
-      return res.status(500).send({ error: "Site not existed!" });
+      return res.status(400).send({ error: "Site not existed!" });
     }
   } catch (error) {
-    return res.status(500).send({ error });
+    return res.status(400).send({ error });
   }
 });
 
@@ -736,9 +750,9 @@ router.patch("/logo", async (req, res) => {
     if (update) {
       return res.status(200).send(update);
     }
-    return res.status(500).send({ error: "Action failed!" });
+    return res.status(400).send({ error: "Action failed!" });
   } catch (error) {
-    return res.status(500).send({ error });
+    return res.status(400).send({ error });
   }
 });
 export default router;
