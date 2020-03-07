@@ -71,7 +71,16 @@ export async function activateUser(id) {
 }
 
 export async function findAllUser() {
-  return await User.find().populate({ path: "sites" });
+  return await User.find()
+    .select("id displayName sites picture")
+    .populate({
+      path: "sites",
+      select: "id title categories theme sitePath isPublish",
+      populate: {
+        path: "theme",
+        select: "name"
+      }
+    });
 }
 
 // export async function findOneUser(id) {
