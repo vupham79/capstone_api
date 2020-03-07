@@ -299,7 +299,8 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                           media_type: "album",
                           images: subAttachmentList,
                           video: null
-                        }
+                        },
+                        target: post.attachments.data[0].target.url
                       });
                     } else if (
                       post.attachments &&
@@ -320,7 +321,8 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                           media_type: "photo",
                           images: [post.attachments.data[0].media.image.src],
                           video: null
-                        }
+                        },
+                        target: post.attachments.data[0].target.url
                       });
                     } else if (
                       post.attachments &&
@@ -337,7 +339,8 @@ router.post("/createNewSite", authenticate, async (req, res) => {
                           media_type: "video",
                           images: null,
                           video: post.attachments.data[0].media.source
-                        }
+                        },
+                        target: post.attachments.data[0].target.url
                       });
                     }
                   });
@@ -616,7 +619,6 @@ router.patch("/syncData", authenticate, async (req, res) => {
                     post.attachments.data[0].subattachments.data.forEach(
                       subAttachment => {
                         subAttachmentList.push(subAttachment.media.image.src);
-
                         galleryList.push({
                           url: subAttachment.media.image.src,
                           target: subAttachment.target.url
@@ -634,7 +636,8 @@ router.patch("/syncData", authenticate, async (req, res) => {
                         media_type: "album",
                         images: subAttachmentList,
                         video: null
-                      }
+                      },
+                      target: post.attachments.data[0].target.url
                     });
                   } else if (
                     post.attachments &&
@@ -651,7 +654,8 @@ router.patch("/syncData", authenticate, async (req, res) => {
                         media_type: "photo",
                         images: [post.attachments.data[0].media.image.src],
                         video: null
-                      }
+                      },
+                      target: post.attachments.data[0].target.url
                     });
                     galleryList.push({
                       url: post.attachments.data[0].media.image.src,
@@ -672,7 +676,8 @@ router.patch("/syncData", authenticate, async (req, res) => {
                         media_type: "video",
                         images: null,
                         video: post.attachments.data[0].media.source
-                      }
+                      },
+                      target: post.attachments.data[0].target.url
                     });
                   }
                 });

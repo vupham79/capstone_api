@@ -26,6 +26,10 @@ const PostSchema = new mongoose.Schema(
     createdTime: {
       type: String,
       default: null
+    },
+    target: {
+      type: String,
+      default: null
     }
   },
   {

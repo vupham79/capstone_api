@@ -7,7 +7,8 @@ export async function insertPost(body) {
     message: body.message,
     createdTime: body.createdTime,
     attachments: body.attachments,
-    isActive: body.isActive
+    isActive: body.isActive,
+    target: body.target
   });
 }
 
@@ -29,7 +30,8 @@ export async function insertAllPost(body) {
 //       title: body.title,
 //       message: body.message,
 //       attachments: body.attachments,
-//       isActive: body.isActive
+//       isActive: body.isActive,
+//       target: body.target
 //     }
 //   );
 //   return edit;
