@@ -1,6 +1,6 @@
 import { Router } from "express";
 import mongoose from "mongoose";
-import { getPageData, getSyncData } from "../services/fbPage";
+import { getPageData, getSyncData, getSyncEvent } from "../services/fbPage";
 import { authenticate } from "../services/middleware";
 import {
   findAllSiteByUser,
@@ -11,7 +11,6 @@ import {
 } from "../services/siteDB";
 import { findAllUser } from "../services/userDB";
 import { activePost } from "../services/postDB";
-import { insertEvent } from "../services/eventDB";
 import { Site, Post, User, Theme, Event } from "../models";
 const router = Router();
 
@@ -441,9 +440,143 @@ router.post("/createNewSite", authenticate, async (req, res) => {
   }
 });
 
-router.patch("/syncData", authenticate, async (req, res) => {
+router.patch("/syncEvent", authenticate, async (req, res) => {
   try {
     let eventList = [];
+    const { pageId, accessToken } = req.body;
+    const data = await getSyncEvent({
+      pageId: pageId,
+      access_token: accessToken
+    });
+    if (data) {
+      //event list
+      data.events &&
+        data.events.data &&
+        data.events.data.forEach(event => {
+          //set place
+          let place = {
+            name: null,
+            street: null,
+            city: null,
+            country: null
+          };
+          if (event.place) {
+            place.name = event.place.name;
+            if (event.place.location) {
+              place.street =
+                event.place.location.street !== undefined
+                  ? event.place.location.street
+                  : null;
+              place.city =
+                event.place.location.city !== undefined
+                  ? event.place.location.city
+                  : null;
+              place.country =
+                event.place.location.country !== undefined
+                  ? event.place.location.country
+                  : null;
+            }
+          } else {
+            place = null;
+          }
+          //event list
+          eventList.push({
+            id: event.id,
+            name: event.name,
+            description: event.description,
+            cover: event.cover ? event.cover.source : null,
+            startTime: event.start_time,
+            endTime: event.end_time,
+            place: place,
+            isCanceled: event.is_canceled,
+            url: "facebook.com/" + event.id
+          });
+        });
+      const siteExist = await findOneSite(pageId);
+      if (siteExist) {
+        //event Id list
+        let eventIdList = [];
+        eventList.forEach(event => {
+          eventIdList.push(event.id);
+        });
+        //insert and update event
+        await Event.findOneAndUpdate(
+          { id: { $in: eventIdList } },
+          eventList,
+          {
+            upsert: true,
+            useFindAndModify: false
+          },
+          async (error, result) => {
+            if (error) {
+              // console.log(error);
+            }
+            if (!result) {
+              //find existed event id
+              const site = await Site.findOne({ id: pageId })
+                .select("events")
+                .populate("events");
+              let existedEventObjIdList = [];
+              let existedEventIdList = [];
+              site.events.forEach(existedEvent => {
+                existedEventObjIdList.push(
+                  new mongoose.Types.ObjectId(existedEvent._id)
+                );
+                existedEventIdList.push(existedEvent.id);
+              });
+              //update existing event
+              let newEventList = [];
+              eventList.forEach(async event => {
+                if (!existedEventIdList.includes(event.id)) {
+                  newEventList.push(event);
+                } else {
+                  await Event.updateOne({ id: event.id }, event);
+                }
+              });
+              //create new event and save new event into site
+              await Event.create(newEventList, async (err, docs) => {
+                if (err) {
+                  console.log(err);
+                }
+                if (docs) {
+                  //save new event
+                  let newEventObjList = [];
+                  docs.forEach(event => {
+                    newEventObjList.push(
+                      new mongoose.Types.ObjectId(event._id)
+                    );
+                  });
+                  await Site.updateOne(
+                    { id: pageId },
+                    {
+                      $push: {
+                        events:
+                          newEventObjList.length > 0 ? newEventObjList : null
+                      }
+                    }
+                  );
+                }
+              });
+            }
+          }
+        );
+
+        if (siteExist) {
+          return res.status(200).send(siteExist);
+        } else {
+          return res.status(400).send({ error: "Edit failed!" });
+        }
+      }
+      return res.status(400).send({ error: "Site not existed!" });
+    }
+    return res.status(400).send({ error: "Facebook page event not existed!" });
+  } catch (error) {
+    return res.status(400).send({ error });
+  }
+});
+
+router.patch("/syncData", authenticate, async (req, res) => {
+  try {
     let galleryList = [];
     let postsList = [];
     const { pageId, accessToken } = req.body;
@@ -618,120 +751,6 @@ router.patch("/syncData", authenticate, async (req, res) => {
                   }
                 }
               );
-
-              //event list
-              data.events &&
-                data.events.data &&
-                data.events.data.forEach(event => {
-                  //set place
-                  let place = {
-                    name: null,
-                    street: null,
-                    city: null,
-                    country: null
-                  };
-                  if (event.place) {
-                    place.name = event.place.name;
-                    if (event.place.location) {
-                      place.street =
-                        event.place.location.street !== undefined
-                          ? event.place.location.street
-                          : null;
-                      place.city =
-                        event.place.location.city !== undefined
-                          ? event.place.location.city
-                          : null;
-                      place.country =
-                        event.place.location.country !== undefined
-                          ? event.place.location.country
-                          : null;
-                    }
-                  } else {
-                    place = null;
-                  }
-                  //event list
-                  eventList.push({
-                    id: event.id,
-                    name: event.name,
-                    description: event.description,
-                    cover: event.cover ? event.cover.source : null,
-                    startTime: event.start_time,
-                    endTime: event.end_time,
-                    place: place,
-                    isCanceled: event.is_canceled,
-                    url: "facebook.com/" + event.id
-                  });
-                });
-
-              //event Id list
-              let eventIdList = [];
-              eventList.forEach(event => {
-                eventIdList.push(event.id);
-              });
-              //insert and update event
-              await Event.findOneAndUpdate(
-                { id: { $in: eventIdList } },
-                eventList,
-                {
-                  upsert: true,
-                  useFindAndModify: false
-                },
-                async (error, result) => {
-                  if (error) {
-                    // console.log(error);
-                  }
-                  if (!result) {
-                    //find existed event id
-                    const site = await Site.findOne({ id: pageId })
-                      .select("events")
-                      .populate("events");
-                    let existedEventObjIdList = [];
-                    let existedEventIdList = [];
-                    site.events.forEach(existedEvent => {
-                      existedEventObjIdList.push(
-                        new mongoose.Types.ObjectId(existedEvent._id)
-                      );
-                      existedEventIdList.push(existedEvent.id);
-                    });
-                    //update existing event
-                    let newEventList = [];
-                    eventList.forEach(async event => {
-                      if (!existedEventIdList.includes(event.id)) {
-                        newEventList.push(event);
-                      } else {
-                        await Event.updateOne({ id: event.id }, event);
-                      }
-                    });
-                    //create new event and save new event into site
-                    await Event.create(newEventList, async (err, docs) => {
-                      if (err) {
-                        console.log(err);
-                      }
-                      if (docs) {
-                        //save new event
-                        let newEventObjList = [];
-                        docs.forEach(event => {
-                          newEventObjList.push(
-                            new mongoose.Types.ObjectId(event._id)
-                          );
-                        });
-                        await Site.updateOne(
-                          { id: pageId },
-                          {
-                            $push: {
-                              events:
-                                newEventObjList.length > 0
-                                  ? newEventObjList
-                                  : null
-                            }
-                          }
-                        );
-                      }
-                    });
-                  }
-                }
-              );
-
               if (update) {
                 return res.status(200).send(update);
               } else {
