@@ -61,14 +61,18 @@ router.get("/findAll", async (req, res) => {
       find.forEach(user => {
         user.sites.forEach(site => {
           siteList.push({
-            title: 'Pianissimo',
+            title: site.title,
             isPublish: site.isPublish,
             _id: site._id,
-            id: site.id,
             theme: site.theme,
             categories: site.categories,
             sitePath: site.sitePath,
-            displayName: user.displayName
+            phone: site.phone,
+            id: user.id,
+            displayName: user.displayName,
+            picture: user.picture,
+            email: user.email,
+            isActivated: user.isActivated
           });
         });
       });
@@ -76,7 +80,6 @@ router.get("/findAll", async (req, res) => {
     }
     return res.status(204).send();
   } catch (error) {
-    console.log(error);
     return res.status(400).send({ error });
   }
 });
@@ -191,7 +194,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
     //get page data
     const data = await getPageData({
       pageId: pageId,
-      access_token: accessToken
+      accessToken: accessToken
     }).catch(error => {
       return res.status(400).send({ error: "This facebook page not existed!" });
     });
@@ -465,7 +468,7 @@ router.patch("/syncEvent", authenticate, async (req, res) => {
     const { pageId, accessToken } = req.body;
     const data = await getSyncEvent({
       pageId: pageId,
-      access_token: accessToken
+      accessToken: accessToken
     });
     if (data) {
       //event list
@@ -601,7 +604,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
     const { pageId, accessToken } = req.body;
     const data = await getSyncData({
       pageId: pageId,
-      access_token: accessToken
+      accessToken: accessToken
     });
     if (data) {
       const siteExist = await findOneSite(pageId);

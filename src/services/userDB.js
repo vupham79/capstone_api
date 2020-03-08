@@ -72,10 +72,10 @@ export async function activateUser(id) {
 
 export async function findAllUser() {
   return await User.find()
-    .select("id displayName sites picture")
+    .select("id displayName sites picture email isActivated")
     .populate({
       path: "sites",
-      select: "id title categories theme sitePath isPublish",
+      select: "id title categories theme sitePath isPublish phone",
       populate: {
         path: "theme",
         select: "name"
