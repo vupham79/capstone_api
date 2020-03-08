@@ -53,34 +53,6 @@ router.get("/findAllByUser", async (req, res) => {
   }
 });
 
-router.get("/findAll", async (req, res) => {
-  try {
-    const find = await findAllUser();
-    if (find) {
-      let siteList = [];
-      find.forEach(user => {
-        user.sites.forEach(site => {
-          siteList.push({
-            title: 'Pianissimo',
-            isPublish: site.isPublish,
-            _id: site._id,
-            id: site.id,
-            theme: site.theme,
-            categories: site.categories,
-            sitePath: site.sitePath,
-            displayName: user.displayName
-          });
-        });
-      });
-      return res.status(200).send(siteList);
-    }
-    return res.status(204).send();
-  } catch (error) {
-    console.log(error);
-    return res.status(400).send({ error });
-  }
-});
-
 router.patch("/publish", async (req, res) => {
   const { id, isPublish } = req.body;
   try {

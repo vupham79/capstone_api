@@ -1,5 +1,4 @@
 import { User } from "../models";
-import jwt from "jsonwebtoken";
 require("dotenv").config();
 
 export const login = async ({ accessToken, id, name, email, picture }) => {
@@ -7,18 +6,28 @@ export const login = async ({ accessToken, id, name, email, picture }) => {
     email
   });
   if (user) {
-    const token = jwt.sign({ email, accessToken }, process.env.secret);
-    return token;
+    const update = await User.updateOne(
+      {
+        id: id
+      },
+      {
+        accessToken: accessToken
+      }
+    );
+    if (update) {
+      return true;
+    }
+    return false;
   } else {
     const create = await User.create({
       id: id,
       displayName: name,
       email: email,
+      accessToken: accessToken,
       picture: picture
     });
     if (create) {
-      const token = jwt.sign({ email, accessToken }, process.env.secret);
-      return token;
+      return true;
     }
     return false;
   }
