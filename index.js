@@ -3,7 +3,7 @@ import cors from "cors";
 import routes from "./src/routes";
 import { connectDb } from "./src/models";
 import bodyParser from "body-parser";
-
+import cookieParser from "cookie-parser";
 require("dotenv").config();
 
 const app = express();
@@ -13,9 +13,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // parse application/json
 app.use(bodyParser.json());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true
+  })
+);
 
-app.use(cors());
-
+app.use(cookieParser(process.env.secret));
 routes(app);
 // mongodb local
 connectDb();

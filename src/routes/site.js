@@ -41,8 +41,8 @@ router.get("/find/:sitepath", async (req, res) => {
 router.get("/findAllByUser", async (req, res) => {
   try {
     const find = await findAllSiteByUser(
-      req.query.userId,
-      req.query.accessToken
+      req.signedCookies["email"],
+      req.signedCookies["accessToken"]
     );
     if (find) {
       return res.status(200).send(find);

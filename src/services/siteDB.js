@@ -131,9 +131,9 @@ export async function findOneSite(id) {
   });
 }
 
-export async function findAllSiteByUser(id, accessToken) {
+export async function findAllSiteByUser(email, accessToken) {
   const sites = await User.findOne({
-    id: id,
+    email: email,
     accessToken: accessToken
   })
     .select("sites")
