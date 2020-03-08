@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { findAllTheme } from "../services/themeDB";
+import { findAllTheme, editTheme, findOneTheme } from "../services/themeDB";
 
 const router = Router();
 
@@ -15,17 +15,17 @@ const router = Router();
 //   }
 // });
 
-// router.patch("/update/:id", async (req, res) => {
-//   try {
-//     const update = await editTheme(req.params.id, req.body);
-//     if (update) {
-//       return res.status(200).send(update);
-//     }
-//     return res.status(204).send();
-//   } catch (error) {
-//     return res.status(400).send({ error });
-//   }
-// });
+router.patch("/update/:id", async (req, res) => {
+  try {
+    const update = await editTheme(req.params.id, req.body);
+    if (update) {
+      return res.status(200).send(update);
+    }
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(400).send({ error });
+  }
+});
 
 // router.patch("/delete/:id", async (req, res) => {
 //   try {
@@ -39,17 +39,17 @@ const router = Router();
 //   }
 // });
 
-// router.get("/find/:id", async (req, res) => {
-//   try {
-//     const find = await findOneTheme(req.params.id);
-//     if (find) {
-//       return res.status(200).send(find);
-//     }
-//     return res.status(204).send();
-//   } catch (error) {
-//     return res.status(400).send({ error });
-//   }
-// });
+router.get("/find/:id", async (req, res) => {
+  try {
+    const find = await findOneTheme(req.params.id);
+    if (find) {
+      return res.status(200).send(find);
+    }
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(400).send({ error });
+  }
+});
 
 router.get("/findAll", async (req, res) => {
   try {
