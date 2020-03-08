@@ -1,8 +1,9 @@
 import { User } from "../models";
+require("dotenv").config();
 
 export const login = async ({ accessToken, id, name, email, picture }) => {
   const user = await User.findOne({
-    id: id
+    email
   });
   if (user) {
     const update = await User.updateOne(
