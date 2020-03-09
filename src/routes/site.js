@@ -621,7 +621,7 @@ router.patch("/syncData", authenticate, async (req, res) => {
   try {
     let galleryList = [];
     let postsList = [];
-    const { pageId, accessToken } = req.body;
+    const { pageId, accessToken, lastSync } = req.body;
     const data = await getSyncData({
       pageId: pageId,
       accessToken: accessToken
@@ -644,18 +644,9 @@ router.patch("/syncData", authenticate, async (req, res) => {
                 cover: data.cover ? [data.cover.source] : null,
                 categories: data.category_list,
                 about: data.about,
-                genre: data.genre
+                genre: data.genre,
+                lastSync: lastSync
               });
-              const syncAfterUpdateSite = await Site.findOne({ id: pageId });
-              await Site.updateOne(
-                {
-                  id: pageId
-                },
-                {
-                  lastSync: syncAfterUpdateSite.updatedAt
-                }
-              );
-
               //post list
               data.posts &&
                 data.posts.data.forEach(post => {
@@ -797,17 +788,6 @@ router.patch("/syncData", authenticate, async (req, res) => {
                                   ? newPostObjIdList
                                   : null
                             }
-                          }
-                        );
-                        const siteAfterSyncPost = await Site.findOne({
-                          id: pageId
-                        });
-                        await Site.updateOne(
-                          {
-                            id: pageId
-                          },
-                          {
-                            lastSync: siteAfterSyncPost.updatedAt
                           }
                         );
                       }

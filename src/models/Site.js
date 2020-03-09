@@ -108,7 +108,7 @@ const SiteSchema = new mongoose.Schema(
       }
     ],
     lastSync: {
-      type: String,
+      type: Date,
       default: null
     },
     posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
