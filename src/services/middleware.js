@@ -7,6 +7,8 @@ export async function authUser(req, res, next) {
     if (user) {
       req.user = user;
       next();
+    } else {
+      throw "Invalid user ID";
     }
   } catch (error) {
     return res.status(400).send("Not Authenticated!");
@@ -22,6 +24,8 @@ export async function authAdmin(req, res, next) {
     if (admin) {
       req.admin = admin;
       next();
+    } else {
+      throw "Invalid user ID";
     }
   } catch (error) {
     return res.status(400).send("Not Authenticated!");
@@ -53,6 +57,8 @@ export async function authAll(req, res, next) {
     );
     if (auth) {
       next();
+    } else {
+      throw "Invalid user ID";
     }
   } catch (error) {
     return res.status(400).send("Not Authenticated!");

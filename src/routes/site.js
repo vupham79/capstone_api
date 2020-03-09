@@ -326,7 +326,7 @@ router.post("/createNewSite", authUser, async (req, res) => {
                 email: email
               });
               //find user
-              await User.findOne({ email: email })
+              await User.findOne({ id: req.user.id })
                 .select("sites")
                 .then(async result => {
                   let siteList = result.sites;
@@ -335,7 +335,6 @@ router.post("/createNewSite", authUser, async (req, res) => {
                     sites: siteList
                   });
                 });
-
               if (insert) {
                 //post list
                 data.posts &&
@@ -512,10 +511,10 @@ router.post("/createNewSite", authUser, async (req, res) => {
 router.patch("/syncEvent", authUser, async (req, res) => {
   try {
     let eventList = [];
-    const { pageId, accessToken } = req.body;
+    const { pageId } = req.body;
     const data = await getSyncEvent({
       pageId: pageId,
-      accessToken: accessToken
+      accessToken: req.user.accessToken
     });
     if (data) {
       //event list
@@ -648,10 +647,10 @@ router.patch("/syncData", authUser, async (req, res) => {
   try {
     let galleryList = [];
     let postsList = [];
-    const { pageId, accessToken, lastSync } = req.body;
+    const { pageId, lastSync } = req.body;
     const data = await getSyncData({
       pageId: pageId,
-      accessToken: accessToken
+      accessToken: req.user.accessToken
     });
     if (data) {
       const siteExist = await findOneSite(pageId);
