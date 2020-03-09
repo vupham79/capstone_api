@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { getUserPages } from "../services/fbPage";
+import { authUser } from "../services/middleware";
 
 const router = Router();
 
-router.get("/pages", async (req, res) => {
+router.get("/pages", authUser, async (req, res) => {
   try {
-    const data = await getUserPages(req.signedCookies["accessToken"]);
+    const data = await getUserPages(req.user.accessToken);
     if (data && data.accounts) {
       return res.status(200).send(data.accounts.data);
     }

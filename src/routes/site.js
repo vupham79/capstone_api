@@ -1,7 +1,7 @@
 import { Router } from "express";
 import mongoose from "mongoose";
 import { getPageData, getSyncData, getSyncEvent } from "../services/fbPage";
-import { authenticate } from "../services/middleware";
+import { authUser } from "../services/middleware";
 import {
   findAllSiteByUser,
   findOneSite,
@@ -38,12 +38,9 @@ router.get("/find/:sitepath", async (req, res) => {
   }
 });
 
-router.get("/findAllByUser", async (req, res) => {
+router.get("/findAllByUser", authUser, async (req, res) => {
   try {
-    const find = await findAllSiteByUser(
-      req.signedCookies["email"],
-      req.signedCookies["accessToken"]
-    );
+    const find = await findAllSiteByUser(req.user.email, req.user.accessToken);
     if (find) {
       return res.status(200).send(find);
     }
@@ -124,7 +121,7 @@ router.patch("/activePost", async (req, res) => {
   }
 });
 
-router.patch("/saveDesign", authenticate, async (req, res) => {
+router.patch("/saveDesign", authUser, async (req, res) => {
   let {
     fontBody,
     fontTitle,
@@ -133,7 +130,7 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
     theme,
     name,
     color,
-    facebook,
+    email,
     instagram,
     whatsapp
   } = req.body;
@@ -141,18 +138,14 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
     const findTheme = await Theme.findOne({ id: theme });
     if (findTheme) {
       if (
-        !facebook ||
-        facebook === undefined ||
-        facebook.replace(/\s/g, "") === ""
-      ) {
-        facebook = null;
-      }
-      if (
         !instagram ||
         instagram === undefined ||
         instagram.replace(/\s/g, "") === ""
       ) {
         instagram = null;
+      }
+      if (!email || email === undefined || email.replace(/\s/g, "") === "") {
+        email = null;
       }
       if (
         !whatsapp ||
@@ -170,9 +163,9 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
           color: color,
           navItems: navItems && navItems.length > 0 ? navItems : null,
           theme: new mongoose.Types.ObjectId(findTheme._id),
-          facebook: facebook,
           instagram: instagram,
-          whatsapp: whatsapp
+          whatsapp: whatsapp,
+          email: email
         }
       );
       if (update) {
@@ -186,7 +179,7 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
   }
 });
 
-router.patch("/saveHomePageImage", authenticate, async (req, res) => {
+router.patch("/saveHomePageImage", authUser, async (req, res) => {
   const { pageId, cover } = req.body;
   try {
     const update = await Site.updateOne(
@@ -206,7 +199,7 @@ router.patch("/saveHomePageImage", authenticate, async (req, res) => {
   }
 });
 
-router.post("/createNewSite", authenticate, async (req, res) => {
+router.post("/createNewSite", authUser, async (req, res) => {
   try {
     let eventList = [];
     let galleryList = [];
@@ -509,7 +502,7 @@ router.post("/createNewSite", authenticate, async (req, res) => {
   }
 });
 
-router.patch("/syncEvent", authenticate, async (req, res) => {
+router.patch("/syncEvent", authUser, async (req, res) => {
   try {
     let eventList = [];
     const { pageId, accessToken } = req.body;
@@ -644,7 +637,7 @@ router.patch("/syncEvent", authenticate, async (req, res) => {
   }
 });
 
-router.patch("/syncData", authenticate, async (req, res) => {
+router.patch("/syncData", authUser, async (req, res) => {
   try {
     let galleryList = [];
     let postsList = [];

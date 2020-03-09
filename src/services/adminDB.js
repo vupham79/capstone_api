@@ -1,4 +1,5 @@
 import { Admin } from "../models";
+import passport from "../utils/passport";
 
 export async function loginAdmin(username, password) {
   return await Admin.findOne({ username: username, password: password });

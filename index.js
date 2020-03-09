@@ -4,13 +4,15 @@ import routes from "./src/routes";
 import { connectDb } from "./src/models";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
+import passport from "./src/utils/passport";
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 8000;
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
-
+app.use(passport.initialize());
+app.use(passport.session());
 // parse application/json
 app.use(bodyParser.json());
 app.use(

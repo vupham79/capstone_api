@@ -119,8 +119,7 @@ export async function findAllSite() {
 
 export async function findOneSiteByAccessToken(id, body) {
   return await Site.findOne({
-    id: id,
-    accessToken: body.accessToken
+    id: id
   }).populate({
     path: "theme posts events"
   });
@@ -132,10 +131,9 @@ export async function findOneSite(id) {
   });
 }
 
-export async function findAllSiteByUser(email, accessToken) {
+export async function findAllSiteByUser(email) {
   const sites = await User.findOne({
-    email: email,
-    accessToken: accessToken
+    email: email
   })
     .select("sites")
     .populate({

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { findAllUser, deactivateUser, activateUser } from "../services/userDB";
-
+import { authAdmin } from "../services/middleware";
 const router = Router();
 
 // router.get("/create", async (req, res) => {
@@ -75,7 +75,7 @@ router.patch("/activate", async (req, res) => {
 //   }
 // });
 
-router.get("/findAll", async (req, res) => {
+router.get("/findAll", authAdmin, async (req, res) => {
   try {
     const find = await findAllUser();
     if (find) {

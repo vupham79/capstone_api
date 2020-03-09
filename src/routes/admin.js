@@ -1,20 +1,31 @@
 import { Router } from "express";
-import { loginAdmin } from "../services/adminDB";
-
+import passport from "../utils/passport";
+import jwt from "jsonwebtoken";
+require("dotenv").config();
 const router = Router();
 
-router.post("/login", async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    const login = await loginAdmin(username, password);
-    if (login) {
-      return res.status(200).send(login);
+router.post(
+  "/login",
+  passport.authenticate("local", { failureRedirect: "/error" }),
+  async (req, res) => {
+    try {
+      const token = jwt.sign(
+        { username: req.user.username, _id: req.user._id },
+        process.env.secret
+      );
+      return res
+        .status(200)
+        .cookie("adminToken", token, {
+          signed: true,
+          expires: new Date(Date.now() + 365 * 24 * 3600 * 1000)
+        })
+        .send();
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send({ error });
     }
-    return res.status(204).send();
-  } catch (error) {
-    return res.status(500).send({ error });
   }
-});
+);
 
 // router.patch("/update", async (req, res) => {
 //   try {

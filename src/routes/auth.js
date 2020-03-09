@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { login } from "../services/auth";
-
+import jwt from "jsonwebtoken";
+require("dotenv").config();
 const router = Router();
 
 router.post("/", async (req, res) => {
@@ -8,11 +9,11 @@ router.post("/", async (req, res) => {
     const { accessToken, id, name, email, picture } = req.body;
     const data = await login({ accessToken, id, name, email, picture });
     if (data) {
-      res.cookie("accessToken", accessToken, {
-        expires: new Date(Date.now() + 365 * 24 * 3600 * 1000),
-        signed: true
-      });
-      res.cookie("email", email, {
+      const token = jwt.sign(
+        { accessToken: accessToken, email: email },
+        process.env.secret
+      );
+      res.cookie("userToken", token, {
         expires: new Date(Date.now() + 365 * 24 * 3600 * 1000),
         signed: true
       });

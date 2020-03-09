@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Mongoose } from "mongoose";
 
 const SiteSchema = new mongoose.Schema(
   {
@@ -111,7 +111,7 @@ const SiteSchema = new mongoose.Schema(
       type: Date,
       default: null
     },
-    facebook: {
+    email: {
       type: String,
       default: null
     },
