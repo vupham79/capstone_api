@@ -159,6 +159,26 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
   }
 });
 
+router.patch("/saveHomePageImage", authenticate, async (req, res) => {
+  const { pageId, cover } = req.body;
+  try {
+    const update = await Site.updateOne(
+      {
+        id: pageId
+      },
+      {
+        cover: cover.length > 0 ? cover : null
+      }
+    );
+    if (update) {
+      return res.status(200).send(update);
+    }
+    return res.status(400).send({ error: "Save failed!" });
+  } catch (error) {
+    return res.status(400).send({ error });
+  }
+});
+
 router.post("/createNewSite", authenticate, async (req, res) => {
   try {
     let eventList = [];
