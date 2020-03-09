@@ -5,7 +5,7 @@ const router = Router();
 
 router.get("/pages", async (req, res) => {
   try {
-    const data = await getUserPages(req.query.access_token);
+    const data = await getUserPages(req.signedCookies["accessToken"]);
     if (data && data.accounts) {
       return res.status(200).send(data.accounts.data);
     }
