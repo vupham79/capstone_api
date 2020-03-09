@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { findAllUser, deactivateUser, activateUser } from "../services/userDB";
-import { authAdmin } from "../services/middleware";
+import { authAdmin, authAll } from "../services/middleware";
 const router = Router();
 
 // router.get("/create", async (req, res) => {
@@ -39,9 +39,12 @@ const router = Router();
 //   }
 // });
 
-router.patch("/deactivate", async (req, res) => {
+router.patch("/deactivate/:id", authAll, async (req, res) => {
   try {
-    const update = await deactivateUser(req.signedCookies["email"]);
+    if (req.user && req.user.id !== req.query.id) {
+      return res.status(400).send("Not authorization");
+    }
+    const update = await deactivateUser(req.query.id);
     if (update) {
       return res.status(200).send(update);
     }
@@ -51,9 +54,12 @@ router.patch("/deactivate", async (req, res) => {
   }
 });
 
-router.patch("/activate", async (req, res) => {
+router.patch("/activate/:id", authAll, async (req, res) => {
   try {
-    const update = await activateUser(req.signedCookies["email"]);
+    if (req.user && req.user.id !== req.query.id) {
+      return res.status(400).send("Not authorization");
+    }
+    const update = await activateUser(req.query.id);
     if (update) {
       return res.status(200).send(update);
     }

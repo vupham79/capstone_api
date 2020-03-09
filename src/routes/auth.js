@@ -10,7 +10,7 @@ router.post("/", async (req, res) => {
     const data = await login({ accessToken, id, name, email, picture });
     if (data) {
       const token = jwt.sign(
-        { accessToken: accessToken, email: email },
+        { accessToken: accessToken, email: email, id: id },
         process.env.secret
       );
       res.cookie("userToken", token, {

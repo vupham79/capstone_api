@@ -27,3 +27,34 @@ export async function authAdmin(req, res, next) {
     return res.status(400).send("Not Authenticated!");
   }
 }
+
+export async function authAll(req, res, next) {
+  try {
+    let auth = false;
+    jwt.verify(
+      req.signedCookies["adminToken"],
+      process.env.secret,
+      (errAdmin, resultAdmin) => {
+        if (resultAdmin) {
+          req.admin = resultAdmin;
+          auth = true;
+        }
+        jwt.verify(
+          req.signedCookies["userToken"],
+          process.env.secret,
+          (errUser, resultUser) => {
+            if (resultUser) {
+              req.user = resultUser;
+              auth = true;
+            }
+          }
+        );
+      }
+    );
+    if (auth) {
+      next();
+    }
+  } catch (error) {
+    return res.status(400).send("Not Authenticated!");
+  }
+}

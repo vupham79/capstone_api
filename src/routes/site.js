@@ -1,7 +1,7 @@
 import { Router } from "express";
 import mongoose from "mongoose";
 import { getPageData, getSyncData, getSyncEvent } from "../services/fbPage";
-import { authUser } from "../services/middleware";
+import { authUser, authAll, authAdmin } from "../services/middleware";
 import {
   findAllSiteByUser,
   findOneSite,
@@ -14,7 +14,7 @@ import { activePost } from "../services/postDB";
 import { Site, Post, User, Theme, Event } from "../models";
 const router = Router();
 
-router.get("/find", async (req, res) => {
+router.get("/find", authAll, async (req, res) => {
   try {
     const find = await findOneSite(req.query.id);
     if (find) {
@@ -50,7 +50,7 @@ router.get("/findAllByUser", authUser, async (req, res) => {
   }
 });
 
-router.get("/findAll", async (req, res) => {
+router.get("/findAll", authAdmin, async (req, res) => {
   try {
     const find = await findAllUser();
     if (find) {
@@ -81,7 +81,7 @@ router.get("/findAll", async (req, res) => {
   }
 });
 
-router.patch("/publish", async (req, res) => {
+router.patch("/publish", authAll, async (req, res) => {
   const { id, isPublish } = req.body;
   try {
     const user = await User.find({ "sites.id": id });
@@ -105,7 +105,7 @@ router.patch("/publish", async (req, res) => {
   }
 });
 
-router.patch("/activePost", async (req, res) => {
+router.patch("/activePost", authUser, async (req, res) => {
   const { activeList, deactiveList } = req.body;
   try {
     const update = await activePost({
@@ -208,11 +208,9 @@ router.post("/createNewSite", authUser, async (req, res) => {
     let galleryList = [];
     const postsList = [];
     let {
-      userId,
       category,
       pageUrl,
       pageId,
-      accessToken,
       isPublish,
       sitepath,
       instagram,
@@ -240,7 +238,7 @@ router.post("/createNewSite", authUser, async (req, res) => {
     //get page data
     const data = await getPageData({
       pageId: pageId,
-      accessToken: accessToken
+      accessToken: req.user.accessToken
     }).catch(error => {
       return res.status(400).send({ error: "This facebook page not existed!" });
     });
@@ -328,7 +326,7 @@ router.post("/createNewSite", authUser, async (req, res) => {
                 email: email
               });
               //find user
-              await User.findOne({ id: userId })
+              await User.findOne({ email: email })
                 .select("sites")
                 .then(async result => {
                   let siteList = result.sites;
@@ -840,7 +838,7 @@ router.patch("/syncData", authUser, async (req, res) => {
   }
 });
 
-router.patch("/logo", async (req, res) => {
+router.patch("/logo", authUser, async (req, res) => {
   const { logo, id } = req.body;
   try {
     const update = await Site.updateOne(

@@ -5,10 +5,10 @@ import {
   findOneEvent,
   findAllEvent
 } from "../services/eventDB";
-
+import { authAdmin, authUser, authAll } from "../services/middleware";
 const router = Router();
 
-router.post("/insert/:id", async (req, res) => {
+router.post("/insert/:id", authUser, async (req, res) => {
   try {
     const insert = await insertEvent(req.params.id, req.body);
     if (insert) {
@@ -20,7 +20,7 @@ router.post("/insert/:id", async (req, res) => {
   }
 });
 
-router.patch("/update/:id", async (req, res) => {
+router.patch("/update/:id", authUser, async (req, res) => {
   try {
     const update = await editEvent(req.params.id, req.body);
     if (update) {
@@ -32,7 +32,7 @@ router.patch("/update/:id", async (req, res) => {
   }
 });
 
-router.get("/find/:id", async (req, res) => {
+router.get("/find/:id", authAll, async (req, res) => {
   try {
     const find = await findOneEvent(req.params.id);
     if (find) {
@@ -44,7 +44,7 @@ router.get("/find/:id", async (req, res) => {
   }
 });
 
-router.get("/findAll", async (req, res) => {
+router.get("/findAll", authAdmin, async (req, res) => {
   try {
     const find = await findAllEvent();
     if (find) {

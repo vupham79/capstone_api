@@ -45,14 +45,14 @@ import { User, Site, mongoose } from "../models";
 //   return update;
 // }
 
-export async function deactivateUser(email) {
+export async function deactivateUser(id) {
   await User.updateOne(
-    { email: email },
+    { id: id },
     {
       isActivated: false
     }
   );
-  const user = await User.findOne({ email: email });
+  const user = await User.findOne({ id: id });
   await Site.updateMany(
     { _id: { $in: user.sites } },
     {
@@ -62,8 +62,8 @@ export async function deactivateUser(email) {
   return user;
 }
 
-export async function activateUser(email) {
-  const user = User.find({ email: email });
+export async function activateUser(id) {
+  const user = User.find({ id: id });
   await user.updateOne({
     isActivated: true
   });

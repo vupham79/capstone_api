@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { findAllTheme, editTheme, findOneTheme } from "../services/themeDB";
-
+import { authAdmin, authAll } from "../services/middleware";
 const router = Router();
 
 // router.post("/insert/:id", async (req, res) => {
@@ -15,7 +15,7 @@ const router = Router();
 //   }
 // });
 
-router.patch("/update/:id", async (req, res) => {
+router.patch("/update/:id", authAdmin, async (req, res) => {
   try {
     const update = await editTheme(req.params.id, req.body);
     if (update) {
@@ -39,7 +39,7 @@ router.patch("/update/:id", async (req, res) => {
 //   }
 // });
 
-router.get("/find/:id", async (req, res) => {
+router.get("/find/:id", authAll, async (req, res) => {
   try {
     const find = await findOneTheme(req.params.id);
     if (find) {
@@ -51,7 +51,7 @@ router.get("/find/:id", async (req, res) => {
   }
 });
 
-router.get("/findAll", async (req, res) => {
+router.get("/findAll", authAll, async (req, res) => {
   try {
     const find = await findAllTheme();
     if (find) {
