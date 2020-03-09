@@ -27,6 +27,17 @@ router.post(
   }
 );
 
+router.get("/logout", async (req, res) => {
+  try {
+    return res
+      .clearCookie("adminToken")
+      .status(200)
+      .send();
+  } catch (error) {
+    return res.status(400).send({ error });
+  }
+});
+
 // router.patch("/update", async (req, res) => {
 //   try {
 //     const { username, password } = req.body;

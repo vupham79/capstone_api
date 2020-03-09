@@ -6,6 +6,9 @@ export const login = async ({ id, name, email, picture }) => {
     email
   });
   if (user) {
+    if (!user.isActivated) {
+      return false;
+    }
     return true;
   } else {
     const create = await User.create({

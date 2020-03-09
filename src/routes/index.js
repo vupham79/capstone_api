@@ -5,6 +5,7 @@ import theme from "./theme";
 import user from "./user";
 import admin from "./admin";
 import post from "./post";
+import sitepath from "./sitepath";
 
 export default app => {
   app.use("/theme", theme);
@@ -14,4 +15,5 @@ export default app => {
   app.use("/facebook", facebook);
   app.use("/admin", admin);
   app.use("/post", post);
+  app.use("/sitePath", sitepath);
 };

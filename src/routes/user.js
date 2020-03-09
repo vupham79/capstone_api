@@ -3,6 +3,17 @@ import { findAllUser, deactivateUser, activateUser } from "../services/userDB";
 import { authAdmin, authAll } from "../services/middleware";
 const router = Router();
 
+router.get("/logout", async (req, res) => {
+  try {
+    return res
+      .clearCookie("userToken")
+      .status(200)
+      .send();
+  } catch (error) {
+    return res.status(400).send({ error });
+  }
+});
+
 // router.get("/create", async (req, res) => {
 //   try {
 //     const user = await createUser();

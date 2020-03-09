@@ -19,7 +19,7 @@ router.post("/", async (req, res) => {
       });
       return res.status(200).send("Success");
     }
-    return res.status(400).send("Failed");
+    return res.status(400).send({ error: "User is inactivated!" });
   } catch (error) {
     return res.status(400).send({ error });
   }
