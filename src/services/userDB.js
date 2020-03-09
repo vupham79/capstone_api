@@ -1,7 +1,7 @@
 import { User, Site, mongoose } from "../models";
 
 // export async function createUser() {
-//   const site = await Site.findOne({ id: "109919550538707" });
+//   const site = await Site.findOne({ email: "109919550538707" });
 //   const user = await User.create([
 //     {
 //       id: "1",
@@ -31,9 +31,9 @@ import { User, Site, mongoose } from "../models";
 //   return insert;
 // }
 
-// export async function editUser(id, body) {
+// export async function editUser(email, body) {
 //   const update = await User.updateOne(
-//     { id: id },
+//     { email: email },
 //     {
 //       displayName: body.displayName,
 //       email: body.email,
@@ -45,16 +45,16 @@ import { User, Site, mongoose } from "../models";
 //   return update;
 // }
 
-export async function deactivateUser(id) {
+export async function deactivateUser(email) {
   await User.updateOne(
-    { id: id },
+    { email: email },
     {
       isActivated: false
     }
   );
-  const user = await User.findOne({ id: id });
-  const site = await Site.updateMany(
-    { user: user._id },
+  const user = await User.findOne({ email: email });
+  await Site.updateMany(
+    { _id: { $in: user.sites } },
     {
       isPublish: false
     }
@@ -62,8 +62,8 @@ export async function deactivateUser(id) {
   return user;
 }
 
-export async function activateUser(id) {
-  const user = User.find({ id: id });
+export async function activateUser(email) {
+  const user = User.find({ email: email });
   await user.updateOne({
     isActivated: true
   });
@@ -83,6 +83,6 @@ export async function findAllUser() {
     });
 }
 
-// export async function findOneUser(id) {
-//   return await User.findOne({ id: id });
+// export async function findOneUser(email) {
+//   return await User.findOne({ email: email });
 // }
