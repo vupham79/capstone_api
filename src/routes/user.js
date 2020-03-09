@@ -27,9 +27,9 @@ const router = Router();
 //   }
 // });
 
-// router.patch("/update/:id", async (req, res) => {
+// router.patch("/update/:email", async (req, res) => {
 //   try {
-//     const update = await editUser(req.params.id, req.body);
+//     const update = await editUser(req.params.email, req.body);
 //     if (update) {
 //       return res.status(200).send(update);
 //     }
@@ -39,9 +39,9 @@ const router = Router();
 //   }
 // });
 
-router.patch("/deactivate/:id", async (req, res) => {
+router.patch("/deactivate", async (req, res) => {
   try {
-    const update = await deactivateUser(req.params.id);
+    const update = await deactivateUser(req.signedCookies["email"]);
     if (update) {
       return res.status(200).send(update);
     }
@@ -51,9 +51,9 @@ router.patch("/deactivate/:id", async (req, res) => {
   }
 });
 
-router.patch("/activate/:id", async (req, res) => {
+router.patch("/activate", async (req, res) => {
   try {
-    const update = await activateUser(req.params.id);
+    const update = await activateUser(req.signedCookies["email"]);
     if (update) {
       return res.status(200).send(update);
     }
@@ -63,9 +63,9 @@ router.patch("/activate/:id", async (req, res) => {
   }
 });
 
-// router.get("/find/:id", async (req, res) => {
+// router.get("/find/:email", async (req, res) => {
 //   try {
-//     const find = await findOneUser(req.params.id);
+//     const find = await findOneUser(req.params.email);
 //     if (find) {
 //       return res.status(200).send(find);
 //     }
