@@ -93,7 +93,8 @@ export async function editSite(id, body) {
       address: body.address,
       cover: body.cover,
       categories: body.categories,
-      about: body.about
+      about: body.about,
+      lastSync: body.lastSync
     }
   );
   return update;
