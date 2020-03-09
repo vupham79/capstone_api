@@ -78,7 +78,10 @@ export async function insertSite(pageId, body) {
     sitePath: body.sitePath.toLowerCase(),
     isPublish: body.isPublish,
     about: body.about,
-    events: body.events
+    events: body.events,
+    instagram: body.instagram,
+    whatsapp: body.whatsapp,
+    email: body.email
   });
   return insert;
 }

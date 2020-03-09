@@ -130,13 +130,16 @@ router.patch("/saveDesign", authUser, async (req, res) => {
     theme,
     name,
     color,
-    email,
     instagram,
-    whatsapp
+    whatsapp,
+    email
   } = req.body;
   try {
     const findTheme = await Theme.findOne({ id: theme });
     if (findTheme) {
+      if (!email || email === undefined || email.replace(/\s/g, "") === "") {
+        email = null;
+      }
       if (
         !instagram ||
         instagram === undefined ||
@@ -211,7 +214,10 @@ router.post("/createNewSite", authUser, async (req, res) => {
       pageId,
       accessToken,
       isPublish,
-      sitepath
+      sitepath,
+      instagram,
+      whatsapp,
+      email
     } = req.body;
     //site path is empty, undefined or null
     if (
@@ -316,7 +322,10 @@ router.post("/createNewSite", authUser, async (req, res) => {
                 isPublish: isPublish,
                 sitePath: sitepath,
                 about: data.about,
-                genre: data.genre
+                genre: data.genre,
+                instagram: instagram,
+                whatsapp: whatsapp,
+                email: email
               });
               //find user
               await User.findOne({ id: userId })
