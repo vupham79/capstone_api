@@ -125,18 +125,42 @@ router.patch("/activePost", async (req, res) => {
 });
 
 router.patch("/saveDesign", authenticate, async (req, res) => {
-  const {
+  let {
     fontBody,
     fontTitle,
     navItems,
     pageId,
     theme,
     name,
-    color
+    color,
+    facebook,
+    instagram,
+    whatsapp
   } = req.body;
   try {
     const findTheme = await Theme.findOne({ id: theme });
     if (findTheme) {
+      if (
+        !facebook ||
+        facebook === undefined ||
+        facebook.replace(/\s/g, "") === ""
+      ) {
+        facebook = null;
+      }
+      if (
+        !instagram ||
+        instagram === undefined ||
+        instagram.replace(/\s/g, "") === ""
+      ) {
+        instagram = null;
+      }
+      if (
+        !whatsapp ||
+        whatsapp === undefined ||
+        whatsapp.replace(/\s/g, "") === ""
+      ) {
+        whatsapp = null;
+      }
       const update = await Site.updateOne(
         { id: pageId },
         {
@@ -145,7 +169,10 @@ router.patch("/saveDesign", authenticate, async (req, res) => {
           title: name,
           color: color,
           navItems: navItems && navItems.length > 0 ? navItems : null,
-          theme: new mongoose.Types.ObjectId(findTheme._id)
+          theme: new mongoose.Types.ObjectId(findTheme._id),
+          facebook: facebook,
+          instagram: instagram,
+          whatsapp: whatsapp
         }
       );
       if (update) {

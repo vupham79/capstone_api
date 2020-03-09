@@ -111,6 +111,18 @@ const SiteSchema = new mongoose.Schema(
       type: Date,
       default: null
     },
+    facebook: {
+      type: String,
+      default: null
+    },
+    instagram: {
+      type: String,
+      default: null
+    },
+    whatsapp: {
+      type: String,
+      default: null
+    },
     posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
     theme: { type: Schema.Types.ObjectId, ref: "Theme" },
     events: [{ type: Schema.Types.ObjectId, ref: "Event" }]
