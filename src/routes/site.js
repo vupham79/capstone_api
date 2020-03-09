@@ -646,6 +646,15 @@ router.patch("/syncData", authenticate, async (req, res) => {
                 about: data.about,
                 genre: data.genre
               });
+              const syncAfterUpdateSite = await Site.findOne({ id: pageId });
+              await Site.updateOne(
+                {
+                  id: pageId
+                },
+                {
+                  lastSync: syncAfterUpdateSite.updatedAt
+                }
+              );
 
               //post list
               data.posts &&
@@ -788,6 +797,17 @@ router.patch("/syncData", authenticate, async (req, res) => {
                                   ? newPostObjIdList
                                   : null
                             }
+                          }
+                        );
+                        const siteAfterSyncPost = await Site.findOne({
+                          id: pageId
+                        });
+                        await Site.updateOne(
+                          {
+                            id: pageId
+                          },
+                          {
+                            lastSync: siteAfterSyncPost.updatedAt
                           }
                         );
                       }

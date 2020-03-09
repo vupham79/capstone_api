@@ -107,6 +107,10 @@ const SiteSchema = new mongoose.Schema(
         }
       }
     ],
+    lastSync: {
+      type: String,
+      default: null
+    },
     posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
     theme: { type: Schema.Types.ObjectId, ref: "Theme" },
     events: [{ type: Schema.Types.ObjectId, ref: "Event" }]
