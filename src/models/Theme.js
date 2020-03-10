@@ -22,6 +22,9 @@ const ThemeSchema = new mongoose.Schema(
       type: String,
       default: null
     },
+    previewImage: {
+      type: String
+    },
     categories: [
       {
         id: {
