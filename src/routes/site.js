@@ -777,12 +777,14 @@ router.patch("/syncData", authUser, async (req, res) => {
                       .populate("posts");
                     let existedPostObjIdList = [];
                     let existedPostIdList = [];
-                    site.posts.forEach(existedPost => {
-                      existedPostObjIdList.push(
-                        new mongoose.Types.ObjectId(existedPost._id)
-                      );
-                      existedPostIdList.push(existedPost.id);
-                    });
+                    site.posts &&
+                      site.posts.forEach(existedPost => {
+                        console.log("hhello");
+                        existedPostObjIdList.push(
+                          new mongoose.Types.ObjectId(existedPost._id)
+                        );
+                        existedPostIdList.push(existedPost.id);
+                      });
                     //update existing post
                     let newPostList = [];
                     postsList.forEach(async post => {
@@ -805,17 +807,14 @@ router.patch("/syncData", authUser, async (req, res) => {
                             new mongoose.Types.ObjectId(post._id)
                           );
                         });
-                        await Site.updateOne(
-                          { id: pageId },
-                          {
-                            $push: {
-                              posts:
-                                newPostObjIdList.length > 0
-                                  ? newPostObjIdList
-                                  : null
+                        if (newPostObjIdList.length > 0) {
+                          await Site.updateOne(
+                            { id: pageId },
+                            {
+                              posts: newPostObjIdList
                             }
-                          }
-                        );
+                          );
+                        }
                       }
                     });
                   }
