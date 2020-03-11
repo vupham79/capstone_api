@@ -52,11 +52,8 @@ router.get("/logout", async (req, res) => {
 //   }
 // });
 
-router.patch("/deactivate/:id", authAll, async (req, res) => {
+router.patch("/deactivate/:id", authAdmin, async (req, res) => {
   try {
-    if (req.user && req.user.id !== req.query.id) {
-      return res.status(400).send("Not authorization");
-    }
     const update = await deactivateUser(req.query.id);
     if (update) {
       return res.status(200).send(update);
@@ -67,11 +64,8 @@ router.patch("/deactivate/:id", authAll, async (req, res) => {
   }
 });
 
-router.patch("/activate/:id", authAll, async (req, res) => {
+router.patch("/activate/:id", authAdmin, async (req, res) => {
   try {
-    if (req.user && req.user.id !== req.query.id) {
-      return res.status(400).send("Not authorization");
-    }
     const update = await activateUser(req.query.id);
     if (update) {
       return res.status(200).send(update);

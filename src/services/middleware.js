@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { client as redis } from "../utils/redis";
+import { client as redis, get } from "../utils/redis";
 require("dotenv").config();
 
 export async function authUser(req, res, next) {
@@ -51,39 +51,22 @@ export async function authAdmin(req, res, next) {
 export async function authAll(req, res, next) {
   try {
     let auth = false;
-    jwt.verify(
-      req.signedCookies["adminToken"],
-      process.env.secret,
-      (errAdmin, resultAdmin) => {
-        if (resultAdmin) {
-          redis.get(req.signedCookies["adminToken"], (err, reply) => {
-            if (reply) {
-              req.admin = resultAdmin;
-              auth = true;
-            }
-          });
-        }
-        jwt.verify(
-          req.signedCookies["userToken"],
-          process.env.secret,
-          (errUser, resultUser) => {
-            if (resultUser) {
-              redis.get(req.signedCookies["userToken"], (err, reply) => {
-                if (reply) {
-                  req.user = resultUser;
-                  auth = true;
-                }
-              });
-            }
-          }
-        );
+    console.log("START");
+    redis.get(req.signedCookies["adminToken"], (err, reply) => {
+      if (reply) {
+        console.log("Admin: ", reply);
+        auth = true;
       }
-    );
-    if (auth) {
-      next();
-    } else {
-      throw "Invalid token";
-    }
+      redis.get(req.signedCookies["userToken"], (err, reply) => {
+        if (reply) {
+          console.log("User: ", reply);
+          auth = true;
+        }
+        if (auth) {
+          next();
+        }
+      });
+    });
   } catch (error) {
     return res.status(400).send("Not Authenticated!");
   }
