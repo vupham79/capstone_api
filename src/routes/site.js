@@ -11,10 +11,11 @@ import {
 } from "../services/siteDB";
 import { findAllUser } from "../services/userDB";
 import { activePost } from "../services/postDB";
-import { Site, Post, User, Theme, Event } from "../models";
+import { Site, Post, User, Theme, Event, Category } from "../models";
 const router = Router();
 
 router.get("/find", authAll, async (req, res) => {
+  console.log(req.query.id);
   try {
     const find = await findOneSite(req.query.id);
     if (find) {
@@ -27,6 +28,7 @@ router.get("/find", authAll, async (req, res) => {
 });
 
 router.get("/find/:sitepath", async (req, res) => {
+  console.log(req.params.sitepath);
   try {
     const find = await findSiteBySitepath(req.params.sitepath);
     if (find) {
@@ -50,9 +52,11 @@ router.get("/findAllByUser", authUser, async (req, res) => {
   }
 });
 
-router.get("/findAll", authAdmin, async (req, res) => {
+router.get("/findAll", authUser, async (req, res) => {
+  console.log("Abc");
   try {
     const find = await findAllUser();
+    console.log(find);
     if (find) {
       let siteList = [];
       find.forEach(user => {
@@ -65,7 +69,7 @@ router.get("/findAll", authAdmin, async (req, res) => {
             categories: site.categories,
             sitePath: site.sitePath,
             phone: site.phone,
-            id: user.id,
+            id: site.id,
             displayName: user.displayName,
             picture: user.picture,
             email: user.email,
@@ -73,6 +77,7 @@ router.get("/findAll", authAdmin, async (req, res) => {
           });
         });
       });
+      console.log(siteList);
       return res.status(200).send(siteList);
     }
     return res.status(204).send();
@@ -132,11 +137,13 @@ router.patch("/saveDesign", authUser, async (req, res) => {
     color,
     instagram,
     whatsapp,
-    email
+    email,
+    youtube
   } = req.body;
   try {
     const findTheme = await Theme.findOne({ id: theme });
     if (findTheme) {
+      //check null instagram, whatsapp, email, youtube
       if (!email || email === undefined || email.replace(/\s/g, "") === "") {
         email = null;
       }
@@ -147,8 +154,12 @@ router.patch("/saveDesign", authUser, async (req, res) => {
       ) {
         instagram = null;
       }
-      if (!email || email === undefined || email.replace(/\s/g, "") === "") {
-        email = null;
+      if (
+        !youtube ||
+        youtube === undefined ||
+        youtube.replace(/\s/g, "") === ""
+      ) {
+        youtube = null;
       }
       if (
         !whatsapp ||
@@ -207,17 +218,34 @@ router.post("/createNewSite", authUser, async (req, res) => {
     let eventList = [];
     let galleryList = [];
     const postsList = [];
-    let {
-      category,
-      pageUrl,
-      pageId,
-      isPublish,
-      sitepath,
-      instagram,
-      whatsapp,
-      email
-    } = req.body;
+    let { pageUrl, pageId, name, profile, sitepath, isPublish } = req.body;
+    //check null instagram, whatsapp, email, youtube
+    if (!email || email === undefined || email.replace(/\s/g, "") === "") {
+      email = null;
+    }
+    if (
+      !instagram ||
+      instagram === undefined ||
+      instagram.replace(/\s/g, "") === ""
+    ) {
+      instagram = null;
+    }
+    if (
+      !youtube ||
+      youtube === undefined ||
+      youtube.replace(/\s/g, "") === ""
+    ) {
+      youtube = null;
+    }
+    if (
+      !whatsapp ||
+      whatsapp === undefined ||
+      whatsapp.replace(/\s/g, "") === ""
+    ) {
+      whatsapp = null;
+    }
     //site path is empty, undefined or null
+    console.log(sitepath);
     if (
       !sitepath ||
       sitepath === undefined ||
@@ -291,31 +319,63 @@ router.post("/createNewSite", authUser, async (req, res) => {
           .then(_session => {
             session = _session;
             session.withTransaction(async () => {
-              //find theme
-              var theme = await Theme.findOne({
-                "categories.name": category
+              let categoryIdList = [];
+              const categoryList = await Category.find().select("id");
+              categoryList.forEach(category => {
+                categoryIdList.push(category.id);
               });
+              console.log(categoryIdList);
+              let categoryObjIdList = [];
+              data.category_list &&
+                data.category_list.forEach(async category => {
+                  if (!categoryIdList.includes(category.id)) {
+                    console.log(category);
+                    const category = await Category.create({
+                      id: category.id,
+                      name: category.name
+                    });
+                    console.log(category);
+                    categoryObjIdList.push(
+                      new mongoose.Types.ObjectId(category._id)
+                    );
+                  } else {
+                    const category = await Category.updateOne(
+                      { id: category.id },
+                      { name: category.name }
+                    );
+                    console.log(category);
+                    categoryObjIdList.push(
+                      new mongoose.Types.ObjectId(category._id)
+                    );
+                  }
+                });
+
+              //find theme
+              const theme = await Theme.findOne({
+                categories: { $in: categoryObjIdList }
+              });
+              console.log(theme);
               if (!theme) {
-                var theme = await Theme.findOne();
+                return res.status(400).send({ error: "Theme not existed!" });
               }
-              //insert site
+              // insert site
               const insert = await insertSite(pageId, {
                 phone: data.phone,
                 longitude: data.location ? data.location.longitude : null,
                 latitude: data.location ? data.location.latitude : null,
                 logo: data.picture ? data.picture.data.url : null,
-                fontTitle: theme.fontTitle,
-                fontBody: theme.fontBody,
-                color: theme.mainColor,
+                fontTitle: null,
+                fontBody: null,
+                color: null,
+                fontTitle: theme && theme.fontTitle,
+                fontBody: theme && theme.fontBody,
+                color: theme && theme.mainColor,
                 title: data.name,
                 address: data.single_line_address,
                 navItems: defaultNavItems,
                 theme: new mongoose.Types.ObjectId(theme._id),
+                theme: null,
                 cover: data.cover ? [data.cover.source] : null,
-                categories:
-                  data.category_list && data.category_list.length > 0
-                    ? data.category_list
-                    : null,
                 url: pageUrl,
                 isPublish: isPublish,
                 sitePath: sitepath,
@@ -339,13 +399,16 @@ router.post("/createNewSite", authUser, async (req, res) => {
                 //post list
                 data.posts &&
                   data.posts.data.forEach(async post => {
+                    console.log(post);
                     if (
                       post.attachments &&
                       post.attachments.data[0].media_type === "album"
                     ) {
+                      console.log(post.attachments.data[0].media_type);
                       const subAttachmentList = [];
                       post.attachments.data[0].subattachments.data.forEach(
                         subAttachment => {
+                          console.log(subAttachment.media.image.src);
                           subAttachmentList.push(subAttachment.media.image.src);
                           galleryList.push({
                             url: subAttachment.media.image.src,
@@ -371,6 +434,7 @@ router.post("/createNewSite", authUser, async (req, res) => {
                       post.attachments &&
                       post.attachments.data[0].media_type === "photo"
                     ) {
+                      console.log(post.attachments.data[0].media_type);
                       galleryList.push({
                         url: post.attachments.data[0].media.image.src,
                         target: post.attachments.data[0].target.url
@@ -393,6 +457,7 @@ router.post("/createNewSite", authUser, async (req, res) => {
                       post.attachments &&
                       post.attachments.data[0].media_type === "video"
                     ) {
+                      console.log(post.attachments.data[0].media_type);
                       postsList.push({
                         id: post.id,
                         message: post.message,

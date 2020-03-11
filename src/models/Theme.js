@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const ThemeSchema = new mongoose.Schema(
   {
@@ -23,20 +23,14 @@ const ThemeSchema = new mongoose.Schema(
       default: null
     },
     previewImage: {
-      type: String
+      type: String,
+      default: null
     },
-    categories: [
-      {
-        id: {
-          type: String,
-          default: null
-        },
-        name: {
-          type: String,
-          default: null
-        }
-      }
-    ]
+    previewUrl: {
+      type: String,
+      default: null
+    },
+    categories: [{ type: Schema.Types.ObjectId, ref: "Category" }]
   },
   {
     timestamps: true
