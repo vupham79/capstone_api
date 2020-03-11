@@ -53,12 +53,11 @@ router.get("/logout", async (req, res) => {
 // });
 
 router.patch("/deactivate/:id", authAll, async (req, res) => {
-  console.log(req.user);
   try {
-    if (req.user && req.user.id !== req.query.id) {
+    if (req.user && req.user.id !== req.params.id) {
       return res.status(400).send("Not authorization");
     }
-    const update = await deactivateUser(req.query.id);
+    const update = await deactivateUser(req.params.id);
     if (update) {
       return res.status(200).send(update);
     }
@@ -70,10 +69,10 @@ router.patch("/deactivate/:id", authAll, async (req, res) => {
 
 router.patch("/activate/:id", authAll, async (req, res) => {
   try {
-    if (req.user && req.user.id !== req.query.id) {
+    if (req.user && req.user.id !== req.params.id) {
       return res.status(400).send("Not authorization");
     }
-    const update = await activateUser(req.query.id);
+    const update = await activateUser(req.params.id);
     if (update) {
       return res.status(200).send(update);
     }
