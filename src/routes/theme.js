@@ -1,19 +1,24 @@
 import { Router } from "express";
-import { insertTheme, findAllTheme, editTheme, findOneTheme } from "../services/themeDB";
+import {
+  insertTheme,
+  findAllTheme,
+  editTheme,
+  findOneTheme
+} from "../services/themeDB";
 import { authAdmin, authAll } from "../services/middleware";
 const router = Router();
 
-router.post("/insert/:id", async (req, res) => {
-  try {
-    const insert = await insertTheme(req.params.id, req.body);
-    if (insert) {
-      return res.status(200).send(insert);
-    }
-    return res.status(204).send();
-  } catch (error) {
-    return res.status(400).send({ error });
-  }
-});
+// router.post("/insert/:id", async (req, res) => {
+//   try {
+//     const insert = await insertTheme(req.params.id, req.body);
+//     if (insert) {
+//       return res.status(200).send(insert);
+//     }
+//     return res.status(204).send();
+//   } catch (error) {
+//     return res.status(400).send({ error });
+//   }
+// });
 
 router.patch("/update/:id", authAdmin, async (req, res) => {
   try {

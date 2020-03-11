@@ -56,7 +56,6 @@ router.get("/findAll", authUser, async (req, res) => {
   console.log("Abc");
   try {
     const find = await findAllUser();
-    console.log(find);
     if (find) {
       let siteList = [];
       find.forEach(user => {
@@ -77,7 +76,6 @@ router.get("/findAll", authUser, async (req, res) => {
           });
         });
       });
-      console.log(siteList);
       return res.status(200).send(siteList);
     }
     return res.status(204).send();
