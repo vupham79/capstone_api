@@ -57,9 +57,6 @@ export async function authAll(req, res, next) {
       (errAdmin, resultAdmin) => {
         if (resultAdmin) {
           redis.get(req.signedCookies["adminToken"], (err, reply) => {
-            if (err) {
-              throw "Invalid token";
-            }
             if (reply) {
               req.admin = resultAdmin;
               auth = true;
@@ -72,9 +69,6 @@ export async function authAll(req, res, next) {
           (errUser, resultUser) => {
             if (resultUser) {
               redis.get(req.signedCookies["userToken"], (err, reply) => {
-                if (err) {
-                  throw "Invalid token";
-                }
                 if (reply) {
                   req.user = resultUser;
                   auth = true;
