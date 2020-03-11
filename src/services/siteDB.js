@@ -78,9 +78,7 @@ export async function insertSite(pageId, body) {
     sitePath: body.sitePath.toLowerCase(),
     isPublish: body.isPublish,
     about: body.about,
-    events: body.events,
-    whatsapp: body.whatsapp,
-    email: body.email
+    events: body.events
   });
   return insert;
 }

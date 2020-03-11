@@ -131,7 +131,9 @@ router.patch("/saveDesign", authUser, async (req, res) => {
     name,
     color,
     whatsapp,
-    email
+    email,
+    youtube,
+    instagram
   } = req.body;
   try {
     const findTheme = await Theme.findOne({ id: theme });
@@ -139,6 +141,20 @@ router.patch("/saveDesign", authUser, async (req, res) => {
       //check null whatsapp, email
       if (!email || email === undefined || email.replace(/\s/g, "") === "") {
         email = null;
+      }
+      if (
+        !instagram ||
+        instagram === undefined ||
+        instagram.replace(/\s/g, "") === ""
+      ) {
+        instagram = null;
+      }
+      if (
+        !youtube ||
+        youtube === undefined ||
+        youtube.replace(/\s/g, "") === ""
+      ) {
+        youtube = null;
       }
       if (
         !whatsapp ||
@@ -157,7 +173,9 @@ router.patch("/saveDesign", authUser, async (req, res) => {
           navItems: navItems && navItems.length > 0 ? navItems : null,
           theme: new mongoose.Types.ObjectId(findTheme._id),
           whatsapp: whatsapp,
-          email: email
+          email: email,
+          instagram: instagram,
+          youtube: youtube
         }
       );
       if (update) {
@@ -197,17 +215,6 @@ router.post("/createNewSite", async (req, res) => {
     let galleryList = [];
     const postsList = [];
     let { pageUrl, pageId, sitepath, isPublish } = req.body;
-    //check null whatsapp, email
-    if (!email || email === undefined || email.replace(/\s/g, "") === "") {
-      email = null;
-    }
-    if (
-      !whatsapp ||
-      whatsapp === undefined ||
-      whatsapp.replace(/\s/g, "") === ""
-    ) {
-      whatsapp = null;
-    }
     //site path is empty, undefined or null
     if (
       !sitepath ||
@@ -322,9 +329,6 @@ router.post("/createNewSite", async (req, res) => {
                 longitude: data.location ? data.location.longitude : null,
                 latitude: data.location ? data.location.latitude : null,
                 logo: data.picture ? data.picture.data.url : null,
-                fontTitle: null,
-                fontBody: null,
-                color: null,
                 fontTitle: theme && theme.fontTitle,
                 fontBody: theme && theme.fontBody,
                 color: theme && theme.mainColor,
@@ -332,15 +336,12 @@ router.post("/createNewSite", async (req, res) => {
                 address: data.single_line_address,
                 navItems: defaultNavItems,
                 theme: new mongoose.Types.ObjectId(theme._id),
-                theme: null,
                 cover: data.cover ? [data.cover.source] : null,
                 url: pageUrl,
                 isPublish: isPublish,
                 sitePath: sitepath,
                 about: data.about,
-                genre: data.genre,
-                whatsapp: whatsapp,
-                email: email
+                genre: data.genre
               });
               //find user
               await User.findOne({ id: req.user.id })
