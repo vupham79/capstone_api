@@ -5,6 +5,7 @@ import User from "./User";
 import Admin from "./Admin";
 import Post from "./Post";
 import Event from "./Event";
+import Category from "./Category";
 require("dotenv").config();
 
 const connectDb = () => {
@@ -23,4 +24,4 @@ const connectDb = () => {
     });
 };
 
-export { connectDb, User, Theme, Site, Admin, Post, Event, mongoose };
+export { connectDb, User, Theme, Site, Admin, Post, Event, Category, mongoose };
