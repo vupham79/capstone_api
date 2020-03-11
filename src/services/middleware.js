@@ -11,7 +11,6 @@ export async function authUser(req, res, next) {
           throw "Invalid token";
         }
         if (reply) {
-          console.log(reply);
           req.user = user;
           next();
         }
@@ -51,15 +50,12 @@ export async function authAdmin(req, res, next) {
 export async function authAll(req, res, next) {
   try {
     let auth = false;
-    console.log("START");
     redis.get(req.signedCookies["adminToken"], (err, reply) => {
       if (reply) {
-        console.log("Admin: ", reply);
         auth = true;
       }
       redis.get(req.signedCookies["userToken"], (err, reply) => {
         if (reply) {
-          console.log("User: ", reply);
           auth = true;
         }
         if (auth) {

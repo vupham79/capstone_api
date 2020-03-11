@@ -15,7 +15,6 @@ import { Site, Post, User, Theme, Event, Category } from "../models";
 const router = Router();
 
 router.get("/find", authAll, async (req, res) => {
-  console.log(req.query.id);
   try {
     const find = await findOneSite(req.query.id);
     if (find) {
@@ -28,7 +27,6 @@ router.get("/find", authAll, async (req, res) => {
 });
 
 router.get("/find/:sitepath", async (req, res) => {
-  console.log(req.params.sitepath);
   try {
     const find = await findSiteBySitepath(req.params.sitepath);
     if (find) {
@@ -53,7 +51,6 @@ router.get("/findAllByUser", authUser, async (req, res) => {
 });
 
 router.get("/findAll", authUser, async (req, res) => {
-  console.log("Abc");
   try {
     const find = await findAllUser();
     if (find) {
@@ -217,34 +214,35 @@ router.post("/createNewSite", authUser, async (req, res) => {
     let eventList = [];
     let galleryList = [];
     const postsList = [];
-    let { pageUrl, pageId, name, profile, sitepath, isPublish } = req.body;
+    console.log("hello");
+    let { pageUrl, pageId, sitepath, isPublish } = req.body;
     //check null instagram, whatsapp, email, youtube
-    if (!email || email === undefined || email.replace(/\s/g, "") === "") {
-      email = null;
-    }
-    if (
-      !instagram ||
-      instagram === undefined ||
-      instagram.replace(/\s/g, "") === ""
-    ) {
-      instagram = null;
-    }
-    if (
-      !youtube ||
-      youtube === undefined ||
-      youtube.replace(/\s/g, "") === ""
-    ) {
-      youtube = null;
-    }
-    if (
-      !whatsapp ||
-      whatsapp === undefined ||
-      whatsapp.replace(/\s/g, "") === ""
-    ) {
-      whatsapp = null;
-    }
+    // if (!email || email === undefined || email.replace(/\s/g, "") === "") {
+    //   email = null;
+    // }
+    // if (
+    //   !instagram ||
+    //   instagram === undefined ||
+    //   instagram.replace(/\s/g, "") === ""
+    // ) {
+    //   instagram = null;
+    // }
+    // if (
+    //   !youtube ||
+    //   youtube === undefined ||
+    //   youtube.replace(/\s/g, "") === ""
+    // ) {
+    //   youtube = null;
+    // }
+    // if (
+    //   !whatsapp ||
+    //   whatsapp === undefined ||
+    //   whatsapp.replace(/\s/g, "") === ""
+    // ) {
+    //   whatsapp = null;
+    // }
     //site path is empty, undefined or null
-    console.log(sitepath);
+    console.log("Sitepath: ", sitepath);
     if (
       !sitepath ||
       sitepath === undefined ||
@@ -323,17 +321,14 @@ router.post("/createNewSite", authUser, async (req, res) => {
               categoryList.forEach(category => {
                 categoryIdList.push(category.id);
               });
-              console.log(categoryIdList);
               let categoryObjIdList = [];
               data.category_list &&
                 data.category_list.forEach(async category => {
                   if (!categoryIdList.includes(category.id)) {
-                    console.log(category);
                     const category = await Category.create({
                       id: category.id,
                       name: category.name
                     });
-                    console.log(category);
                     categoryObjIdList.push(
                       new mongoose.Types.ObjectId(category._id)
                     );
@@ -342,7 +337,6 @@ router.post("/createNewSite", authUser, async (req, res) => {
                       { id: category.id },
                       { name: category.name }
                     );
-                    console.log(category);
                     categoryObjIdList.push(
                       new mongoose.Types.ObjectId(category._id)
                     );
@@ -353,7 +347,6 @@ router.post("/createNewSite", authUser, async (req, res) => {
               const theme = await Theme.findOne({
                 categories: { $in: categoryObjIdList }
               });
-              console.log(theme);
               if (!theme) {
                 return res.status(400).send({ error: "Theme not existed!" });
               }
@@ -382,7 +375,8 @@ router.post("/createNewSite", authUser, async (req, res) => {
                 genre: data.genre,
                 instagram: instagram,
                 whatsapp: whatsapp,
-                email: email
+                email: email,
+                youtube: youtube
               });
               //find user
               await User.findOne({ id: req.user.id })
@@ -398,16 +392,13 @@ router.post("/createNewSite", authUser, async (req, res) => {
                 //post list
                 data.posts &&
                   data.posts.data.forEach(async post => {
-                    console.log(post);
                     if (
                       post.attachments &&
                       post.attachments.data[0].media_type === "album"
                     ) {
-                      console.log(post.attachments.data[0].media_type);
                       const subAttachmentList = [];
                       post.attachments.data[0].subattachments.data.forEach(
                         subAttachment => {
-                          console.log(subAttachment.media.image.src);
                           subAttachmentList.push(subAttachment.media.image.src);
                           galleryList.push({
                             url: subAttachment.media.image.src,
@@ -433,7 +424,6 @@ router.post("/createNewSite", authUser, async (req, res) => {
                       post.attachments &&
                       post.attachments.data[0].media_type === "photo"
                     ) {
-                      console.log(post.attachments.data[0].media_type);
                       galleryList.push({
                         url: post.attachments.data[0].media.image.src,
                         target: post.attachments.data[0].target.url
@@ -456,7 +446,6 @@ router.post("/createNewSite", authUser, async (req, res) => {
                       post.attachments &&
                       post.attachments.data[0].media_type === "video"
                     ) {
-                      console.log(post.attachments.data[0].media_type);
                       postsList.push({
                         id: post.id,
                         message: post.message,
@@ -843,7 +832,6 @@ router.patch("/syncData", authUser, async (req, res) => {
                     let existedPostIdList = [];
                     site.posts &&
                       site.posts.forEach(existedPost => {
-                        console.log("hhello");
                         existedPostObjIdList.push(
                           new mongoose.Types.ObjectId(existedPost._id)
                         );
