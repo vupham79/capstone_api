@@ -177,7 +177,8 @@ router.patch("/saveDesign", authUser, async (req, res) => {
           theme: new mongoose.Types.ObjectId(findTheme._id),
           instagram: instagram,
           whatsapp: whatsapp,
-          email: email
+          email: email,
+          youtube: youtube
         }
       );
       if (update) {
