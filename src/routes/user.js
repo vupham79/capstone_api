@@ -54,7 +54,7 @@ router.get("/logout", async (req, res) => {
 
 router.patch("/deactivate/:id", authAdmin, async (req, res) => {
   try {
-    const update = await deactivateUser(req.query.id);
+    const update = await deactivateUser(req.params.id);
     if (update) {
       return res.status(200).send(update);
     }

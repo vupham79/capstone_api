@@ -130,15 +130,15 @@ router.patch("/saveDesign", authUser, async (req, res) => {
     theme,
     name,
     color,
-    instagram,
     whatsapp,
     email,
-    youtube
+    youtube,
+    instagram
   } = req.body;
   try {
     const findTheme = await Theme.findOne({ id: theme });
     if (findTheme) {
-      //check null instagram, whatsapp, email, youtube
+      //check null whatsapp, email
       if (!email || email === undefined || email.replace(/\s/g, "") === "") {
         email = null;
       }
@@ -172,9 +172,9 @@ router.patch("/saveDesign", authUser, async (req, res) => {
           color: color,
           navItems: navItems && navItems.length > 0 ? navItems : null,
           theme: new mongoose.Types.ObjectId(findTheme._id),
-          instagram: instagram,
           whatsapp: whatsapp,
           email: email,
+          instagram: instagram,
           youtube: youtube
         }
       );
@@ -209,40 +209,13 @@ router.patch("/saveHomePageImage", authUser, async (req, res) => {
   }
 });
 
-router.post("/createNewSite", authUser, async (req, res) => {
+router.post("/createNewSite", async (req, res) => {
   try {
     let eventList = [];
     let galleryList = [];
     const postsList = [];
-    console.log("hello");
     let { pageUrl, pageId, sitepath, isPublish } = req.body;
-    //check null instagram, whatsapp, email, youtube
-    // if (!email || email === undefined || email.replace(/\s/g, "") === "") {
-    //   email = null;
-    // }
-    // if (
-    //   !instagram ||
-    //   instagram === undefined ||
-    //   instagram.replace(/\s/g, "") === ""
-    // ) {
-    //   instagram = null;
-    // }
-    // if (
-    //   !youtube ||
-    //   youtube === undefined ||
-    //   youtube.replace(/\s/g, "") === ""
-    // ) {
-    //   youtube = null;
-    // }
-    // if (
-    //   !whatsapp ||
-    //   whatsapp === undefined ||
-    //   whatsapp.replace(/\s/g, "") === ""
-    // ) {
-    //   whatsapp = null;
-    // }
     //site path is empty, undefined or null
-    console.log("Sitepath: ", sitepath);
     if (
       !sitepath ||
       sitepath === undefined ||
@@ -356,9 +329,6 @@ router.post("/createNewSite", authUser, async (req, res) => {
                 longitude: data.location ? data.location.longitude : null,
                 latitude: data.location ? data.location.latitude : null,
                 logo: data.picture ? data.picture.data.url : null,
-                fontTitle: null,
-                fontBody: null,
-                color: null,
                 fontTitle: theme && theme.fontTitle,
                 fontBody: theme && theme.fontBody,
                 color: theme && theme.mainColor,
@@ -366,17 +336,12 @@ router.post("/createNewSite", authUser, async (req, res) => {
                 address: data.single_line_address,
                 navItems: defaultNavItems,
                 theme: new mongoose.Types.ObjectId(theme._id),
-                theme: null,
                 cover: data.cover ? [data.cover.source] : null,
                 url: pageUrl,
                 isPublish: isPublish,
                 sitePath: sitepath,
                 about: data.about,
-                genre: data.genre,
-                instagram: instagram,
-                whatsapp: whatsapp,
-                email: email,
-                youtube: youtube
+                genre: data.genre
               });
               //find user
               await User.findOne({ id: req.user.id })
@@ -884,6 +849,7 @@ router.patch("/syncData", authUser, async (req, res) => {
     }
     return res.status(400).send({ error: "Facebook page data not existed!" });
   } catch (error) {
+    console.log(error);
     return res.status(400).send({ error });
   }
 });
