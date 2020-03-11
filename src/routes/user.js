@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { findAllUser, deactivateUser, activateUser } from "../services/userDB";
 import { authAdmin, authAll } from "../services/middleware";
+import { client as redis } from "../utils/redis";
 const router = Router();
 
 router.get("/logout", async (req, res) => {
   try {
+    redis.del(req.signedCookies["userToken"]);
     return res
       .clearCookie("userToken")
       .status(200)

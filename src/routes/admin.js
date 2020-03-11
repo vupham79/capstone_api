@@ -1,6 +1,7 @@
 import { Router } from "express";
 import passport from "../utils/passport";
 import jwt from "jsonwebtoken";
+import { client as redis } from "../utils/redis";
 require("dotenv").config();
 const router = Router();
 
@@ -13,6 +14,7 @@ router.post(
         { username: req.user.username, _id: req.user._id },
         process.env.secret
       );
+      redis.set(token, req.user.username);
       return res
         .status(200)
         .cookie("adminToken", token, {
@@ -29,6 +31,7 @@ router.post(
 
 router.get("/logout", async (req, res) => {
   try {
+    redis.del(req.signedCookies["adminToken"]);
     return res
       .clearCookie("adminToken")
       .status(200)

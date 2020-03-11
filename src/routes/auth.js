@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { login } from "../services/auth";
 import jwt from "jsonwebtoken";
+import { client as redis } from "../utils/redis";
+
 require("dotenv").config();
 const router = Router();
 
@@ -13,6 +15,7 @@ router.post("/", async (req, res) => {
         { accessToken: accessToken, email: email, id: id },
         process.env.secret
       );
+      redis.set(token, id);
       res.cookie("userToken", token, {
         expires: new Date(Date.now() + 365 * 24 * 3600 * 1000),
         signed: true
