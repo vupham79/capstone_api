@@ -6,7 +6,6 @@ import user from "./user";
 import admin from "./admin";
 import post from "./post";
 import sitepath from "./sitepath";
-import category from "./category";
 
 export default app => {
   app.use("/theme", theme);
@@ -17,5 +16,4 @@ export default app => {
   app.use("/admin", admin);
   app.use("/post", post);
   app.use("/sitePath", sitepath);
-  app.use("/category", category);
 };
