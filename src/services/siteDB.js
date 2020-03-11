@@ -79,7 +79,6 @@ export async function insertSite(pageId, body) {
     isPublish: body.isPublish,
     about: body.about,
     events: body.events,
-    instagram: body.instagram,
     whatsapp: body.whatsapp,
     email: body.email
   });

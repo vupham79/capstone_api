@@ -53,6 +53,7 @@ router.get("/logout", async (req, res) => {
 // });
 
 router.patch("/deactivate/:id", authAll, async (req, res) => {
+  console.log(req.user);
   try {
     if (req.user && req.user.id !== req.query.id) {
       return res.status(400).send("Not authorization");

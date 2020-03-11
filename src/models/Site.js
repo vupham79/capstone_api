@@ -111,19 +111,11 @@ const SiteSchema = new mongoose.Schema(
       type: Date,
       default: null
     },
-    instagram: {
-      type: String,
-      default: null
-    },
     whatsapp: {
       type: String,
       default: null
     },
     email: {
-      type: String,
-      default: null
-    },
-    youtube: {
       type: String,
       default: null
     },
