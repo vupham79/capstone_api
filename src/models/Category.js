@@ -2,14 +2,9 @@ import mongoose from "mongoose";
 
 const CategorySchema = new mongoose.Schema(
   {
-    id: {
-      type: String,
-      default: null,
-      unique: [true, "Category already existed!"]
-    },
     name: {
       type: String,
-      default: null
+      unique: [true, "Category already existed!"]
     }
   },
   {

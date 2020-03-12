@@ -91,10 +91,6 @@ const SiteSchema = new mongoose.Schema(
       type: String,
       default: null
     },
-    genre: {
-      type: String,
-      default: null
-    },
     galleries: [
       {
         url: {

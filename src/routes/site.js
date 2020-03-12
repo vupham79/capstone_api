@@ -293,40 +293,35 @@ router.post("/createNewSite", authUser, async (req, res) => {
           .then(_session => {
             session = _session;
             session.withTransaction(async () => {
-              let categoryIdList = [];
-              const categoryList = await Category.find().select("id");
+              let categoryInDB = [];
+              const categoryList = await Category.find();
               console.log(categoryList);
               categoryList.forEach(category => {
-                categoryIdList.push(category.id);
+                categoryInDB.push(category.name);
               });
               let categoryObjIdList = [];
               data.category_list &&
                 data.category_list.forEach(async category => {
-                  if (!categoryIdList.includes(category.id)) {
-                    const category = await Category.create({
-                      id: category.id,
+                  if (!categoryInDB.includes(category.name)) {
+                    await Category.create({
                       name: category.name
                     });
+                  }
+                  let find = await Category.findOne({
+                    name: category.name
+                  });
+                  if (find) {
                     categoryObjIdList.push(
-                      new mongoose.Types.ObjectId(category._id)
-                    );
-                  } else {
-                    const category = await Category.updateOne(
-                      { id: category.id },
-                      { name: category.name }
-                    );
-                    categoryObjIdList.push(
-                      new mongoose.Types.ObjectId(category._id)
+                      new mongoose.Types.ObjectId(find._id)
                     );
                   }
                 });
-
               //find theme
               const theme = await Theme.findOne({
                 categories: { $in: categoryObjIdList }
               });
               if (!theme) {
-                return res.status(400).send({ error: "Theme not existed!" });
+                theme = await Theme.findOne();
               }
               // insert site
               const insert = await insertSite(pageId, {
@@ -345,8 +340,7 @@ router.post("/createNewSite", authUser, async (req, res) => {
                 url: pageUrl,
                 isPublish: isPublish,
                 sitePath: sitepath,
-                about: data.about,
-                genre: data.genre
+                about: data.about
               });
               //find user
               await User.findOne({ id: req.user.id })
