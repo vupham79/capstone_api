@@ -106,8 +106,10 @@ router.patch("/publish", authAll, async (req, res) => {
 });
 
 router.patch("/activePost", authUser, async (req, res) => {
-  const { activeList, deactiveList } = req.body;
+  const { posts } = req.body;
   try {
+    const activeList = posts.filter(post => post.isActive === true)
+    const deactiveList = posts.filter(post => post.isActive === false)
     const update = await activePost({
       activeList: activeList && activeList.length > 0 && activeList,
       deactiveList: deactiveList && deactiveList.length > 0 && deactiveList
