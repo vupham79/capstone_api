@@ -883,72 +883,74 @@ router.patch("/syncData", authUser, async (req, res) => {
                     url: "facebook.com/" + event.id
                   });
                 });
-                //event Id list
-                let eventIdList = [];
-                eventList.forEach(event => {
-                  eventIdList.push(event.id);
-                });
-                //insert and update event
-                await Event.findOneAndUpdate(
-                  { id: { $in: eventIdList } },
-                  eventList,
-                  {
-                    upsert: true,
-                    useFindAndModify: false
-                  },
-                  async (error, result) => {
-                    if (error) {
-                      // console.log(error);
-                    }
-                    if (!result) {
-                      //find existed event id
-                      const site = await Site.findOne({ id: pageId })
-                        .select("events")
-                        .populate("events");
-                      let existedEventObjIdList = [];
-                      let existedEventIdList = [];
-                      site.events.forEach(existedEvent => {
-                        existedEventObjIdList.push(
-                          new mongoose.Types.ObjectId(existedEvent._id)
-                        );
-                        existedEventIdList.push(existedEvent.id);
-                      });
-                      //update existing event
-                      let newEventList = [];
-                      eventList.forEach(async event => {
-                        if (!existedEventIdList.includes(event.id)) {
-                          newEventList.push(event);
-                        } else {
-                          await Event.updateOne({ id: event.id }, event);
-                        }
-                      });
-                      //create new event and save new event into site
-                      await Event.create(newEventList, async (err, docs) => {
-                        if (err) {
-                          console.log(err);
-                        }
-                        if (docs) {
-                          //save new event
-                          let newEventObjList = [];
-                          docs.forEach(event => {
-                            newEventObjList.push(
-                              new mongoose.Types.ObjectId(event._id)
-                            );
-                          });
-                          await Site.updateOne(
-                            { id: pageId },
-                            {
-                              $push: {
-                                events:
-                                  newEventObjList.length > 0 ? newEventObjList : null
-                              }
-                            }
-                          );
-                        }
-                      });
-                    }
+              //event Id list
+              let eventIdList = [];
+              eventList.forEach(event => {
+                eventIdList.push(event.id);
+              });
+              //insert and update event
+              await Event.findOneAndUpdate(
+                { id: { $in: eventIdList } },
+                eventList,
+                {
+                  upsert: true,
+                  useFindAndModify: false
+                },
+                async (error, result) => {
+                  if (error) {
+                    // console.log(error);
                   }
-                );
+                  if (!result) {
+                    //find existed event id
+                    const site = await Site.findOne({ id: pageId })
+                      .select("events")
+                      .populate("events");
+                    let existedEventObjIdList = [];
+                    let existedEventIdList = [];
+                    site.events.forEach(existedEvent => {
+                      existedEventObjIdList.push(
+                        new mongoose.Types.ObjectId(existedEvent._id)
+                      );
+                      existedEventIdList.push(existedEvent.id);
+                    });
+                    //update existing event
+                    let newEventList = [];
+                    eventList.forEach(async event => {
+                      if (!existedEventIdList.includes(event.id)) {
+                        newEventList.push(event);
+                      } else {
+                        await Event.updateOne({ id: event.id }, event);
+                      }
+                    });
+                    //create new event and save new event into site
+                    await Event.create(newEventList, async (err, docs) => {
+                      if (err) {
+                        console.log(err);
+                      }
+                      if (docs) {
+                        //save new event
+                        let newEventObjList = [];
+                        docs.forEach(event => {
+                          newEventObjList.push(
+                            new mongoose.Types.ObjectId(event._id)
+                          );
+                        });
+                        await Site.updateOne(
+                          { id: pageId },
+                          {
+                            $push: {
+                              events:
+                                newEventObjList.length > 0
+                                  ? newEventObjList
+                                  : null
+                            }
+                          }
+                        );
+                      }
+                    });
+                  }
+                }
+              );
               if (update) {
                 return res.status(200).send(update);
               } else {
