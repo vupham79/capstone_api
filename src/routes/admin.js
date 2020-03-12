@@ -32,7 +32,7 @@ router.get("/logout", async (req, res) => {
   try {
     redis.del(req.signedCookies["adminToken"]);
     return res
-      .clearCookie("adminToken")
+      .cookie("adminToken", "", { maxAge: Date.now() })
       .status(200)
       .send();
   } catch (error) {
