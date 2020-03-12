@@ -317,7 +317,7 @@ router.post("/createNewSite", authUser, async (req, res) => {
                   }
                 });
               //find theme
-              const theme = await Theme.findOne({
+              let theme = await Theme.findOne({
                 categories: { $in: categoryObjIdList }
               });
               if (!theme) {

@@ -24,4 +24,4 @@ const connectDb = () => {
     });
 };
 
-export { connectDb, User, Theme, Site, Admin, Post, Event, mongoose };
+export { connectDb, User, Theme, Site, Admin, Post, Event, Category, mongoose };
