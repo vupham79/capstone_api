@@ -115,7 +115,7 @@ router.patch("/activePost", authUser, async (req, res) => {
       deactiveList: deactiveList && deactiveList.length > 0 && deactiveList
     });
     if (update) {
-      return res.status(200).send(update);
+      return res.status(200).send(posts);
     }
     return res.status(400).send({ error: "Update failed!" });
   } catch (error) {
@@ -218,6 +218,7 @@ router.post("/createNewSite", authUser, async (req, res) => {
     let galleryList = [];
     const postsList = [];
     let { pageUrl, pageId, sitepath, isPublish } = req.body;
+    console.log(isPublish);
 
     //site path is empty, undefined or null
     if (
@@ -510,7 +511,6 @@ router.post("/createNewSite", authUser, async (req, res) => {
                     );
                   }
                 });
-
                 //return
                 return res.status(200).send(insert);
               } else {
@@ -838,6 +838,66 @@ router.patch("/syncData", authUser, async (req, res) => {
                   }
                 }
               );
+
+              //event list
+              data.events &&
+                data.events.data &&
+                data.events.data.forEach(event => {
+                  //set place
+                  let place = {
+                    name: null,
+                    street: null,
+                    city: null,
+                    country: null
+                  };
+                  if (event.place) {
+                    place.name = event.place.name;
+                    if (event.place.location) {
+                      place.street =
+                        event.place.location.street !== undefined
+                          ? event.place.location.street
+                          : null;
+                      place.city =
+                        event.place.location.city !== undefined
+                          ? event.place.location.city
+                          : null;
+                      place.country =
+                        event.place.location.country !== undefined
+                          ? event.place.location.country
+                          : null;
+                    }
+                  } else {
+                    place = null;
+                  }
+                  //event list
+                  eventList.push({
+                    id: event.id,
+                    name: event.name,
+                    description: event.description,
+                    cover: event.cover ? event.cover.source : null,
+                    startTime: event.start_time,
+                    endTime: event.end_time,
+                    place: place,
+                    isCanceled: event.is_canceled,
+                    url: "facebook.com/" + event.id
+                  });
+                });
+              await Event.insertMany(eventList, async (error, docs) => {
+                if (error) {
+                  return error;
+                } else {
+                  const eventIdList = [];
+                  docs.forEach(doc => {
+                    eventIdList.push(doc._id);
+                  });
+                  await Site.updateOne(
+                    { id: pageId },
+                    {
+                      events: eventIdList.length > 0 ? eventIdList : null
+                    }
+                  );
+                }
+              });
               if (update) {
                 return res.status(200).send(update);
               } else {
