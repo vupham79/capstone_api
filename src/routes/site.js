@@ -135,6 +135,7 @@ router.patch("/saveDesign", authUser, async (req, res) => {
     youtube,
     instagram
   } = req.body;
+
   try {
     const findTheme = await Theme.findOne({ id: theme });
     if (findTheme) {
@@ -209,12 +210,13 @@ router.patch("/saveHomePageImage", authUser, async (req, res) => {
   }
 });
 
-router.post("/createNewSite", async (req, res) => {
+router.post("/createNewSite", authUser, async (req, res) => {
   try {
     let eventList = [];
     let galleryList = [];
     const postsList = [];
     let { pageUrl, pageId, sitepath, isPublish } = req.body;
+
     //site path is empty, undefined or null
     if (
       !sitepath ||
@@ -228,6 +230,7 @@ router.post("/createNewSite", async (req, res) => {
     const isExistedSitePath = await Site.findOne({
       sitePath: sitepath.toLowerCase()
     });
+
     if (isExistedSitePath) {
       return res
         .status(400)
@@ -282,6 +285,7 @@ router.post("/createNewSite", async (req, res) => {
       }
       const siteExist = await findOneSite(pageId);
       //if site not existed
+      console.log(siteExist);
       if (!siteExist) {
         let session;
         return Site.createCollection()
@@ -291,6 +295,7 @@ router.post("/createNewSite", async (req, res) => {
             session.withTransaction(async () => {
               let categoryIdList = [];
               const categoryList = await Category.find().select("id");
+              console.log(categoryList);
               categoryList.forEach(category => {
                 categoryIdList.push(category.id);
               });

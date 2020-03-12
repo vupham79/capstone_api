@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { client as redis, get } from "../utils/redis";
+import { client as redis } from "../utils/redis_";
 require("dotenv").config();
 
 export async function authUser(req, res, next) {

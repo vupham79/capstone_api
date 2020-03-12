@@ -1,5 +1,5 @@
 import { User, Site } from "../models";
-import { client as redis } from "../utils/redis";
+import { client as redis } from "../utils/redis_";
 export async function deactivateUser(id) {
   const user = await User.findOne({ id: id });
   redis.del(user.token);

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { findAllUser, deactivateUser, activateUser } from "../services/userDB";
 import { authAdmin } from "../services/middleware";
-import { client as redis } from "../utils/redis";
+import { client as redis } from "../utils/redis_";
 import { login } from "../services/userDB";
 import jwt from "jsonwebtoken";
 const router = Router();
