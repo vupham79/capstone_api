@@ -27,7 +27,7 @@ export async function getSyncData({ pageId, accessToken }) {
   const data = await axios({
     params: {
       fields:
-        "cover,phone,category_list,about,genre," +
+        "cover,phone,category_list,about," +
         "location,single_line_address,albums{picture,link}," +
         "posts{message,created_time,attachments{title,media_type,subattachments,media,target}}",
       locale: "en_US",
