@@ -1,7 +1,7 @@
 import { Router } from "express";
 import passport from "../utils/passport";
 import jwt from "jsonwebtoken";
-import { client as redis } from "../utils/redis";
+import { client as redis } from "../utils/redis_";
 require("dotenv").config();
 const router = Router();
 

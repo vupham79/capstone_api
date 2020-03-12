@@ -5,7 +5,7 @@ import User from "./User";
 import Admin from "./Admin";
 import Post from "./Post";
 import Event from "./Event";
-// import Category from "./Category";
+import Category from "./Category";
 require("dotenv").config();
 
 const connectDb = () => {
