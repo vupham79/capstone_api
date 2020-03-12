@@ -26,6 +26,10 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: true
     },
+    token: {
+      type: String,
+      default: null
+    },
     sites: [{ type: Schema.Types.ObjectId, ref: "Site" }]
   },
   {
