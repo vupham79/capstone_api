@@ -1,59 +1,16 @@
-import { User, Site, mongoose } from "../models";
-
-// export async function createUser() {
-//   const site = await Site.findOne({ email: "109919550538707" });
-//   const user = await User.create([
-//     {
-//       id: "1",
-//       displayName: "Hoang Cao",
-//       email: "cmhoang123@gmail.com",
-//       phone: "0907419552",
-//       accessToken:
-//         "EAAMIaToJEsABAOgPRL0cXTP1KCUBddRZAUhfWWxiH1xIZCqcyU0yXbL2rlXWxgN0keFOLZC0Wcb4YvBv5guO7t4AOaEJomXxF8ZAcmnZACYRQh1NJywBwVyHZCnggdZABV7Kn8PahQFTCbGPKZAXl4fyDL9SAtVKyKRpbVpMjY7wZBj312HDfO5OYoKK62WvZCKWPAB6xnrdFW9gZDZD",
-//       isActivated: true,
-//       sites: [new mongoose.Types.ObjectId(site._id)]
-//     }
-//   ]);
-//   return user;
-// }
-
-// export async function insertUser(id, body) {
-//   const insert = await User.collection.insertOne({
-//     id: id,
-//     displayName: body.displayName,
-//     email: body.email,
-//     phone: body.phone,
-//     accessToken: body.accessToken,
-//     picture: body.picture,
-//     isActivated: true,
-//     sites: body.sites ? body.sites : null
-//   });
-//   return insert;
-// }
-
-// export async function editUser(email, body) {
-//   const update = await User.updateOne(
-//     { email: email },
-//     {
-//       displayName: body.displayName,
-//       email: body.email,
-//       phone: body.phone,
-//       accessToken: body.accessToken,
-//       picture: body.picture
-//     }
-//   );
-//   return update;
-// }
-
+import { User, Site } from "../models";
+import { client as redis } from "../utils/redis";
 export async function deactivateUser(id) {
-  await User.updateOne(
+  const user = await User.findOne({ id: id });
+  redis.del(user.token);
+  User.updateOne(
     { id: id },
     {
-      isActivated: false
+      isActivated: false,
+      token: null
     }
   );
-  const user = await User.findOne({ id: id });
-  await Site.updateMany(
+  Site.updateMany(
     { _id: { $in: user.sites } },
     {
       isPublish: false
@@ -83,6 +40,28 @@ export async function findAllUser() {
     });
 }
 
-// export async function findOneUser(email) {
-//   return await User.findOne({ email: email });
-// }
+export const login = async ({ id, name, email, picture, token }) => {
+  const user = await User.findOne({
+    email
+  });
+  if (user) {
+    if (!user.isActivated) {
+      return false;
+    }
+    user.update({
+      token: token
+    });
+    return true;
+  } else {
+    const create = await User.create({
+      id: id,
+      displayName: name,
+      email: email,
+      picture: picture
+    });
+    if (create) {
+      return true;
+    }
+    return false;
+  }
+};
