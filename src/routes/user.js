@@ -66,7 +66,7 @@ router.patch("/deactivate/:id", authAdmin, async (req, res) => {
 
 router.patch("/activate/:id", authAdmin, async (req, res) => {
   try {
-    const update = await activateUser(req.query.id);
+    const update = await activateUser(req.params.id);
     if (update) {
       return res.status(200).send(update);
     }
