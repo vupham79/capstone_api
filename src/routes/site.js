@@ -1,7 +1,7 @@
 import { Router } from "express";
 import mongoose from "mongoose";
 import { getPageData, getSyncData, getSyncEvent } from "../services/fbPage";
-import { authUser, authAll, authAdmin } from "../services/middleware";
+import { authUser, authAll } from "../services/middleware";
 import {
   findAllSiteByUser,
   findOneSite,
@@ -108,8 +108,8 @@ router.patch("/publish", authAll, async (req, res) => {
 router.patch("/activePost", authUser, async (req, res) => {
   const { posts } = req.body;
   try {
-    const activeList = posts.filter(post => post.isActive === true)
-    const deactiveList = posts.filter(post => post.isActive === false)
+    const activeList = posts.filter(post => post.isActive === true);
+    const deactiveList = posts.filter(post => post.isActive === false);
     const update = await activePost({
       activeList: activeList && activeList.length > 0 && activeList,
       deactiveList: deactiveList && deactiveList.length > 0 && deactiveList
@@ -285,9 +285,10 @@ router.post("/createNewSite", authUser, async (req, res) => {
           .status(400)
           .send({ error: "Facebook page data not existed!" });
       }
-      const siteExist = await findOneSite(pageId);
+      const siteExist = await Site.findOne({
+        id: pageId
+      });
       //if site not existed
-      console.log(siteExist);
       if (!siteExist) {
         let session;
         return Site.createCollection()
@@ -297,7 +298,6 @@ router.post("/createNewSite", authUser, async (req, res) => {
             session.withTransaction(async () => {
               let categoryInDB = [];
               const categoryList = await Category.find();
-              console.log(categoryList);
               categoryList.forEach(category => {
                 categoryInDB.push(category.name);
               });
