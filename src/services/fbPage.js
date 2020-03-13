@@ -43,7 +43,7 @@ export async function getPageData({ pageId, accessToken }) {
   const data = await axios({
     params: {
       fields:
-        "name,cover,phone,category_list,picture,about," +
+        "name,cover,phone,category_list,about," +
         "location,single_line_address,albums{picture,link}," +
         "posts{message,created_time,attachments{title,media_type,subattachments,media,target}}," +
         "events{id,name,description,place,is_canceled,end_time,start_time,cover}",
@@ -52,5 +52,14 @@ export async function getPageData({ pageId, accessToken }) {
     },
     url: process.env.facebookAPI + pageId
   });
-  return data.data;
+  const logo = await axios({
+    params: {
+      access_token: accessToken
+    },
+    url: process.env.facebookAPI + pageId + "/picture?type=large&redirect=0"
+  });
+  return {
+    data: data.data,
+    logo: logo.data.data.url
+  };
 }

@@ -218,8 +218,6 @@ router.post("/createNewSite", authUser, async (req, res) => {
     let galleryList = [];
     const postsList = [];
     let { pageUrl, pageId, sitepath, isPublish } = req.body;
-    console.log(isPublish);
-
     //site path is empty, undefined or null
     if (
       !sitepath ||
@@ -240,7 +238,7 @@ router.post("/createNewSite", authUser, async (req, res) => {
         .send({ error: "A website with this sitepath already existed!" });
     }
     //get page data
-    const data = await getPageData({
+    const page = await getPageData({
       pageId: pageId,
       accessToken: req.user.accessToken
     }).catch(error => {
@@ -280,8 +278,8 @@ router.post("/createNewSite", authUser, async (req, res) => {
       }
     ];
     //if fb api data existed
-    if (data) {
-      if (data.statusCode !== undefined) {
+    if (page.data) {
+      if (page.data.statusCode !== undefined) {
         return res
           .status(400)
           .send({ error: "Facebook page data not existed!" });
@@ -303,8 +301,8 @@ router.post("/createNewSite", authUser, async (req, res) => {
                 categoryInDB.push(category.name);
               });
               let categoryObjIdList = [];
-              data.category_list &&
-                data.category_list.forEach(async category => {
+              page.data.category_list &&
+                page.data.category_list.forEach(async category => {
                   if (!categoryInDB.includes(category.name)) {
                     await Category.create({
                       name: category.name
@@ -328,22 +326,33 @@ router.post("/createNewSite", authUser, async (req, res) => {
               }
               // insert site
               const insert = await insertSite(pageId, {
-                phone: data.phone,
-                longitude: data.location ? data.location.longitude : null,
-                latitude: data.location ? data.location.latitude : null,
-                logo: data.picture ? data.picture.data.url : null,
+                phone: page.data.phone,
+                longitude: page.data.location
+                  ? page.data.location.longitude
+                  : null,
+                latitude: page.data.location
+                  ? page.data.location.latitude
+                  : null,
+                logo: page.logo
+                  ? page.logo
+                      .replace(/\&amp\;/g, "&")
+                      .replace(/\&gt\;/g, ">")
+                      .replace(/\&lt\;/g, "<")
+                      .replace(/\&quot\;/g, "'")
+                      .replace(/\&\#39\;/g, "'")
+                  : null,
                 fontTitle: theme && theme.fontTitle,
                 fontBody: theme && theme.fontBody,
                 color: theme && theme.mainColor,
-                title: data.name,
-                address: data.single_line_address,
+                title: page.data.name,
+                address: page.data.single_line_address,
                 navItems: defaultNavItems,
                 theme: new mongoose.Types.ObjectId(theme._id),
-                cover: data.cover ? [data.cover.source] : null,
+                cover: page.data.cover ? [page.data.cover.source] : null,
                 url: pageUrl,
                 isPublish: isPublish,
                 sitePath: sitepath,
-                about: data.about
+                about: page.data.about
               });
               //find user
               await User.findOne({ id: req.user.id })
@@ -357,8 +366,8 @@ router.post("/createNewSite", authUser, async (req, res) => {
                 });
               if (insert) {
                 //post list
-                data.posts &&
-                  data.posts.data.forEach(async post => {
+                page.data.posts &&
+                  page.data.posts.data.forEach(async post => {
                     if (
                       post.attachments &&
                       post.attachments.data[0].media_type === "album"
@@ -453,9 +462,9 @@ router.post("/createNewSite", authUser, async (req, res) => {
                   }
                 });
                 //event list
-                data.events &&
-                  data.events.data &&
-                  data.events.data.forEach(event => {
+                page.data.events &&
+                  page.data.events.data &&
+                  page.data.events.data.forEach(event => {
                     //set place
                     let place = {
                       name: null,
