@@ -57,6 +57,7 @@ export const login = async ({ id, name, email, picture, token }) => {
       id: id,
       displayName: name,
       email: email,
+      token: token,
       picture: picture
     });
     if (create) {
