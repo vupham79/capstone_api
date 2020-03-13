@@ -19,7 +19,7 @@ export async function authUser(req, res, next) {
       throw "Invalid token";
     }
   } catch (error) {
-    return res.status(400).send("Not Authenticated!");
+    return res.status(401).send("Not Authenticated!");
   }
 }
 
@@ -43,7 +43,7 @@ export async function authAdmin(req, res, next) {
       throw "Invalid token";
     }
   } catch (error) {
-    return res.status(400).send("Not Authenticated!");
+    return res.status(401).send("Not Authenticated!");
   }
 }
 
@@ -64,6 +64,6 @@ export async function authAll(req, res, next) {
       });
     });
   } catch (error) {
-    return res.status(400).send("Not Authenticated!");
+    return res.status(401).send("Not Authenticated!");
   }
 }
