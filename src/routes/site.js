@@ -249,32 +249,38 @@ router.post("/createNewSite", authUser, async (req, res) => {
       {
         name: "Home",
         order: 1,
-        isActive: true
+        isActive: true,
+        original: "home"
       },
       {
         name: "About",
         order: 2,
-        isActive: true
+        isActive: true,
+        original: "about"
       },
       {
         name: "Gallery",
         order: 3,
-        isActive: true
+        isActive: true,
+        original: "gallery"
       },
       {
         name: "Event",
         order: 4,
-        isActive: true
+        isActive: true,
+        original: "event"
       },
       {
         name: "Contact",
         order: 5,
-        isActive: true
+        isActive: true,
+        original: "contact"
       },
       {
         name: "News",
         order: 6,
-        isActive: true
+        isActive: true,
+        original: "news"
       }
     ];
     //if fb api data existed

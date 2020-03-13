@@ -59,6 +59,10 @@ const SiteSchema = new mongoose.Schema(
         isActive: {
           type: Boolean,
           default: true
+        },
+        original: {
+          type: String,
+          required: true
         }
       }
     ],
