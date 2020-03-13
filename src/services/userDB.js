@@ -48,7 +48,7 @@ export const login = async ({ id, name, email, picture, token }) => {
     if (!user.isActivated) {
       return false;
     }
-    user.update({
+    await user.updateOne({
       token: token
     });
     return true;

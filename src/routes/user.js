@@ -9,20 +9,26 @@ const router = Router();
 router.post("/", async (req, res) => {
   try {
     const { accessToken, id, name, email, picture } = req.body;
-    const token = jwt.sign(
+    jwt.sign(
       { accessToken: accessToken, email: email, id: id },
-      process.env.secret
+      process.env.secret,
+      async (err, token) => {
+        const data = await login({ token, id, name, email, picture });
+        if (err) {
+          return res.status(500).send(err);
+        }
+        if (data) {
+          redis.set(token, id);
+          res.cookie("userToken", token, {
+            expires: new Date(Date.now() + 365 * 24 * 3600 * 1000),
+            signed: true
+          });
+          return res.status(200).send("Success");
+        } else {
+          return res.status(400).send("User is inactivated!");
+        }
+      }
     );
-    const data = await login({ token, id, name, email, picture });
-    if (data) {
-      redis.set(token, id);
-      res.cookie("userToken", token, {
-        expires: new Date(Date.now() + 365 * 24 * 3600 * 1000),
-        signed: true
-      });
-      return res.status(200).send("Success");
-    }
-    return res.status(400).send({ error: "User is inactivated!" });
   } catch (error) {
     return res.status(400).send({ error });
   }
