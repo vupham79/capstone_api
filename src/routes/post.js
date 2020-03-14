@@ -1,5 +1,6 @@
 import { Router } from "express";
-
+import { authUser } from "../controllers/AuthController";
+import * as PostController from "../controllers/PostController";
 const router = Router();
 
 // router.post("/insert/:id", async (req, res) => {
@@ -49,5 +50,7 @@ const router = Router();
 //     return res.status(400).send({ error });
 //   }
 // });
+
+router.patch("/activePosts", authUser, PostController.activePosts);
 
 export default router;

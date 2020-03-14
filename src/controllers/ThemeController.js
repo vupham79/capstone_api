@@ -1,0 +1,41 @@
+import {
+  editTheme,
+  findOneTheme,
+  findAllTheme
+} from "../services/ThemeService";
+
+export async function update(req, res) {
+  try {
+    const update = await editTheme(req.params.id, req.body);
+    if (update) {
+      return res.status(200).send(update);
+    }
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(400).send({ error });
+  }
+}
+
+export async function findOne(req, res) {
+  try {
+    const find = await findOneTheme(req.params.id);
+    if (find) {
+      return res.status(200).send(find);
+    }
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(400).send({ error });
+  }
+}
+
+export async function findAll(req, res) {
+  try {
+    const find = await findAllTheme();
+    if (find) {
+      return res.status(200).send(find);
+    }
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(400).send({ error });
+  }
+}

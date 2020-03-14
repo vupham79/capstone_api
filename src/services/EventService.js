@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { Event } from "../models";
 
 export async function insertEvent(id, body) {

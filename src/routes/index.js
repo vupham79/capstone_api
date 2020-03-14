@@ -1,10 +1,10 @@
+import admin from "./admin";
 import facebook from "./facebook";
+import post from "./post";
 import site from "./site";
+import sitepath from "./sitepath";
 import theme from "./theme";
 import user from "./user";
-import admin from "./admin";
-import post from "./post";
-import sitepath from "./sitepath";
 
 export default app => {
   app.use("/theme", theme);

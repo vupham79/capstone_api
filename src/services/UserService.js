@@ -1,5 +1,6 @@
 import { User, Site } from "../models";
 import { client as redis } from "../utils/redis_";
+
 export async function deactivateUser(id) {
   const user = await User.findOne({ id: id });
   redis.del(user.token);
@@ -40,7 +41,7 @@ export async function findAllUser() {
     });
 }
 
-export const login = async ({ id, name, email, picture, token }) => {
+export async function login({ id, name, email, picture, token }) {
   const user = await User.findOne({
     email
   });
@@ -65,4 +66,4 @@ export const login = async ({ id, name, email, picture, token }) => {
     }
     return false;
   }
-};
+}
