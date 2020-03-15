@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authAll, authUser } from "../controllers/AuthController";
+import { authAll, authUser, authAdmin } from "../controllers/AuthController";
 import * as SiteController from "../controllers/SiteController";
 const router = Router();
 
@@ -9,7 +9,7 @@ router.get("/find/:sitepath", SiteController.findOneBySitepath);
 
 router.get("/findAllByUser", authUser, SiteController.findAllByUser);
 
-router.get("/findAll", authUser, SiteController.findAll);
+router.get("/findAll", authAdmin, SiteController.findAll);
 
 router.patch("/publish", authAll, SiteController.publish);
 

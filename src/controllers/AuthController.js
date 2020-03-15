@@ -9,16 +9,13 @@ export async function authAdmin(req, res, next) {
     );
     if (admin) {
       redis.get(req.signedCookies["adminToken"], (err, reply) => {
-        if (err) {
-          throw "Invalid token";
-        }
         if (reply) {
           req.admin = admin;
           next();
-        }
+        } else return res.status(401).send("Not Authenticated!");
       });
     } else {
-      throw "Invalid token";
+      return res.status(401).send("Not Authenticated!");
     }
   } catch (error) {
     return res.status(401).send("Not Authenticated!");
@@ -30,16 +27,13 @@ export async function authUser(req, res, next) {
     const user = jwt.verify(req.signedCookies["userToken"], process.env.secret);
     if (user) {
       redis.get(req.signedCookies["userToken"], (err, reply) => {
-        if (err) {
-          throw "Invalid token";
-        }
         if (reply) {
           req.user = user;
           next();
-        }
+        } else return res.status(401).send("Not Authenticated!");
       });
     } else {
-      throw "Invalid token";
+      return res.status(401).send("Not Authenticated!");
     }
   } catch (error) {
     return res.status(401).send("Not Authenticated!");
@@ -59,7 +53,7 @@ export async function authAll(req, res, next) {
         }
         if (auth) {
           next();
-        }
+        } else return res.status(401).send("Not Authenticated!");
       });
     });
   } catch (error) {

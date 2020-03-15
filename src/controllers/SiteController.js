@@ -1,5 +1,6 @@
 import { Category, Event, mongoose, Post, Site, Theme, User } from "../models";
 import { getPageData, getSyncData } from "../services/FacebookAPI";
+import { findAllUser } from "../services/UserService";
 import * as SiteService from "../services/SiteService";
 import { findOneTheme } from "../services/ThemeService";
 
@@ -42,7 +43,7 @@ export async function findAllByUser(req, res) {
 
 export async function findAll(req, res) {
   try {
-    const find = await SiteService.findAllSite();
+    const find = await findAllUser();
     if (find) {
       let siteList = [];
       find.forEach(user => {
@@ -67,6 +68,7 @@ export async function findAll(req, res) {
     }
     return res.status(204).send();
   } catch (error) {
+    console.log(error);
     return res.status(400).send({ error });
   }
 }
