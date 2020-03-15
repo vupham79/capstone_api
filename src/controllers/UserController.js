@@ -24,8 +24,7 @@ export async function login(req, res) {
           redis.set(token, id);
           res.cookie("userToken", token, {
             expires: new Date(Date.now() + 365 * 24 * 3600 * 1000),
-            signed: true,
-            sameSite: "Strict"
+            signed: true
           });
           return res.status(200).send("Success");
         } else {
