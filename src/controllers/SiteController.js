@@ -745,13 +745,9 @@ export async function syncData(req, res) {
                 { id: { $in: postIdList } },
                 postsList,
                 {
-                  upsert: true,
                   useFindAndModify: false
                 },
                 async (error, result) => {
-                  if (error) {
-                    // console.log(error);
-                  }
                   if (!result) {
                     //find existed post id
                     const site = await Site.findOne({ id: pageId })
