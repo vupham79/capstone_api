@@ -944,11 +944,9 @@ export async function updateLogo(req, res) {
 export async function updateCover(req, res) {
   const { pageId, cover } = req.body;
   try {
-    if (cover && cover.length !== 0) {
-      const update = await SiteService.updateCovers(pageId, cover);
-      if (update) {
-        return res.status(200).send(update);
-      }
+    const update = await SiteService.updateCovers(pageId, cover);
+    if (update) {
+      return res.status(200).send(update);
     }
     return res.status(400).send({ error: "Save failed!" });
   } catch (error) {
