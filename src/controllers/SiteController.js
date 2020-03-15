@@ -855,7 +855,6 @@ export async function syncData(req, res) {
                 { id: { $in: eventIdList } },
                 eventList,
                 {
-                  upsert: true,
                   useFindAndModify: false
                 },
                 async (error, result) => {
@@ -869,12 +868,13 @@ export async function syncData(req, res) {
                       .populate("events");
                     let existedEventObjIdList = [];
                     let existedEventIdList = [];
-                    site.events.forEach(existedEvent => {
-                      existedEventObjIdList.push(
-                        new mongoose.Types.ObjectId(existedEvent._id)
-                      );
-                      existedEventIdList.push(existedEvent.id);
-                    });
+                    site.events &&
+                      site.events.forEach(existedEvent => {
+                        existedEventObjIdList.push(
+                          new mongoose.Types.ObjectId(existedEvent._id)
+                        );
+                        existedEventIdList.push(existedEvent.id);
+                      });
                     //update existing event
                     let newEventList = [];
                     eventList.forEach(async event => {

@@ -145,7 +145,7 @@ export async function updateCovers(pageId, cover) {
       id: pageId
     },
     {
-      cover: cover.length > 0 ? cover : null
+      cover: cover ? cover : null
     }
   );
 }
