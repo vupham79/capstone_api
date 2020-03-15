@@ -1,26 +1,24 @@
-import {
-  findAllSiteByUser,
-  findOneSite,
-  findSiteBySitepath,
-  publishSite
-} from "../services/SiteService";
-import { findAllUser } from "../services/UserService";
+import { Category, Event, mongoose, Post, Site, Theme, User } from "../models";
+import { getPageData, getSyncData } from "../services/FacebookAPI";
+import * as SiteService from "../services/SiteService";
+import { findOneTheme } from "../services/ThemeService";
 
 export async function findOneBySitepath(req, res) {
   try {
-    const find = await findSiteBySitepath(req.params.sitepath);
+    const find = await SiteService.findSiteBySitepath(req.params.sitepath);
     if (find) {
       return res.status(200).send(find);
     }
     return res.status(204).send();
   } catch (error) {
-    return res.status(400).send({ error });
+    console.log(error);
+    return res.status(400).send(error);
   }
 }
 
 export async function findOneById(req, res) {
   try {
-    const find = await findOneSite(req.query.id);
+    const find = await SiteService.findOneSite(req.query.id);
     if (find) {
       return res.status(200).send(find);
     }
@@ -32,7 +30,7 @@ export async function findOneById(req, res) {
 
 export async function findAllByUser(req, res) {
   try {
-    const find = await findAllSiteByUser(req.user.email);
+    const find = await SiteService.findAllSiteByUser(req.user.email);
     if (find) {
       return res.status(200).send(find);
     }
@@ -44,7 +42,7 @@ export async function findAllByUser(req, res) {
 
 export async function findAll(req, res) {
   try {
-    const find = await findAllUser();
+    const find = await SiteService.findAllSite();
     if (find) {
       let siteList = [];
       find.forEach(user => {
@@ -76,9 +74,9 @@ export async function findAll(req, res) {
 export async function publish(req, res) {
   const { id, isPublish } = req.body;
   try {
-    const siteExist = await checkSiteExist(id);
+    const siteExist = await SiteService.checkSiteExist(id);
     if (siteExist) {
-      const publish = await publishSite(id, isPublish);
+      const publish = await SiteService.publishSite(id, isPublish);
       if (publish) {
         return res.status(200).send(publish);
       }
@@ -102,11 +100,11 @@ export async function saveDesign(req, res) {
     whatsapp,
     email,
     youtube,
-    instagram
+    instagram,
+    phone
   } = req.body;
-
   try {
-    const findTheme = await Theme.findOne({ id: theme });
+    const findTheme = await findOneTheme(theme);
     if (findTheme) {
       //check null whatsapp, email
       if (!email || email === undefined || email.replace(/\s/g, "") === "") {
@@ -133,21 +131,19 @@ export async function saveDesign(req, res) {
       ) {
         whatsapp = null;
       }
-      const update = await Site.updateOne(
-        { id: pageId },
-        {
-          fontTitle: fontTitle,
-          fontBody: fontBody,
-          title: name,
-          color: color,
-          navItems: navItems && navItems.length > 0 ? navItems : null,
-          theme: new mongoose.Types.ObjectId(findTheme._id),
-          whatsapp: whatsapp,
-          email: email,
-          instagram: instagram,
-          youtube: youtube
-        }
-      );
+      const update = await SiteService.saveDesign({
+        pageId,
+        fontTitle,
+        fontBody,
+        name,
+        color,
+        navItems,
+        findTheme,
+        whatsapp,
+        email,
+        youtube,
+        phone
+      });
       if (update) {
         return res.status(200).send(update);
       }
@@ -155,27 +151,8 @@ export async function saveDesign(req, res) {
     }
     return res.status(400).send({ error: "Theme not exist!" });
   } catch (error) {
-    return res.status(400).send({ error });
-  }
-}
-
-export async function saveHomepageImages(req, res) {
-  const { pageId, cover } = req.body;
-  try {
-    const update = await Site.updateOne(
-      {
-        id: pageId
-      },
-      {
-        cover: cover.length > 0 ? cover : null
-      }
-    );
-    if (update) {
-      return res.status(200).send(update);
-    }
-    return res.status(400).send({ error: "Save failed!" });
-  } catch (error) {
-    return res.status(400).send({ error });
+    console.log(error);
+    return res.status(400).send(error);
   }
 }
 
@@ -298,7 +275,7 @@ export async function createNewSite(req, res) {
                 theme = await Theme.findOne();
               }
               // insert site
-              const insert = await insertSite(pageId, {
+              const insert = await SiteService.insertSite(pageId, {
                 phone: page.data.phone,
                 longitude: page.data.location
                   ? page.data.location.longitude
@@ -505,7 +482,8 @@ export async function createNewSite(req, res) {
     }
     return res.status(400).send({ error: "Facebook page data not existed!" });
   } catch (error) {
-    return res.status(400).send({ error });
+    console.log(error);
+    return res.status(400).send(error);
   }
 }
 
@@ -655,7 +633,7 @@ export async function syncData(req, res) {
       accessToken: req.user.accessToken
     });
     if (data) {
-      const siteExist = await findOneSite(pageId);
+      const siteExist = await SiteService.findOneSite(pageId);
       if (siteExist) {
         let session;
         return Site.createCollection()
@@ -664,7 +642,7 @@ export async function syncData(req, res) {
             session = _session;
             session.withTransaction(async () => {
               //update site
-              const update = await editSite(pageId, {
+              const update = await SiteService.editSite(pageId, {
                 phone: data.phone,
                 longitude: data.location ? data.location.longitude : null,
                 latitude: data.location ? data.location.latitude : null,
@@ -946,25 +924,33 @@ export async function syncData(req, res) {
     return res.status(400).send({ error: "Facebook page data not existed!" });
   } catch (error) {
     console.log(error);
-    return res.status(400).send({ error });
+    return res.status(400).send(error);
   }
 }
 
 export async function updateLogo(req, res) {
   const { logo, id } = req.body;
   try {
-    const update = await Site.updateOne(
-      {
-        id
-      },
-      {
-        logo
-      }
-    );
+    const update = await SiteService.updateLogo(id, logo);
     if (update) {
       return res.status(200).send(update);
     }
     return res.status(400).send({ error: "Action failed!" });
+  } catch (error) {
+    return res.status(400).send({ error });
+  }
+}
+
+export async function updateCover(req, res) {
+  const { pageId, cover } = req.body;
+  try {
+    if (cover && cover.length !== 0) {
+      const update = await SiteService.updateCovers(pageId, cover);
+      if (update) {
+        return res.status(200).send(update);
+      }
+    }
+    return res.status(400).send({ error: "Save failed!" });
   } catch (error) {
     return res.status(400).send({ error });
   }

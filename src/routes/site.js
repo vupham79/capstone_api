@@ -15,7 +15,7 @@ router.patch("/publish", authAll, SiteController.publish);
 
 router.patch("/saveDesign", authUser, SiteController.saveDesign);
 
-router.patch("/saveHomePageImage", authUser, SiteController.saveHomepageImages);
+router.patch("/saveHomePageImage", authUser, SiteController.updateCover);
 
 router.post("/createNewSite", authUser, SiteController.createNewSite);
 

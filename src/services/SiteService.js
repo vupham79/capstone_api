@@ -1,4 +1,4 @@
-import { Site, User } from "../models";
+import { mongoose, Site, User } from "../models";
 
 export async function insertSite(pageId, body) {
   const insert = await Site.create({
@@ -106,6 +106,46 @@ export async function publishSite(id, isPublish) {
     },
     {
       isPublish
+    }
+  );
+}
+
+export async function saveDesign(data) {
+  const site = await Site.findOne({
+    id: data.pageId
+  });
+  site.fontTitle = data.fontTitle;
+  site.fontBody = data.fontBody;
+  site.title = data.name;
+  site.color = data.color;
+  site.navItems = data.navItems;
+  site.theme = new mongoose.Types.ObjectId(data.findTheme._id);
+  site.whatsapp = data.whatsapp;
+  site.email = data.email;
+  site.instagram = data.instagram;
+  site.youtube = data.youtube;
+  site.phone = data.phone;
+  return await site.save();
+}
+
+export async function updateLogo(id, logo) {
+  return await Site.updateOne(
+    {
+      id
+    },
+    {
+      logo
+    }
+  );
+}
+
+export async function updateCovers(pageId, cover) {
+  return await Site.updateOne(
+    {
+      id: pageId
+    },
+    {
+      cover: cover.length > 0 ? cover : null
     }
   );
 }
