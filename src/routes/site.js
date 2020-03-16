@@ -25,4 +25,6 @@ router.patch("/syncData", authUser, SiteController.syncData);
 
 router.patch("/logo", authUser, SiteController.updateLogo);
 
+router.patch("/favicon", authUser, SiteController.updateFavicon);
+
 export default router;

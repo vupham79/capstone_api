@@ -125,6 +125,7 @@ export async function saveDesign(data) {
   site.instagram = data.instagram;
   site.youtube = data.youtube;
   site.phone = data.phone;
+  site.metas = data.metas;
   return await site.save();
 }
 
@@ -135,6 +136,17 @@ export async function updateLogo(id, logo) {
     },
     {
       logo
+    }
+  );
+}
+
+export async function updateFavicon(id, favicon) {
+  return await Site.updateOne(
+    {
+      id
+    },
+    {
+      favicon
     }
   );
 }

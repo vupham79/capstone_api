@@ -103,7 +103,8 @@ export async function saveDesign(req, res) {
     email,
     youtube,
     instagram,
-    phone
+    phone,
+    metas
   } = req.body;
   try {
     const findTheme = await findOneTheme(theme);
@@ -144,7 +145,8 @@ export async function saveDesign(req, res) {
         whatsapp,
         email,
         youtube,
-        phone
+        phone,
+        metas
       });
       if (update) {
         return res.status(200).send(update);
@@ -947,6 +949,19 @@ export async function updateCover(req, res) {
       return res.status(200).send(update);
     }
     return res.status(400).send({ error: "Save failed!" });
+  } catch (error) {
+    return res.status(400).send({ error });
+  }
+}
+
+export async function updateFavicon(req, res) {
+  const { favicon, id } = req.body;
+  try {
+    const update = await SiteService.updateFavicon(id, favicon);
+    if (update) {
+      return res.status(200).send(update);
+    }
+    return res.status(400).send({ error: "Action failed!" });
   } catch (error) {
     return res.status(400).send({ error });
   }

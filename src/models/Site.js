@@ -129,7 +129,14 @@ const SiteSchema = new mongoose.Schema(
     },
     posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
     theme: { type: Schema.Types.ObjectId, ref: "Theme" },
-    events: [{ type: Schema.Types.ObjectId, ref: "Event" }]
+    events: [{ type: Schema.Types.ObjectId, ref: "Event" }],
+    favicon: {
+      type: String,
+      default: null
+    },
+    metas: {
+      type: String
+    }
   },
   {
     timestamps: true
