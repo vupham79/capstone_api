@@ -197,134 +197,149 @@ export async function insertAndUpdateEvents(pageId, eventList) {
   });
 }
 
-export async function getFacebookPostData(posts) {
+export async function getFacebookPostData(page) {
   let postsList = [];
-  posts.forEach(async post => {
-    if (post.attachments && post.attachments.data[0].media_type === "album") {
-      const subAttachmentList = [];
-      post.attachments.data[0].subattachments.data.forEach(subAttachment => {
-        subAttachmentList.push(subAttachment.media.image.src);
-      });
-      postsList.push({
-        id: post.id,
-        title: post.attachments.data[0].title,
-        message: post.message,
-        isActive: true,
-        createdTime: post.created_time,
-        attachments: {
+  if (page.data.posts === undefined) {
+    return null;
+  }
+  page.data.posts &&
+    page.data.posts.data &&
+    page.data.posts.data.forEach(async post => {
+      if (post.attachments && post.attachments.data[0].media_type === "album") {
+        const subAttachmentList = [];
+        post.attachments.data[0].subattachments.data.forEach(subAttachment => {
+          subAttachmentList.push(subAttachment.media.image.src);
+        });
+        postsList.push({
           id: post.id,
-          media_type: "album",
-          images: subAttachmentList,
-          video: null
-        },
-        target: post.attachments.data[0].target.url
-      });
-    } else if (
-      post.attachments &&
-      post.attachments.data[0].media_type === "photo"
-    ) {
-      postsList.push({
-        id: post.id,
-        message: post.message,
-        title: post.attachments.data[0].title,
-        isActive: true,
-        createdTime: post.created_time,
-        attachments: {
+          title: post.attachments.data[0].title,
+          message: post.message,
+          isActive: true,
+          createdTime: post.created_time,
+          attachments: {
+            id: post.id,
+            media_type: "album",
+            images: subAttachmentList,
+            video: null
+          },
+          target: post.attachments.data[0].target.url
+        });
+      } else if (
+        post.attachments &&
+        post.attachments.data[0].media_type === "photo"
+      ) {
+        postsList.push({
           id: post.id,
-          media_type: "photo",
-          images: [post.attachments.data[0].media.image.src],
-          video: null
-        },
-        target: post.attachments.data[0].target.url
-      });
-    } else if (
-      post.attachments &&
-      post.attachments.data[0].media_type === "video"
-    ) {
-      postsList.push({
-        id: post.id,
-        message: post.message,
-        title: post.attachments.data[0].title,
-        isActive: true,
-        createdTime: post.created_time,
-        attachments: {
+          message: post.message,
+          title: post.attachments.data[0].title,
+          isActive: true,
+          createdTime: post.created_time,
+          attachments: {
+            id: post.id,
+            media_type: "photo",
+            images: [post.attachments.data[0].media.image.src],
+            video: null
+          },
+          target: post.attachments.data[0].target.url
+        });
+      } else if (
+        post.attachments &&
+        post.attachments.data[0].media_type === "video"
+      ) {
+        postsList.push({
           id: post.id,
-          media_type: "video",
-          images: null,
-          video: post.attachments.data[0].media.source
-        },
-        target: post.attachments.data[0].target.url
-      });
-    }
-  });
+          message: post.message,
+          title: post.attachments.data[0].title,
+          isActive: true,
+          createdTime: post.created_time,
+          attachments: {
+            id: post.id,
+            media_type: "video",
+            images: null,
+            video: post.attachments.data[0].media.source
+          },
+          target: post.attachments.data[0].target.url
+        });
+      }
+    });
   return postsList;
 }
 
-export async function getFacebookGalleryData(posts) {
+export async function getFacebookGalleryData(page) {
   let galleryList = [];
-  posts.forEach(async post => {
-    if (post.attachments && post.attachments.data[0].media_type === "album") {
-      post.attachments.data[0].subattachments.data.forEach(subAttachment => {
-        galleryList.push({
-          url: subAttachment.media.image.src,
-          target: subAttachment.target.url
+  if (page.data.posts === undefined) {
+    return null;
+  }
+  page.data.posts &&
+    page.data.posts.data &&
+    page.data.posts.data.forEach(async post => {
+      if (post.attachments && post.attachments.data[0].media_type === "album") {
+        post.attachments.data[0].subattachments.data.forEach(subAttachment => {
+          galleryList.push({
+            url: subAttachment.media.image.src,
+            target: subAttachment.target.url
+          });
         });
-      });
-    } else if (
-      post.attachments &&
-      post.attachments.data[0].media_type === "photo"
-    ) {
-      galleryList.push({
-        url: post.attachments.data[0].media.image.src,
-        target: post.attachments.data[0].target.url
-      });
-    }
-  });
+      } else if (
+        post.attachments &&
+        post.attachments.data[0].media_type === "photo"
+      ) {
+        galleryList.push({
+          url: post.attachments.data[0].media.image.src,
+          target: post.attachments.data[0].target.url
+        });
+      }
+    });
   return galleryList;
 }
 
-export async function getFacebookEventData(events) {
+export async function getFacebookEventData(page) {
   let eventList = [];
-  events.forEach(event => {
-    //set place
-    let place = {
-      name: null,
-      street: null,
-      city: null,
-      country: null
-    };
-    if (event.place) {
-      place.name = event.place.name;
-      if (event.place.location) {
-        place.street =
-          event.place.location.street !== undefined
-            ? event.place.location.street
-            : null;
-        place.city =
-          event.place.location.city !== undefined
-            ? event.place.location.city
-            : null;
-        place.country =
-          event.place.location.country !== undefined
-            ? event.place.location.country
-            : null;
+  if (page.data.events === undefined) {
+    return null;
+  }
+  page.data.events &&
+    page.data.events.data &&
+    page.data.events.data.forEach(event => {
+      //set place
+      let place = {
+        name: null,
+        street: null,
+        city: null,
+        country: null
+      };
+      if (event.place) {
+        place.name = event.place.name;
+        if (event.place.location) {
+          place.street =
+            event.place.location.street !== undefined
+              ? event.place.location.street
+              : null;
+          place.city =
+            event.place.location.city !== undefined
+              ? event.place.location.city
+              : null;
+          place.country =
+            event.place.location.country !== undefined
+              ? event.place.location.country
+              : null;
+        }
+      } else {
+        place = null;
       }
-    } else {
-      place = null;
-    }
-    //event list
-    eventList.push({
-      id: event.id,
-      name: event.name,
-      description: event.description,
-      cover: event.cover ? event.cover.source : null,
-      startTime: event.start_time,
-      endTime: event.end_time,
-      place: place,
-      isCanceled: event.is_canceled,
-      url: "facebook.com/" + event.id
+      //event list
+      eventList.push({
+        id: event.id,
+        name: event.name,
+        description: event.description,
+        cover: event.cover ? event.cover.source : null,
+        startTime: event.start_time,
+        endTime: event.end_time,
+        place: place,
+        isCanceled: event.is_canceled,
+        url: "facebook.com/" + event.id
+      });
     });
-  });
   return eventList;
 }
 

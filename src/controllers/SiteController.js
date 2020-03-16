@@ -313,35 +313,14 @@ export async function createNewSite(req, res) {
               await SiteService.updateSiteList(req.user.id, insert);
               if (insert) {
                 //post list
-                if (page.data.posts === undefined) {
-                  postsList = null;
-                  galleryList = null;
-                } else {
-                  postsList = await SiteService.getFacebookPostData(
-                    page.data.posts &&
-                      page.data.posts.data &&
-                      page.data.posts.data
-                  );
-                  //gallery list
-                  galleryList = await SiteService.getFacebookGalleryData(
-                    page.data.posts &&
-                      page.data.posts.data &&
-                      page.data.posts.data
-                  );
-                }
+                postsList = await SiteService.getFacebookPostData(page);
+                //gallery list
+                galleryList = await SiteService.getFacebookGalleryData(page);
                 await SiteService.updateGallery(pageId, galleryList);
                 //insert port and update site's posts
                 await SiteService.insertAndUpdatePosts(pageId, postsList);
                 //event list
-                if (page.data.events === undefined) {
-                  eventList = null;
-                } else {
-                  eventList = await SiteService.getFacebookEventData(
-                    page.data.events &&
-                      page.data.events.data &&
-                      page.data.events.data
-                  );
-                }
+                eventList = await SiteService.getFacebookEventData(page);
                 await SiteService.insertAndUpdateEvents(pageId, eventList);
                 //return
                 return res.status(200).send(insert);
