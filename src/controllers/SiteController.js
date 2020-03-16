@@ -106,6 +106,21 @@ export async function saveDesign(req, res) {
     phone
   } = req.body;
   try {
+    navItems &&
+      navItems.length > 0 &&
+      navItems.forEach(navItem => {
+        if (
+          !navItem ||
+          !navItem.name ||
+          navItem.name === undefined ||
+          navItem.name.replace(/\s/g, "") === ""
+        ) {
+          console.log(navItem.name);
+          return res
+            .status(400)
+            .send({ error: "Navigation item must not be empty!" });
+        }
+      });
     const findTheme = await findOneTheme(theme);
     if (findTheme) {
       //check null whatsapp, email
@@ -162,7 +177,7 @@ export async function createNewSite(req, res) {
   try {
     let eventList = [];
     let galleryList = [];
-    const postsList = [];
+    let postsList = [];
     let { pageUrl, pageId, sitepath, isPublish } = req.body;
     //site path is empty, undefined or null
     if (
@@ -253,22 +268,10 @@ export async function createNewSite(req, res) {
                 categoryInDB.push(category.name);
               });
               let categoryObjIdList = [];
-              page.data.category_list &&
-                page.data.category_list.forEach(async category => {
-                  if (!categoryInDB.includes(category.name)) {
-                    await Category.create({
-                      name: category.name
-                    });
-                  }
-                  let find = await Category.findOne({
-                    name: category.name
-                  });
-                  if (find) {
-                    categoryObjIdList.push(
-                      new mongoose.Types.ObjectId(find._id)
-                    );
-                  }
-                });
+              categoryObjIdList = await SiteService.getFacebookCategoryObjIdData(
+                categoryInDB,
+                page.data.category_list && page.data.category_list
+              );
               //find theme
               let theme = await Theme.findOne({
                 categories: { $in: categoryObjIdList }
@@ -307,171 +310,39 @@ export async function createNewSite(req, res) {
                 about: page.data.about
               });
               //find user
-              await User.findOne({ id: req.user.id })
-                .select("sites")
-                .then(async result => {
-                  let siteList = result.sites;
-                  siteList.push(insert._id);
-                  await result.updateOne({
-                    sites: siteList
-                  });
-                });
+              await SiteService.updateSiteList(req.user.id, insert);
               if (insert) {
                 //post list
-                page.data.posts &&
-                  page.data.posts.data.forEach(async post => {
-                    if (
-                      post.attachments &&
-                      post.attachments.data[0].media_type === "album"
-                    ) {
-                      const subAttachmentList = [];
-                      post.attachments.data[0].subattachments.data.forEach(
-                        subAttachment => {
-                          subAttachmentList.push(subAttachment.media.image.src);
-                          galleryList.push({
-                            url: subAttachment.media.image.src,
-                            target: subAttachment.target.url
-                          });
-                        }
-                      );
-                      postsList.push({
-                        id: post.id,
-                        title: post.attachments.data[0].title,
-                        message: post.message,
-                        isActive: true,
-                        createdTime: post.created_time,
-                        attachments: {
-                          id: post.id,
-                          media_type: "album",
-                          images: subAttachmentList,
-                          video: null
-                        },
-                        target: post.attachments.data[0].target.url
-                      });
-                    } else if (
-                      post.attachments &&
-                      post.attachments.data[0].media_type === "photo"
-                    ) {
-                      galleryList.push({
-                        url: post.attachments.data[0].media.image.src,
-                        target: post.attachments.data[0].target.url
-                      });
-                      postsList.push({
-                        id: post.id,
-                        message: post.message,
-                        title: post.attachments.data[0].title,
-                        isActive: true,
-                        createdTime: post.created_time,
-                        attachments: {
-                          id: post.id,
-                          media_type: "photo",
-                          images: [post.attachments.data[0].media.image.src],
-                          video: null
-                        },
-                        target: post.attachments.data[0].target.url
-                      });
-                    } else if (
-                      post.attachments &&
-                      post.attachments.data[0].media_type === "video"
-                    ) {
-                      postsList.push({
-                        id: post.id,
-                        message: post.message,
-                        title: post.attachments.data[0].title,
-                        isActive: true,
-                        createdTime: post.created_time,
-                        attachments: {
-                          id: post.id,
-                          media_type: "video",
-                          images: null,
-                          video: post.attachments.data[0].media.source
-                        },
-                        target: post.attachments.data[0].target.url
-                      });
-                    }
-                  });
-                await Site.updateOne(
-                  { id: pageId },
-                  {
-                    galleries: galleryList.length > 0 ? galleryList : null
-                  }
-                );
+                if (page.data.posts === undefined) {
+                  postsList = null;
+                  galleryList = null;
+                } else {
+                  postsList = await SiteService.getFacebookPostData(
+                    page.data.posts &&
+                      page.data.posts.data &&
+                      page.data.posts.data
+                  );
+                  //gallery list
+                  galleryList = await SiteService.getFacebookGalleryData(
+                    page.data.posts &&
+                      page.data.posts.data &&
+                      page.data.posts.data
+                  );
+                }
+                await SiteService.updateGallery(pageId, galleryList);
                 //insert port and update site's posts
-                await Post.insertMany(postsList, async (error, docs) => {
-                  if (error) {
-                    return error;
-                  } else {
-                    const postIdList = [];
-                    docs.forEach(doc => {
-                      postIdList.push(doc._id);
-                    });
-                    await Site.updateOne(
-                      { id: pageId },
-                      {
-                        posts: postIdList.length > 0 ? postIdList : null
-                      }
-                    );
-                  }
-                });
+                await SiteService.insertAndUpdatePosts(pageId, postsList);
                 //event list
-                page.data.events &&
-                  page.data.events.data &&
-                  page.data.events.data.forEach(event => {
-                    //set place
-                    let place = {
-                      name: null,
-                      street: null,
-                      city: null,
-                      country: null
-                    };
-                    if (event.place) {
-                      place.name = event.place.name;
-                      if (event.place.location) {
-                        place.street =
-                          event.place.location.street !== undefined
-                            ? event.place.location.street
-                            : null;
-                        place.city =
-                          event.place.location.city !== undefined
-                            ? event.place.location.city
-                            : null;
-                        place.country =
-                          event.place.location.country !== undefined
-                            ? event.place.location.country
-                            : null;
-                      }
-                    } else {
-                      place = null;
-                    }
-                    //event list
-                    eventList.push({
-                      id: event.id,
-                      name: event.name,
-                      description: event.description,
-                      cover: event.cover ? event.cover.source : null,
-                      startTime: event.start_time,
-                      endTime: event.end_time,
-                      place: place,
-                      isCanceled: event.is_canceled,
-                      url: "facebook.com/" + event.id
-                    });
-                  });
-                await Event.insertMany(eventList, async (error, docs) => {
-                  if (error) {
-                    return error;
-                  } else {
-                    const eventIdList = [];
-                    docs.forEach(doc => {
-                      eventIdList.push(doc._id);
-                    });
-                    await Site.updateOne(
-                      { id: pageId },
-                      {
-                        events: eventIdList.length > 0 ? eventIdList : null
-                      }
-                    );
-                  }
-                });
+                if (page.data.events === undefined) {
+                  eventList = null;
+                } else {
+                  eventList = await SiteService.getFacebookEventData(
+                    page.data.events &&
+                      page.data.events.data &&
+                      page.data.events.data
+                  );
+                }
+                await SiteService.insertAndUpdateEvents(pageId, eventList);
                 //return
                 return res.status(200).send(insert);
               } else {
