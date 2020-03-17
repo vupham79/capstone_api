@@ -349,48 +349,7 @@ export async function syncEvent(req, res) {
     });
     if (data) {
       //event list
-      data.events &&
-        data.events.data &&
-        data.events.data.forEach(event => {
-          //set place
-          let place = {
-            name: null,
-            street: null,
-            city: null,
-            country: null
-          };
-          if (event.place) {
-            place.name = event.place.name;
-            if (event.place.location) {
-              place.street =
-                event.place.location.street !== undefined
-                  ? event.place.location.street
-                  : null;
-              place.city =
-                event.place.location.city !== undefined
-                  ? event.place.location.city
-                  : null;
-              place.country =
-                event.place.location.country !== undefined
-                  ? event.place.location.country
-                  : null;
-            }
-          } else {
-            place = null;
-          }
-          //event list
-          eventList.push({
-            id: event.id,
-            name: event.name,
-            description: event.description,
-            cover: event.cover ? event.cover.source : null,
-            startTime: event.start_time,
-            endTime: event.end_time,
-            place: place,
-            isCanceled: event.is_canceled,
-            url: "facebook.com/" + event.id
-          });
-        });
+      eventList = await SiteService.getFacebookEventData(data);
       const siteExist = await findOneSite(pageId);
       if (siteExist) {
         //event Id list
@@ -424,38 +383,12 @@ export async function syncEvent(req, res) {
                 existedEventIdList.push(existedEvent.id);
               });
               //update existing event
-              let newEventList = [];
-              eventList.forEach(async event => {
-                if (!existedEventIdList.includes(event.id)) {
-                  newEventList.push(event);
-                } else {
-                  await Event.updateOne({ id: event.id }, event);
-                }
-              });
+              let newEventList = await SiteSerivce.updateExistingEvent(
+                eventList,
+                existedEventIdList
+              );
               //create new event and save new event into site
-              await Event.create(newEventList, async (err, docs) => {
-                if (err) {
-                  console.log(err);
-                }
-                if (docs) {
-                  //save new event
-                  let newEventObjList = [];
-                  docs.forEach(event => {
-                    newEventObjList.push(
-                      new mongoose.Types.ObjectId(event._id)
-                    );
-                  });
-                  await Site.updateOne(
-                    { id: pageId },
-                    {
-                      $push: {
-                        events:
-                          newEventObjList.length > 0 ? newEventObjList : null
-                      }
-                    }
-                  );
-                }
-              });
+              await SiteSerice.createAndSaveNewEvent(newEventList);
             }
           }
         );
@@ -506,78 +439,10 @@ export async function syncData(req, res) {
                 lastSync: lastSync
               });
               //post list
-              data.posts &&
-                data.posts.data.forEach(post => {
-                  if (
-                    post.attachments &&
-                    post.attachments.data[0].media_type === "album"
-                  ) {
-                    const subAttachmentList = [];
-                    post.attachments.data[0].subattachments.data.forEach(
-                      subAttachment => {
-                        subAttachmentList.push(subAttachment.media.image.src);
-                        galleryList.push({
-                          url: subAttachment.media.image.src,
-                          target: subAttachment.target.url
-                        });
-                      }
-                    );
-                    postsList.push({
-                      id: post.id,
-                      title: post.attachments.data[0].title,
-                      message: post.message,
-                      createdTime: post.created_time,
-                      isActive: true,
-                      attachments: {
-                        id: post.id,
-                        media_type: "album",
-                        images: subAttachmentList,
-                        video: null
-                      },
-                      target: post.attachments.data[0].target.url
-                    });
-                  } else if (
-                    post.attachments &&
-                    post.attachments.data[0].media_type === "photo"
-                  ) {
-                    postsList.push({
-                      id: post.id,
-                      title: post.attachments.data[0].title,
-                      createdTime: post.created_time,
-                      message: post.message,
-                      isActive: true,
-                      attachments: {
-                        id: post.id,
-                        media_type: "photo",
-                        images: [post.attachments.data[0].media.image.src],
-                        video: null
-                      },
-                      target: post.attachments.data[0].target.url
-                    });
-                    galleryList.push({
-                      url: post.attachments.data[0].media.image.src,
-                      target: post.attachments.data[0].target.url
-                    });
-                  } else if (
-                    post.attachments &&
-                    post.attachments.data[0].media_type === "video"
-                  ) {
-                    postsList.push({
-                      id: post.id,
-                      title: post.attachments.data[0].title,
-                      message: post.message,
-                      createdTime: post.created_time,
-                      isActive: true,
-                      attachments: {
-                        id: post.id,
-                        media_type: "video",
-                        images: null,
-                        video: post.attachments.data[0].media.source
-                      },
-                      target: post.attachments.data[0].target.url
-                    });
-                  }
-                });
+              postsList = await SiteService.getFacebookPostSyncData(
+                data,
+                galleryList
+              );
               //update galleries
               await Site.updateOne(
                 { id: pageId },
@@ -587,182 +452,93 @@ export async function syncData(req, res) {
               );
               //post Id list
               let postIdList = [];
-              postsList.forEach(post => {
-                postIdList.push(post.id);
-              });
-              //insert and update post
-              await Post.findOneAndUpdate(
-                { id: { $in: postIdList } },
-                postsList,
-                {
-                  upsert: true,
-                  useFindAndModify: false
-                },
-                async (error, result) => {
-                  if (error) {
-                    // console.log(error);
-                  }
-                  if (!result) {
-                    //find existed post id
-                    const site = await Site.findOne({ id: pageId })
-                      .select("posts")
-                      .populate("posts");
-                    let existedPostObjIdList = [];
-                    let existedPostIdList = [];
-                    site.posts &&
-                      site.posts.forEach(existedPost => {
-                        existedPostObjIdList.push(
-                          new mongoose.Types.ObjectId(existedPost._id)
-                        );
-                        existedPostIdList.push(existedPost.id);
-                      });
-                    //update existing post
-                    let newPostList = [];
-                    postsList.forEach(async post => {
-                      if (!existedPostIdList.includes(post.id)) {
-                        newPostList.push(post);
-                      } else {
-                        await Post.updateOne({ id: post.id }, post);
-                      }
-                    });
-                    //create new post and save new post into site
-                    await Post.create(newPostList, async (err, docs) => {
-                      if (err) {
-                        console.log(err);
-                      }
-                      if (docs) {
-                        //save new post
-                        let newPostObjIdList = [];
-                        docs.forEach(post => {
-                          newPostObjIdList.push(
-                            new mongoose.Types.ObjectId(post._id)
+              if (postsList) {
+                postsList.forEach(post => {
+                  postIdList.push(post.id);
+                });
+                //insert and update post
+                await Post.findOneAndUpdate(
+                  { id: { $in: postIdList } },
+                  postsList,
+                  {
+                    upsert: true,
+                    useFindAndModify: false
+                  },
+                  async (error, result) => {
+                    if (error) {
+                      // console.log(error);
+                    }
+                    if (!result) {
+                      //find existed post id
+                      const site = await Site.findOne({ id: pageId })
+                        .select("posts")
+                        .populate("posts");
+                      let existedPostObjIdList = [];
+                      let existedPostIdList = [];
+                      site.posts &&
+                        site.posts.forEach(existedPost => {
+                          existedPostObjIdList.push(
+                            new mongoose.Types.ObjectId(existedPost._id)
                           );
+                          existedPostIdList.push(existedPost.id);
                         });
-                        if (newPostObjIdList.length > 0) {
-                          await Site.updateOne(
-                            { id: pageId },
-                            {
-                              posts: newPostObjIdList
-                            }
-                          );
-                        }
-                      }
-                    });
+                      //update existing post
+                      let newPostList = await SiteService.updateExistingPost(
+                        postsList,
+                        existedPostIdList
+                      );
+                      //create new post and save new post into site
+                      await SiteService.createAndSaveNewPost(newPostList);
+                    }
                   }
-                }
-              );
+                );
+              }
 
               //event list
-              data.events &&
-                data.events.data &&
-                data.events.data.forEach(event => {
-                  //set place
-                  let place = {
-                    name: null,
-                    street: null,
-                    city: null,
-                    country: null
-                  };
-                  if (event.place) {
-                    place.name = event.place.name;
-                    if (event.place.location) {
-                      place.street =
-                        event.place.location.street !== undefined
-                          ? event.place.location.street
-                          : null;
-                      place.city =
-                        event.place.location.city !== undefined
-                          ? event.place.location.city
-                          : null;
-                      place.country =
-                        event.place.location.country !== undefined
-                          ? event.place.location.country
-                          : null;
-                    }
-                  } else {
-                    place = null;
-                  }
-                  //event list
-                  eventList.push({
-                    id: event.id,
-                    name: event.name,
-                    description: event.description,
-                    cover: event.cover ? event.cover.source : null,
-                    startTime: event.start_time,
-                    endTime: event.end_time,
-                    place: place,
-                    isCanceled: event.is_canceled,
-                    url: "facebook.com/" + event.id
-                  });
-                });
+              eventList = await SiteService.getFacebookEventSyncData(data);
               //event Id list
               let eventIdList = [];
-              eventList.forEach(event => {
-                eventIdList.push(event.id);
-              });
-              //insert and update event
-              await Event.findOneAndUpdate(
-                { id: { $in: eventIdList } },
-                eventList,
-                {
-                  useFindAndModify: false
-                },
-                async (error, result) => {
-                  if (error) {
-                    // console.log(error);
-                  }
-                  if (!result) {
-                    //find existed event id
-                    const site = await Site.findOne({ id: pageId })
-                      .select("events")
-                      .populate("events");
-                    let existedEventObjIdList = [];
-                    let existedEventIdList = [];
-                    site.events &&
-                      site.events.forEach(existedEvent => {
-                        existedEventObjIdList.push(
-                          new mongoose.Types.ObjectId(existedEvent._id)
-                        );
-                        existedEventIdList.push(existedEvent.id);
-                      });
-                    //update existing event
-                    let newEventList = [];
-                    eventList.forEach(async event => {
-                      if (!existedEventIdList.includes(event.id)) {
-                        newEventList.push(event);
-                      } else {
-                        await Event.updateOne({ id: event.id }, event);
-                      }
-                    });
-                    //create new event and save new event into site
-                    await Event.create(newEventList, async (err, docs) => {
-                      if (err) {
-                        console.log(err);
-                      }
-                      if (docs) {
-                        //save new event
-                        let newEventObjList = [];
-                        docs.forEach(event => {
-                          newEventObjList.push(
-                            new mongoose.Types.ObjectId(event._id)
+              if (eventList) {
+                eventList.forEach(event => {
+                  eventIdList.push(event.id);
+                });
+                //insert and update event
+                await Event.findOneAndUpdate(
+                  { id: { $in: eventIdList } },
+                  eventList,
+                  {
+                    useFindAndModify: false
+                  },
+                  async (error, result) => {
+                    if (error) {
+                      // console.log(error);
+                    }
+                    if (!result) {
+                      //find existed event id
+                      const site = await Site.findOne({ id: pageId })
+                        .select("events")
+                        .populate("events");
+                      let existedEventObjIdList = [];
+                      let existedEventIdList = [];
+                      site.events &&
+                        site.events.forEach(existedEvent => {
+                          existedEventObjIdList.push(
+                            new mongoose.Types.ObjectId(existedEvent._id)
                           );
+                          existedEventIdList.push(existedEvent.id);
                         });
-                        await Site.updateOne(
-                          { id: pageId },
-                          {
-                            $push: {
-                              events:
-                                newEventObjList.length > 0
-                                  ? newEventObjList
-                                  : null
-                            }
-                          }
-                        );
-                      }
-                    });
+                      //update existing event
+                      let newEventList = await SiteSerivce.updateExistingEvent(
+                        eventList,
+                        existedEventIdList
+                      );
+                      //create new event and save new event into site
+                      await SiteSerice.createAndSaveNewEvent(newEventList);
+                    }
                   }
-                }
-              );
+                );
+              }
+
               if (update) {
                 return res.status(200).send(update);
               } else {

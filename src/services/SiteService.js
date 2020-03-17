@@ -293,6 +293,81 @@ export async function getFacebookGalleryData(page) {
   return galleryList;
 }
 
+export async function getFacebookPostSyncData(data, galleryList) {
+  if (data.posts === undefined) {
+    return null;
+  }
+  let postsList = [];
+  data.posts &&
+    data.posts.data.forEach(post => {
+      if (post.attachments && post.attachments.data[0].media_type === "album") {
+        const subAttachmentList = [];
+        post.attachments.data[0].subattachments.data.forEach(subAttachment => {
+          subAttachmentList.push(subAttachment.media.image.src);
+          galleryList.push({
+            url: subAttachment.media.image.src,
+            target: subAttachment.target.url
+          });
+        });
+        postsList.push({
+          id: post.id,
+          title: post.attachments.data[0].title,
+          message: post.message,
+          createdTime: post.created_time,
+          isActive: true,
+          attachments: {
+            id: post.id,
+            media_type: "album",
+            images: subAttachmentList,
+            video: null
+          },
+          target: post.attachments.data[0].target.url
+        });
+      } else if (
+        post.attachments &&
+        post.attachments.data[0].media_type === "photo"
+      ) {
+        postsList.push({
+          id: post.id,
+          title: post.attachments.data[0].title,
+          createdTime: post.created_time,
+          message: post.message,
+          isActive: true,
+          attachments: {
+            id: post.id,
+            media_type: "photo",
+            images: [post.attachments.data[0].media.image.src],
+            video: null
+          },
+          target: post.attachments.data[0].target.url
+        });
+        galleryList.push({
+          url: post.attachments.data[0].media.image.src,
+          target: post.attachments.data[0].target.url
+        });
+      } else if (
+        post.attachments &&
+        post.attachments.data[0].media_type === "video"
+      ) {
+        postsList.push({
+          id: post.id,
+          title: post.attachments.data[0].title,
+          message: post.message,
+          createdTime: post.created_time,
+          isActive: true,
+          attachments: {
+            id: post.id,
+            media_type: "video",
+            images: null,
+            video: post.attachments.data[0].media.source
+          },
+          target: post.attachments.data[0].target.url
+        });
+      }
+    });
+  return postsList;
+}
+
 export async function getFacebookEventData(page) {
   let eventList = [];
   if (page.data.events === undefined) {
@@ -301,6 +376,56 @@ export async function getFacebookEventData(page) {
   page.data.events &&
     page.data.events.data &&
     page.data.events.data.forEach(event => {
+      //set place
+      let place = {
+        name: null,
+        street: null,
+        city: null,
+        country: null
+      };
+      if (event.place) {
+        place.name = event.place.name;
+        if (event.place.location) {
+          place.street =
+            event.place.location.street !== undefined
+              ? event.place.location.street
+              : null;
+          place.city =
+            event.place.location.city !== undefined
+              ? event.place.location.city
+              : null;
+          place.country =
+            event.place.location.country !== undefined
+              ? event.place.location.country
+              : null;
+        }
+      } else {
+        place = null;
+      }
+      //event list
+      eventList.push({
+        id: event.id,
+        name: event.name,
+        description: event.description,
+        cover: event.cover ? event.cover.source : null,
+        startTime: event.start_time,
+        endTime: event.end_time,
+        place: place,
+        isCanceled: event.is_canceled,
+        url: "facebook.com/" + event.id
+      });
+    });
+  return eventList;
+}
+
+export async function getFacebookEventSyncData(data) {
+  if (data.events === undefined) {
+    return null;
+  }
+  let eventList = [];
+  data.events &&
+    data.events.data &&
+    data.events.data.forEach(event => {
       //set place
       let place = {
         name: null,
@@ -371,4 +496,74 @@ export async function updateSiteList(userId, insert) {
         sites: siteList
       });
     });
+}
+
+export async function createAndSaveNewPost(newPostList) {
+  await Post.create(newPostList, async (err, docs) => {
+    if (err) {
+      console.log(err);
+    }
+    if (docs) {
+      //save new post
+      let newPostObjIdList = [];
+      docs.forEach(post => {
+        newPostObjIdList.push(new mongoose.Types.ObjectId(post._id));
+      });
+      if (newPostObjIdList.length > 0) {
+        await Site.updateOne(
+          { id: pageId },
+          {
+            posts: newPostObjIdList
+          }
+        );
+      }
+    }
+  });
+}
+
+export async function createAndSaveNewEvent(newEventList) {
+  await Event.create(newEventList, async (err, docs) => {
+    if (err) {
+      console.log(err);
+    }
+    if (docs) {
+      //save new event
+      let newEventObjList = [];
+      docs.forEach(event => {
+        newEventObjList.push(new mongoose.Types.ObjectId(event._id));
+      });
+      await Site.updateOne(
+        { id: pageId },
+        {
+          $push: {
+            events: newEventObjList.length > 0 ? newEventObjList : null
+          }
+        }
+      );
+    }
+  });
+}
+
+export async function updateExistingPost(postsList, existedPostIdList) {
+  let newPostList = [];
+  postsList.forEach(async post => {
+    if (!existedPostIdList.includes(post.id)) {
+      newPostList.push(post);
+    } else {
+      await Post.updateOne({ id: post.id }, post);
+    }
+  });
+  return newPostList;
+}
+
+export async function updateExistingEvent(eventList, existedEventIdList) {
+  let newEventList = [];
+  eventList.forEach(async event => {
+    if (!existedEventIdList.includes(event.id)) {
+      newEventList.push(event);
+    } else {
+      await Event.updateOne({ id: event.id }, event);
+    }
+  });
+  return newEventList;
 }
