@@ -581,3 +581,51 @@ export async function updateCover(req, res) {
     return res.status(400).send({ error });
   }
 }
+
+export async function updateFavicon(req, res) {
+  const { favicon, id } = req.body;
+  try {
+    const update = await SiteService.updateFavicon(id, favicon);
+    if (update) {
+      return res.status(200).send(update);
+    }
+    return res.status(400).send({ error: "Action failed!" });
+  } catch (error) {
+    return res.status(400).send({ error });
+  }
+}
+
+export async function findSiteDataByTab(req, res) {
+  const { tab, sitePath, skip, limit } = req.params;
+  try {
+    if (tab === "home") {
+      const home = await SiteService.findSiteHomeTab(sitePath, skip, limit);
+      return home;
+    } else if (tab === "event") {
+      const events = await SiteService.findSiteEventTab(sitePath, skip, limit);
+      return events;
+    } else if (tab === "gallery") {
+      const gallery = await SiteService.findSiteGalleryTab(
+        sitePath,
+        skip,
+        limit
+      );
+      return gallery;
+    } else if (tab === "news") {
+      const news = await SiteService.findSiteNewsTab(sitePath, skip, limit);
+      return news;
+    } else if (tab === "contact") {
+      const contact = await SiteService.findSiteContactTab(
+        sitePath,
+        skip,
+        limit
+      );
+      return contact;
+    } else if (tab === "about") {
+      const about = await SiteService.findSiteAboutTab(sitePath, skip, limit);
+      return about;
+    }
+  } catch (error) {
+    return res.status(400).send({ error });
+  }
+}

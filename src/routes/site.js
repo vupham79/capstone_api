@@ -7,6 +7,8 @@ router.get("/find", authAll, SiteController.findOneById);
 
 router.get("/find/:sitepath", SiteController.findOneBySitepath);
 
+router.get("/find/:sitepath/:tab", SiteController.findSiteDataByTab);
+
 router.get("/findAllByUser", authUser, SiteController.findAllByUser);
 
 router.get("/findAll", authAdmin, SiteController.findAll);
@@ -24,5 +26,7 @@ router.patch("/syncEvent", authUser, SiteController.syncEvent);
 router.patch("/syncData", authUser, SiteController.syncData);
 
 router.patch("/logo", authUser, SiteController.updateLogo);
+
+router.patch("/favicon", authUser, SiteController.updateFavicon);
 
 export default router;
