@@ -374,7 +374,7 @@ export async function getFacebookCategoryObjIdData(categoryInDB, categories) {
 }
 
 export async function updateSiteList(userId, insert) {
-  await User.findOne({ id: userId })
+  return await User.findOne({ id: userId })
     .select("sites")
     .then(async result => {
       let siteList = result.sites;
@@ -383,4 +383,41 @@ export async function updateSiteList(userId, insert) {
         sites: siteList
       });
     });
+}
+
+export async function findSiteEventTab(sitePath, skip = 0, limit = 10) {
+  return await Site.find({ sitePath: sitePath })
+    .populate("events", "select", null, null, { skip, limit })
+    .select("events");
+}
+
+export async function findSiteHomeTab(sitePath, skip = 0, limit = 10) {
+  return await Site.find({ sitePath }).populate("", "", null, null, {
+    skip,
+    limit
+  });
+}
+export async function findSiteGalleryTab(sitePath, skip = 0, limit = 10) {
+  return await Site.find({ sitePath }).populate("", "", null, null, {
+    skip,
+    limit
+  });
+}
+export async function findSiteNewsTab(sitePath, skip = 0, limit = 10) {
+  return await Site.find({ sitePath }).populate("", "", null, null, {
+    skip,
+    limit
+  });
+}
+export async function findSiteContactTab(sitePath, skip = 0, limit = 10) {
+  return await Site.find({ sitePath }).populate("", "", null, null, {
+    skip,
+    limit
+  });
+}
+export async function findSiteAboutTab(sitePath, skip = 0, limit = 10) {
+  return await Site.find({ sitePath }).populate("", "", null, null, {
+    skip,
+    limit
+  });
 }

@@ -134,9 +134,29 @@ const SiteSchema = new mongoose.Schema(
       type: String,
       default: null
     },
-    metas: {
-      type: String
-    }
+    homepage: [
+      {
+        name: {
+          type: String,
+          required: true
+        },
+        order: {
+          type: Number,
+          required: true
+        },
+        filter: {
+          type: {
+            type: String,
+            enum: ["lastest", "optional"]
+          },
+          items: [
+            {
+              type: String
+            }
+          ]
+        }
+      }
+    ]
   },
   {
     timestamps: true

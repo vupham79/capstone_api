@@ -7,6 +7,8 @@ router.get("/find", authAll, SiteController.findOneById);
 
 router.get("/find/:sitepath", SiteController.findOneBySitepath);
 
+router.get("/find/:sitepath/:tab", SiteController.findSiteDataByTab);
+
 router.get("/findAllByUser", authUser, SiteController.findAllByUser);
 
 router.get("/findAll", authAdmin, SiteController.findAll);
