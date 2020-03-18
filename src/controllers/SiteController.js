@@ -158,6 +158,7 @@ export async function saveDesign(req, res) {
         whatsapp,
         email,
         youtube,
+        instagram,
         phone
       });
       if (update) {
