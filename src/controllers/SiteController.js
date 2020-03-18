@@ -115,7 +115,6 @@ export async function saveDesign(req, res) {
           navItem.name === undefined ||
           navItem.name.replace(/\s/g, "") === ""
         ) {
-          console.log(navItem.name);
           return res
             .status(400)
             .send({ error: "Navigation item must not be empty!" });
@@ -358,39 +357,10 @@ export async function syncEvent(req, res) {
           eventIdList.push(event.id);
         });
         //insert and update event
-        await Event.findOneAndUpdate(
-          { id: { $in: eventIdList } },
+        await SiteService.insertAndUpdateSyncDataEvents(
+          pageId,
           eventList,
-          {
-            upsert: true,
-            useFindAndModify: false
-          },
-          async (error, result) => {
-            if (error) {
-              // console.log(error);
-            }
-            if (!result) {
-              //find existed event id
-              const site = await Site.findOne({ id: pageId })
-                .select("events")
-                .populate("events");
-              let existedEventObjIdList = [];
-              let existedEventIdList = [];
-              site.events.forEach(existedEvent => {
-                existedEventObjIdList.push(
-                  new mongoose.Types.ObjectId(existedEvent._id)
-                );
-                existedEventIdList.push(existedEvent.id);
-              });
-              //update existing event
-              let newEventList = await SiteSerivce.updateExistingEvent(
-                eventList,
-                existedEventIdList
-              );
-              //create new event and save new event into site
-              await SiteSerice.createAndSaveNewEvent(newEventList);
-            }
-          }
+          eventIdList
         );
 
         if (siteExist) {
@@ -457,40 +427,10 @@ export async function syncData(req, res) {
                   postIdList.push(post.id);
                 });
                 //insert and update post
-                await Post.findOneAndUpdate(
-                  { id: { $in: postIdList } },
+                await SiteService.insertAndUpdateSyncDataPost(
+                  pageId,
                   postsList,
-                  {
-                    upsert: true,
-                    useFindAndModify: false
-                  },
-                  async (error, result) => {
-                    if (error) {
-                      // console.log(error);
-                    }
-                    if (!result) {
-                      //find existed post id
-                      const site = await Site.findOne({ id: pageId })
-                        .select("posts")
-                        .populate("posts");
-                      let existedPostObjIdList = [];
-                      let existedPostIdList = [];
-                      site.posts &&
-                        site.posts.forEach(existedPost => {
-                          existedPostObjIdList.push(
-                            new mongoose.Types.ObjectId(existedPost._id)
-                          );
-                          existedPostIdList.push(existedPost.id);
-                        });
-                      //update existing post
-                      let newPostList = await SiteService.updateExistingPost(
-                        postsList,
-                        existedPostIdList
-                      );
-                      //create new post and save new post into site
-                      await SiteService.createAndSaveNewPost(newPostList);
-                    }
-                  }
+                  postIdList
                 );
               }
 
@@ -503,39 +443,10 @@ export async function syncData(req, res) {
                   eventIdList.push(event.id);
                 });
                 //insert and update event
-                await Event.findOneAndUpdate(
-                  { id: { $in: eventIdList } },
+                await SiteService.insertAndUpdateSyncDataEvents(
+                  pageId,
                   eventList,
-                  {
-                    useFindAndModify: false
-                  },
-                  async (error, result) => {
-                    if (error) {
-                      // console.log(error);
-                    }
-                    if (!result) {
-                      //find existed event id
-                      const site = await Site.findOne({ id: pageId })
-                        .select("events")
-                        .populate("events");
-                      let existedEventObjIdList = [];
-                      let existedEventIdList = [];
-                      site.events &&
-                        site.events.forEach(existedEvent => {
-                          existedEventObjIdList.push(
-                            new mongoose.Types.ObjectId(existedEvent._id)
-                          );
-                          existedEventIdList.push(existedEvent.id);
-                        });
-                      //update existing event
-                      let newEventList = await SiteSerivce.updateExistingEvent(
-                        eventList,
-                        existedEventIdList
-                      );
-                      //create new event and save new event into site
-                      await SiteSerice.createAndSaveNewEvent(newEventList);
-                    }
-                  }
+                  eventIdList
                 );
               }
 
@@ -551,7 +462,6 @@ export async function syncData(req, res) {
     }
     return res.status(400).send({ error: "Facebook page data not existed!" });
   } catch (error) {
-    console.log(error);
     return res.status(400).send(error);
   }
 }
