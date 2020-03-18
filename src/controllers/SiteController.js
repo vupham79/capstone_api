@@ -1,5 +1,9 @@
 import { Category, Event, mongoose, Post, Site, Theme, User } from "../models";
-import { getPageData, getSyncData } from "../services/FacebookAPI";
+import {
+  getPageData,
+  getSyncData,
+  getSyncEvent
+} from "../services/FacebookAPI";
 import { findAllUser } from "../services/UserService";
 import * as SiteService from "../services/SiteService";
 import { findOneTheme } from "../services/ThemeService";
@@ -341,6 +345,71 @@ export async function createNewSite(req, res) {
   }
 }
 
+export async function syncPost(req, res) {
+  try {
+    let postsList = [];
+    const { pageId } = req.body;
+    const data = await getSyncData({
+      pageId: pageId,
+      accessToken: req.user.accessToken
+    });
+    if (data) {
+      postsList = await SiteService.getFacebookPostSyncData(data);
+      const siteExist = await SiteService.findOneSite(pageId);
+      //post Id list
+      let postIdList = [];
+      if (postsList) {
+        postsList.forEach(post => {
+          postIdList.push(post.id);
+        });
+        //insert and update post
+        await SiteService.insertAndUpdateSyncDataPost(
+          pageId,
+          postsList,
+          postIdList
+        );
+        return res.status(200).send(siteExist);
+      }
+      return res.status(400).send({ error: "Site not existed!" });
+    }
+    return res.status(400).send({ error: "Facebook page event not existed!" });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send({ error });
+  }
+}
+
+export async function syncGallery(req, res) {
+  try {
+    let galleryList = [];
+    const { pageId } = req.body;
+    const data = await getSyncData({
+      pageId: pageId,
+      accessToken: req.user.accessToken
+    });
+    if (data) {
+      //gallery list
+      galleryList = await SiteService.getFacebookGalleryData(data);
+      const siteExist = await SiteService.findOneSite(pageId);
+      if (siteExist) {
+        //update galleries
+        await Site.updateOne(
+          { id: pageId },
+          {
+            galleries: galleryList.length > 0 ? galleryList : null
+          }
+        );
+        return res.status(200).send(siteExist);
+      }
+      return res.status(400).send({ error: "Site not existed!" });
+    }
+    return res.status(400).send({ error: "Facebook page event not existed!" });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send({ error });
+  }
+}
+
 export async function syncEvent(req, res) {
   try {
     let eventList = [];
@@ -352,7 +421,7 @@ export async function syncEvent(req, res) {
     if (data) {
       //event list
       eventList = await SiteService.getFacebookEventData(data);
-      const siteExist = await findOneSite(pageId);
+      const siteExist = await SiteService.findOneSite(pageId);
       if (siteExist) {
         //event Id list
         let eventIdList = [];
@@ -360,22 +429,20 @@ export async function syncEvent(req, res) {
           eventIdList.push(event.id);
         });
         //insert and update event
-        await SiteService.insertAndUpdateSyncDataEvents(
+        await SiteService.insertAndUpdateSyncEvents(
           pageId,
           eventList,
           eventIdList
         );
 
-        if (siteExist) {
-          return res.status(200).send(siteExist);
-        } else {
-          return res.status(400).send({ error: "Edit failed!" });
-        }
+        return res.status(200).send(siteExist);
+      } else {
+        return res.status(400).send({ error: "Site not existed!" });
       }
-      return res.status(400).send({ error: "Site not existed!" });
     }
     return res.status(400).send({ error: "Facebook page event not existed!" });
   } catch (error) {
+    console.log(error);
     return res.status(400).send({ error });
   }
 }
@@ -412,10 +479,9 @@ export async function syncData(req, res) {
                 lastSync: lastSync
               });
               //post list
-              postsList = await SiteService.getFacebookPostSyncData(
-                data,
-                galleryList
-              );
+              postsList = await SiteService.getFacebookPostSyncData(data);
+              //gallery list
+              galleryList = await SiteService.getFacebookGalleryData(data);
               //update galleries
               await Site.updateOne(
                 { id: pageId },

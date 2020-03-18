@@ -69,6 +69,11 @@ export async function findOneSiteByAccessToken(id, body) {
 }
 
 export async function findOneSite(id) {
+  console.log("id: " + id);
+  const site = await Site.findOne({ id: id }).populate({
+    path: "theme posts events"
+  });
+  console.log(site);
   return await Site.findOne({ id: id }).populate({
     path: "theme posts events"
   });
@@ -288,14 +293,15 @@ export async function getFacebookPostData(page) {
   return postsList;
 }
 
-export async function getFacebookGalleryData(page) {
+export async function getFacebookGalleryData(data) {
   let galleryList = [];
-  if (page.data.posts === undefined) {
+  console.log(data);
+  if (data.posts === undefined) {
     return null;
   }
-  page.data.posts &&
-    page.data.posts.data &&
-    page.data.posts.data.forEach(async post => {
+  data.posts &&
+    data.posts.data &&
+    data.posts.data.forEach(async post => {
       if (post.attachments && post.attachments.data[0].media_type === "album") {
         post.attachments.data[0].subattachments.data.forEach(subAttachment => {
           galleryList.push({
@@ -313,10 +319,11 @@ export async function getFacebookGalleryData(page) {
         });
       }
     });
+  console.log("Gallery list: " + galleryList);
   return galleryList;
 }
 
-export async function getFacebookPostSyncData(data, galleryList) {
+export async function getFacebookPostSyncData(data) {
   if (data.posts === undefined) {
     return null;
   }
@@ -327,10 +334,6 @@ export async function getFacebookPostSyncData(data, galleryList) {
         const subAttachmentList = [];
         post.attachments.data[0].subattachments.data.forEach(subAttachment => {
           subAttachmentList.push(subAttachment.media.image.src);
-          galleryList.push({
-            url: subAttachment.media.image.src,
-            target: subAttachment.target.url
-          });
         });
         postsList.push({
           id: post.id,
@@ -362,10 +365,6 @@ export async function getFacebookPostSyncData(data, galleryList) {
             images: [post.attachments.data[0].media.image.src],
             video: null
           },
-          target: post.attachments.data[0].target.url
-        });
-        galleryList.push({
-          url: post.attachments.data[0].media.image.src,
           target: post.attachments.data[0].target.url
         });
       } else if (
@@ -750,6 +749,47 @@ export async function insertAndUpdateSyncDataEvents(
 }
 
 export async function insertAndUpdateSyncEvents(
+  pageId,
+  eventList,
+  eventIdList
+) {
+  await Event.findOneAndUpdate(
+    { id: { $in: eventIdList } },
+    eventList,
+    {
+      upsert: true,
+      useFindAndModify: false
+    },
+    async (error, result) => {
+      if (error) {
+        // console.log(error);
+      }
+      if (!result) {
+        //find existed event id
+        const site = await Site.findOne({ id: pageId })
+          .select("events")
+          .populate("events");
+        let existedEventObjIdList = [];
+        let existedEventIdList = [];
+        site.events.forEach(existedEvent => {
+          existedEventObjIdList.push(
+            new mongoose.Types.ObjectId(existedEvent._id)
+          );
+          existedEventIdList.push(existedEvent.id);
+        });
+        //update existing event
+        let newEventList = await SiteSerivce.updateExistingEvent(
+          eventList,
+          existedEventIdList
+        );
+        //create new event and save new event into site
+        await SiteSerice.createAndSaveNewEvent(pageId, newEventList);
+      }
+    }
+  );
+}
+
+export async function insertAndUpdateSyncGallery(
   pageId,
   eventList,
   eventIdList
