@@ -25,6 +25,10 @@ router.patch("/syncEvent", authUser, SiteController.syncEvent);
 
 router.patch("/syncData", authUser, SiteController.syncData);
 
+router.patch("/syncPost", authUser, SiteController.syncPost);
+
+router.patch("/syncGallery", authUser, SiteController.syncGallery);
+
 router.patch("/logo", authUser, SiteController.updateLogo);
 
 router.patch("/favicon", authUser, SiteController.updateFavicon);
