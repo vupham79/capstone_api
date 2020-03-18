@@ -32,10 +32,6 @@ const EventSchema = new mongoose.Schema(
       city: { type: String, default: null },
       country: { type: String, default: null }
     },
-    isCanceled: {
-      type: Boolean,
-      default: null
-    },
     url: {
       type: String,
       default: null
