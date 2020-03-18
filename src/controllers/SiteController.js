@@ -103,7 +103,8 @@ export async function saveDesign(req, res) {
     email,
     youtube,
     instagram,
-    phone
+    phone,
+    sitePath
   } = req.body;
   try {
     navItems &&
@@ -159,16 +160,17 @@ export async function saveDesign(req, res) {
         email,
         youtube,
         instagram,
-        phone
+        phone,
+        sitePath
       });
       if (update) {
         return res.status(200).send(update);
+      } else if (update.msg) {
+        return res.status(400).send({ error: update.msg });
       }
-      return res.status(400).send({ error: "Save failed!" });
     }
     return res.status(400).send({ error: "Theme not exist!" });
   } catch (error) {
-    console.log(error);
     return res.status(400).send(error);
   }
 }

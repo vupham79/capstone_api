@@ -114,18 +114,30 @@ export async function saveDesign(data) {
   const site = await Site.findOne({
     id: data.pageId
   });
-  site.fontTitle = data.fontTitle;
-  site.fontBody = data.fontBody;
-  site.title = data.name;
-  site.color = data.color;
-  site.navItems = data.navItems;
-  site.theme = new mongoose.Types.ObjectId(data.findTheme._id);
-  site.whatsapp = data.whatsapp;
-  site.email = data.email;
-  site.instagram = data.instagram;
-  site.youtube = data.youtube;
-  site.phone = data.phone;
-  return await site.save();
+  if (site) {
+    const sitePathExisting = await Site.findOne({
+      sitePath: data.sitePath
+    });
+    if (sitePathExisting) {
+      site.fontTitle = data.fontTitle;
+      site.fontBody = data.fontBody;
+      site.title = data.name;
+      site.color = data.color;
+      site.navItems = data.navItems;
+      site.theme = new mongoose.Types.ObjectId(data.findTheme._id);
+      site.whatsapp = data.whatsapp;
+      site.email = data.email;
+      site.instagram = data.instagram;
+      site.youtube = data.youtube;
+      site.phone = data.phone;
+      site.sitePath = data.sitePath;
+      return await site.save();
+    } else {
+      return { msg: "Sitepath existed!" };
+    }
+  } else {
+    return { msg: "Site not existed!" };
+  }
 }
 
 export async function updateLogo(id, logo) {
