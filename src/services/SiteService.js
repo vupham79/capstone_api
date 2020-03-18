@@ -69,11 +69,9 @@ export async function findOneSiteByAccessToken(id, body) {
 }
 
 export async function findOneSite(id) {
-  console.log("id: " + id);
   const site = await Site.findOne({ id: id }).populate({
     path: "theme posts events"
   });
-  console.log(site);
   return await Site.findOne({ id: id }).populate({
     path: "theme posts events"
   });
@@ -283,7 +281,6 @@ export async function getFacebookPostData(page) {
 
 export async function getFacebookGalleryData(data) {
   let galleryList = [];
-  console.log(data);
   if (data.posts === undefined) {
     return null;
   }
@@ -307,7 +304,6 @@ export async function getFacebookGalleryData(data) {
         });
       }
     });
-  console.log("Gallery list: " + galleryList);
   return galleryList;
 }
 
