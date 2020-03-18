@@ -378,14 +378,14 @@ export async function getFacebookPostSyncData(data) {
   return postsList;
 }
 
-export async function getFacebookEventData(page) {
+export async function getFacebookEventData(data) {
   let eventList = [];
-  if (page.data.events === undefined) {
+  if (data.events === undefined) {
     return null;
   }
-  page.data.events &&
-    page.data.events.data &&
-    page.data.events.data.forEach(event => {
+  data.events &&
+    data.events.data &&
+    data.events.data.forEach(event => {
       //set place
       let place = {
         name: null,
