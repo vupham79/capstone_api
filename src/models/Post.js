@@ -30,14 +30,6 @@ const PostSchema = new mongoose.Schema(
     target: {
       type: String,
       default: null
-    },
-    dateFrom: {
-      type: Date,
-      default: null
-    },
-    dateTo: {
-      type: Date,
-      default: null
     }
   },
   {

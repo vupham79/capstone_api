@@ -39,14 +39,6 @@ const EventSchema = new mongoose.Schema(
     url: {
       type: String,
       default: null
-    },
-    dateFrom: {
-      type: Date,
-      default: null
-    },
-    dateTo: {
-      type: Date,
-      default: null
     }
   },
   {
