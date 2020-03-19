@@ -1,4 +1,5 @@
 import { mongoose, Site, User, Category, Post, Event } from "../models";
+import moment from "moment";
 
 export async function insertSite(pageId, body) {
   const insert = await Site.create({
@@ -184,15 +185,26 @@ export async function insertAndUpdatePosts(pageId, postsList) {
 }
 
 export async function updateGallery(pageId, galleryList) {
-  await Site.updateOne(
-    { id: pageId },
-    {
-      galleries: galleryList.length > 0 ? galleryList : null
-    }
-  );
+  if (!galleryList) {
+    await Site.updateOne(
+      { id: pageId },
+      {
+        galleries: null
+      }
+    );
+  } else {
+    await Site.updateOne(
+      { id: pageId },
+      {
+        galleries: galleryList.length > 0 ? galleryList : null
+      }
+    );
+  }
 }
 
 export async function insertAndUpdateEvents(pageId, eventList) {
+  console.log(pageId);
+  console.log(eventList.length);
   await Event.insertMany(eventList, async (error, docs) => {
     if (error) {
       return error;
@@ -211,69 +223,143 @@ export async function insertAndUpdateEvents(pageId, eventList) {
   });
 }
 
-export async function getFacebookPostData(page) {
+export async function getFacebookPostData(data, dateFrom, dateTo) {
   let postsList = [];
-  if (page.data.posts === undefined) {
+  if (data.posts === undefined) {
     return null;
   }
-  page.data.posts &&
-    page.data.posts.data &&
-    page.data.posts.data.forEach(async post => {
-      if (post.attachments && post.attachments.data[0].media_type === "album") {
-        const subAttachmentList = [];
-        post.attachments.data[0].subattachments.data.forEach(subAttachment => {
-          subAttachmentList.push(subAttachment.media.image.src);
-        });
-        postsList.push({
-          id: post.id,
-          title: post.attachments.data[0].title,
-          message: post.message,
-          isActive: true,
-          createdTime: post.created_time,
-          attachments: {
+  data.posts &&
+    data.posts.data &&
+    data.posts.data.forEach(async post => {
+      // console.log(moment(post.created_time).isBetween(dateFrom, dateTo));
+      if (dateFrom instanceof Date && dateTo instanceof Date) {
+        console.log("dateFrom is not Date");
+        if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
+          if (
+            post.attachments &&
+            post.attachments.data[0].media_type === "album"
+          ) {
+            const subAttachmentList = [];
+            post.attachments.data[0].subattachments.data.forEach(
+              subAttachment => {
+                subAttachmentList.push(subAttachment.media.image.src);
+              }
+            );
+            postsList.push({
+              id: post.id,
+              title: post.attachments.data[0].title,
+              message: post.message,
+              isActive: true,
+              createdTime: post.created_time,
+              attachments: {
+                id: post.id,
+                media_type: "album",
+                images: subAttachmentList,
+                video: null
+              },
+              target: post.attachments.data[0].target.url
+            });
+          } else if (
+            post.attachments &&
+            post.attachments.data[0].media_type === "photo"
+          ) {
+            postsList.push({
+              id: post.id,
+              message: post.message,
+              title: post.attachments.data[0].title,
+              isActive: true,
+              createdTime: post.created_time,
+              attachments: {
+                id: post.id,
+                media_type: "photo",
+                images: [post.attachments.data[0].media.image.src],
+                video: null
+              },
+              target: post.attachments.data[0].target.url
+            });
+          } else if (
+            post.attachments &&
+            post.attachments.data[0].media_type === "video"
+          ) {
+            postsList.push({
+              id: post.id,
+              message: post.message,
+              title: post.attachments.data[0].title,
+              isActive: true,
+              createdTime: post.created_time,
+              attachments: {
+                id: post.id,
+                media_type: "video",
+                images: null,
+                video: post.attachments.data[0].media.source
+              },
+              target: post.attachments.data[0].target.url
+            });
+          }
+        }
+      } else {
+        console.log("dateFrom is Date");
+        if (
+          post.attachments &&
+          post.attachments.data[0].media_type === "album"
+        ) {
+          const subAttachmentList = [];
+          post.attachments.data[0].subattachments.data.forEach(
+            subAttachment => {
+              subAttachmentList.push(subAttachment.media.image.src);
+            }
+          );
+          postsList.push({
             id: post.id,
-            media_type: "album",
-            images: subAttachmentList,
-            video: null
-          },
-          target: post.attachments.data[0].target.url
-        });
-      } else if (
-        post.attachments &&
-        post.attachments.data[0].media_type === "photo"
-      ) {
-        postsList.push({
-          id: post.id,
-          message: post.message,
-          title: post.attachments.data[0].title,
-          isActive: true,
-          createdTime: post.created_time,
-          attachments: {
+            title: post.attachments.data[0].title,
+            message: post.message,
+            isActive: true,
+            createdTime: post.created_time,
+            attachments: {
+              id: post.id,
+              media_type: "album",
+              images: subAttachmentList,
+              video: null
+            },
+            target: post.attachments.data[0].target.url
+          });
+        } else if (
+          post.attachments &&
+          post.attachments.data[0].media_type === "photo"
+        ) {
+          postsList.push({
             id: post.id,
-            media_type: "photo",
-            images: [post.attachments.data[0].media.image.src],
-            video: null
-          },
-          target: post.attachments.data[0].target.url
-        });
-      } else if (
-        post.attachments &&
-        post.attachments.data[0].media_type === "video"
-      ) {
-        postsList.push({
-          id: post.id,
-          message: post.message,
-          title: post.attachments.data[0].title,
-          isActive: true,
-          createdTime: post.created_time,
-          attachments: {
+            message: post.message,
+            title: post.attachments.data[0].title,
+            isActive: true,
+            createdTime: post.created_time,
+            attachments: {
+              id: post.id,
+              media_type: "photo",
+              images: [post.attachments.data[0].media.image.src],
+              video: null
+            },
+            target: post.attachments.data[0].target.url
+          });
+        } else if (
+          post.attachments &&
+          post.attachments.data[0].media_type === "video"
+        ) {
+          postsList.push({
             id: post.id,
-            media_type: "video",
-            images: null,
-            video: post.attachments.data[0].media.source
-          },
-          target: post.attachments.data[0].target.url
-        });
+            message: post.message,
+            title: post.attachments.data[0].title,
+            isActive: true,
+            createdTime: post.created_time,
+            attachments: {
+              id: post.id,
+              media_type: "video",
+              images: null,
+              video: post.attachments.data[0].media.source
+            },
+            target: post.attachments.data[0].target.url
+          });
+        }
       }
     });
   return postsList;
@@ -505,6 +591,9 @@ export async function updateSiteList(userId, insert) {
 }
 
 export async function createAndSaveNewPost(pageId, newPostList) {
+  if (!newPostList || newPostList.length === 0) {
+    return;
+  }
   await Post.create(newPostList, async (err, docs) => {
     if (err) {
       console.log(err);
@@ -550,9 +639,9 @@ export async function createAndSaveNewEvent(pageId, newEventList) {
   });
 }
 
-export async function updateExistingPost(postsList, existedPostIdList) {
+export async function updateExistingPost(existedPostList, existedPostIdList) {
   let newPostList = [];
-  postsList.forEach(async post => {
+  existedPostList.forEach(async post => {
     if (!existedPostIdList.includes(post.id)) {
       newPostList.push(post);
     } else {
@@ -645,88 +734,102 @@ export async function findExistedPostObjId(pageId) {
   return site;
 }
 
-export async function insertAndUpdateSyncDataPost(
-  pageId,
-  postsList,
-  postIdList
-) {
-  await Post.findOneAndUpdate(
-    { id: { $in: postIdList } },
-    postsList,
-    {
-      upsert: true,
-      useFindAndModify: false
-    },
-    async (error, result) => {
-      if (error) {
-        // console.log(error);
+export async function insertAndUpdateSyncDataPost(pageId, postsList) {
+  //find existed post id
+  const site = await Site.findOne({ id: pageId })
+    .select("posts")
+    .populate("posts");
+  let existedPostObjIdList = [];
+  let existedPostIdList = [];
+  let fbPostIdList = [];
+  postsList &&
+    postsList.forEach(post => {
+      fbPostIdList.push(post.id);
+    });
+  console.log(site.posts.length);
+  site.posts &&
+    site.posts.forEach(existedPost => {
+      if (fbPostIdList.includes(existedPost.id)) {
+        existedPostIdList.push(existedPost.id);
+        existedPostObjIdList.push(new mongoose.Types.ObjectId(existedPost._id));
       }
-      if (!result) {
-        //find existed post id
-        const site = await Site.findOne({ id: pageId })
-          .select("posts")
-          .populate("posts");
-        let existedPostObjIdList = [];
-        let existedPostIdList = [];
-        site.posts &&
-          site.posts.forEach(existedPost => {
-            existedPostObjIdList.push(
-              new mongoose.Types.ObjectId(existedPost._id)
-            );
-            existedPostIdList.push(existedPost.id);
-          });
-        //update existing post
-        let newPostList = await updateExistingPost(
-          postsList,
-          existedPostIdList
-        );
-        //create new post and save new post into site
-        await createAndSaveNewPost(pageId, newPostList);
+    });
+  postsList &&
+    postsList.forEach(async post => {
+      if (!existedPostIdList.includes(post.id)) {
+        console.log("Post exist but not inside Site: " + post.id);
+        const existedPost = await Post.findOne({ id: post.id });
+        if (existedPost) {
+          await Post.updateOne({ id: post.id }, post);
+          const postResult = await Post.findOne({ id: post.id });
+          existedPostObjIdList.push(
+            new mongoose.Types.ObjectId(postResult._id)
+          );
+        } else {
+          const postResult = await Post.create(post);
+          existedPostObjIdList.push(
+            new mongoose.Types.ObjectId(postResult._id)
+          );
+        }
+      } else {
+        console.log("Post exist: " + post.id);
+        await Post.updateOne({ id: post.id }, post);
+        const postResult = await Post.findOne({ id: post.id });
+        existedPostObjIdList.push(new mongoose.Types.ObjectId(postResult._id));
       }
-    }
-  );
+    });
+  await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
 }
 
-export async function insertAndUpdateSyncDataEvents(
-  pageId,
-  eventList,
-  eventIdList
-) {
-  await Event.findOneAndUpdate(
-    { id: { $in: eventIdList } },
-    eventList,
-    {
-      upsert: true,
-      useFindAndModify: false
-    },
-    async (error, result) => {
-      if (error) {
-        // console.log(error);
-      }
-      if (!result) {
-        //find existed event id
-        const site = await Site.findOne({ id: pageId })
-          .select("events")
-          .populate("events");
-        let existedEventObjIdList = [];
-        let existedEventIdList = [];
-        site.events &&
-          site.events.forEach(existedEvent => {
-            existedEventObjIdList.push(
-              new mongoose.Types.ObjectId(existedEvent._id)
-            );
-            existedEventIdList.push(existedEvent.id);
-          });
-        //update existing event
-        let newEventList = await updateExistingEvent(
-          eventList,
-          existedEventIdList
+export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
+  //find existed event id
+  const site = await Site.findOne({ id: pageId })
+    .select("events")
+    .populate("events");
+  let existedEventObjIdList = [];
+  let existedEventIdList = [];
+  let fbEventIdList = [];
+  eventList &&
+    eventList.forEach(event => {
+      fbEventIdList.push(event.id);
+    });
+  site.events &&
+    site.events.forEach(existedEvent => {
+      if (fbEventIdList.includes(existedEvent.id)) {
+        existedEventIdList.push(existedEvent.id);
+        existedEventObjIdList.push(
+          new mongoose.Types.ObjectId(existedEvent._id)
         );
-        //create new event and save new event into site
-        await createAndSaveNewEvent(pageId, newEventList);
       }
-    }
-  );
+    });
+  eventList &&
+    eventList.forEach(async event => {
+      if (!existedEventIdList.includes(event.id)) {
+        console.log("Event exist but not inside Site: " + event.id);
+        const existedEvent = await Event.findOne({ id: event.id });
+        if (existedEvent) {
+          await Event.updateOne({ id: event.id }, event);
+          const eventResult = await Event.findOne({ id: event.id });
+          existedEventObjIdList.push(
+            new mongoose.Types.ObjectId(eventResult._id)
+          );
+        } else {
+          const eventResult = await Event.create(event);
+          console.log(eventResult);
+          existedEventObjIdList.push(
+            new mongoose.Types.ObjectId(eventResult._id)
+          );
+        }
+      } else {
+        console.log("Event exist: " + event.id);
+        await Event.updateOne({ id: event.id }, event);
+        const eventResult = await Event.findOne({ id: event.id });
+        existedEventObjIdList.push(
+          new mongoose.Types.ObjectId(eventResult._id)
+        );
+      }
+    });
+  await Site.updateOne({ id: pageId }, { events: existedEventObjIdList });
 }
 
 export async function insertAndUpdateSyncEvents(

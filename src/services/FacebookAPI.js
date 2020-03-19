@@ -23,6 +23,32 @@ export async function getSyncEvent({ pageId, accessToken }) {
   return data.data;
 }
 
+export async function getSyncPost({ pageId, accessToken }) {
+  const data = await axios({
+    params: {
+      fields:
+        "posts{message,created_time,attachments{title,media_type,subattachments,media,target}}",
+      locale: "en_US",
+      access_token: accessToken
+    },
+    url: process.env.facebookAPI + pageId
+  });
+  return data.data;
+}
+
+export async function getSyncGallery({ pageId, accessToken }) {
+  const data = await axios({
+    params: {
+      fields:
+        "posts{message,created_time,attachments{title,media_type,subattachments,media,target}}",
+      locale: "en_US",
+      access_token: accessToken
+    },
+    url: process.env.facebookAPI + pageId
+  });
+  return data.data;
+}
+
 export async function getSyncData({ pageId, accessToken }) {
   const data = await axios({
     params: {

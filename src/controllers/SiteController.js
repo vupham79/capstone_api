@@ -2,11 +2,14 @@ import { Category, Event, mongoose, Post, Site, Theme, User } from "../models";
 import {
   getPageData,
   getSyncData,
-  getSyncEvent
+  getSyncEvent,
+  getSyncPost,
+  getSyncGallery
 } from "../services/FacebookAPI";
 import { findAllUser } from "../services/UserService";
 import * as SiteService from "../services/SiteService";
 import { findOneTheme } from "../services/ThemeService";
+import moment from "moment";
 
 export async function findOneBySitepath(req, res) {
   try {
@@ -265,23 +268,8 @@ export async function createNewSite(req, res) {
           .then(_session => {
             session = _session;
             session.withTransaction(async () => {
-              let categoryInDB = [];
-              const categoryList = await Category.find();
-              categoryList.forEach(category => {
-                categoryInDB.push(category.name);
-              });
-              let categoryObjIdList = [];
-              categoryObjIdList = await SiteService.getFacebookCategoryObjIdData(
-                categoryInDB,
-                page.data.category_list && page.data.category_list
-              );
               //find theme
-              let theme = await Theme.findOne({
-                categories: { $in: categoryObjIdList }
-              });
-              if (!theme) {
-                theme = await Theme.findOne();
-              }
+              let theme = await Theme.findOne();
               // insert site
               const insert = await SiteService.insertSite(pageId, {
                 phone: page.data.phone,
@@ -316,15 +304,21 @@ export async function createNewSite(req, res) {
               await SiteService.updateSiteList(req.user.id, insert);
               if (insert) {
                 //post list
-                postsList = await SiteService.getFacebookPostData(page);
+                postsList = await SiteService.getFacebookPostData(page.data);
                 //gallery list
-                galleryList = await SiteService.getFacebookGalleryData(page);
+                galleryList = await SiteService.getFacebookGalleryData(
+                  page.data
+                );
                 await SiteService.updateGallery(pageId, galleryList);
                 //insert port and update site's posts
-                await SiteService.insertAndUpdatePosts(pageId, postsList);
+                if (postsList && postsList.length > 0) {
+                  await SiteService.insertAndUpdatePosts(pageId, postsList);
+                }
                 //event list
-                eventList = await SiteService.getFacebookEventData(page);
-                await SiteService.insertAndUpdateEvents(pageId, eventList);
+                eventList = await SiteService.getFacebookEventData(page.data);
+                if (eventList && eventList.length > 0) {
+                  await SiteService.insertAndUpdateEvents(pageId, eventList);
+                }
                 //return
                 return res.status(200).send(insert);
               } else {
@@ -345,26 +339,23 @@ export async function createNewSite(req, res) {
 export async function syncPost(req, res) {
   try {
     let postsList = [];
-    const { pageId } = req.body;
-    const data = await getSyncData({
+    const { pageId, dateFrom, dateTo } = req.body;
+    const data = await getSyncPost({
       pageId: pageId,
       accessToken: req.user.accessToken
     });
     if (data) {
-      postsList = await SiteService.getFacebookPostSyncData(data);
+      //post list
+      postsList = await SiteService.getFacebookPostData(data, dateFrom, dateTo);
       const siteExist = await SiteService.findOneSite(pageId);
       //post Id list
       let postIdList = [];
-      if (postsList) {
+      if (siteExist) {
         postsList.forEach(post => {
           postIdList.push(post.id);
         });
         //insert and update post
-        await SiteService.insertAndUpdateSyncDataPost(
-          pageId,
-          postsList,
-          postIdList
-        );
+        await SiteService.insertAndUpdateSyncDataPost(pageId, postsList);
         return res.status(200).send(siteExist);
       }
       return res.status(400).send({ error: "Site not existed!" });
@@ -380,7 +371,7 @@ export async function syncGallery(req, res) {
   try {
     let galleryList = [];
     const { pageId } = req.body;
-    const data = await getSyncData({
+    const data = await getSyncGallery({
       pageId: pageId,
       accessToken: req.user.accessToken
     });
@@ -495,24 +486,19 @@ export async function syncData(req, res) {
                 //insert and update post
                 await SiteService.insertAndUpdateSyncDataPost(
                   pageId,
-                  postsList,
-                  postIdList
+                  postsList
                 );
               }
 
               //event list
               eventList = await SiteService.getFacebookEventSyncData(data);
               //event Id list
-              let eventIdList = [];
+              console.log("Event list: ", eventList.length);
               if (eventList) {
-                eventList.forEach(event => {
-                  eventIdList.push(event.id);
-                });
                 //insert and update event
                 await SiteService.insertAndUpdateSyncDataEvents(
                   pageId,
-                  eventList,
-                  eventIdList
+                  eventList
                 );
               }
 
