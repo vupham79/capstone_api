@@ -8,13 +8,14 @@ export async function authAdmin(req, res, next) {
       process.env.secret
     );
     if (admin) {
-      const exist = await checkTokenExist(req.signedCookies["adminToken"]);
-      if (exist) {
-        req.admin = admin;
-        next();
-      } else {
-        return res.status(401).send("Not Authenticated!");
-      }
+      checkTokenExist(req.signedCookies["adminToken"]).then(result => {
+        if (result) {
+          req.admin = admin;
+          next();
+        } else {
+          return res.status(401).send("Not Authenticated!");
+        }
+      });
     } else {
       return res.status(401).send("Not Authenticated!");
     }
@@ -27,13 +28,14 @@ export async function authUser(req, res, next) {
   try {
     const user = jwt.verify(req.signedCookies["userToken"], process.env.secret);
     if (user) {
-      const exist = await checkTokenExist(req.signedCookies["userToken"]);
-      if (exist) {
-        req.user = user;
-        next();
-      } else {
-        return res.status(401).send("Not Authenticated!");
-      }
+      checkTokenExist(req.signedCookies["userToken"]).then(result => {
+        if (result) {
+          req.user = user;
+          next();
+        } else {
+          return res.status(401).send("Not Authenticated!");
+        }
+      });
     } else {
       return res.status(401).send("Not Authenticated!");
     }
@@ -44,11 +46,19 @@ export async function authUser(req, res, next) {
 
 export async function authAll(req, res, next) {
   try {
-    const existUser = await checkTokenExist(req.signedCookies["userToken"]);
-    const existAdmin = await checkTokenExist(req.signedCookies["adminToken"]);
-    if (existAdmin || existUser) {
-      next();
-    } else return res.status(401).send("Not Authenticated!");
+    checkTokenExist(req.signedCookies["userToken"]).then(result => {
+      if (result) {
+        next();
+      } else {
+        checkTokenExist(req.signedCookies["adminToken"]).then(result => {
+          if (result) {
+            next();
+          } else {
+            return res.status(401).send("Not Authenticated!");
+          }
+        });
+      }
+    });
   } catch (error) {
     return res.status(401).send("Not Authenticated!");
   }
