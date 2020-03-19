@@ -3,29 +3,32 @@ import { client as redis } from "../utils/redis_";
 
 export async function deactivateUser(id) {
   const user = await User.findOne({ id: id });
-  redis.del(user.token);
-  User.updateOne(
-    { id: id },
-    {
+  if (user) {
+    if (user.token) {
+      redis.del(user.token);
+    }
+    await user.updateOne({
       isActivated: false,
       token: null
-    }
-  );
-  Site.updateMany(
-    { _id: { $in: user.sites } },
-    {
-      isPublish: false
-    }
-  );
-  return user;
+    });
+    await Site.updateMany(
+      { _id: { $in: user.sites } },
+      { $set: { isPublish: false } }
+    );
+    return user;
+  }
+  return false;
 }
 
 export async function activateUser(id) {
   const user = User.find({ id: id });
-  await user.updateOne({
-    isActivated: true
-  });
-  return user;
+  if (user) {
+    await user.updateOne({
+      isActivated: true
+    });
+    return user;
+  }
+  return false;
 }
 
 export async function findAllUser() {
