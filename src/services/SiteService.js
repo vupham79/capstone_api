@@ -129,6 +129,7 @@ export async function saveDesign(data) {
   site.instagram = data.instagram;
   site.youtube = data.youtube;
   site.phone = data.phone;
+  site.sitePath = data.sitePath;
   return await site.save();
 }
 
@@ -789,6 +790,7 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
   let existedEventObjIdList = [];
   let existedEventIdList = [];
   let fbEventIdList = [];
+  console.log("Event length: " + eventList.length);
   eventList &&
     eventList.forEach(event => {
       fbEventIdList.push(event.id);
@@ -912,4 +914,10 @@ export async function insertAndUpdateSyncGallery(
       }
     }
   );
+}
+
+export async function findExistedSitePath(sitepath) {
+  return await Site.findOne({
+    sitePath: sitepath.toLowerCase()
+  });
 }

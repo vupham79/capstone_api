@@ -4,14 +4,14 @@ import { client as redis } from "../utils/redis_";
 export async function deactivateUser(id) {
   const user = await User.findOne({ id: id });
   redis.del(user.token);
-  User.updateOne(
+  await User.updateOne(
     { id: id },
     {
       isActivated: false,
       token: null
     }
   );
-  Site.updateMany(
+  await Site.updateMany(
     { _id: { $in: user.sites } },
     {
       isPublish: false
