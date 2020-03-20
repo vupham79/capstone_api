@@ -94,9 +94,11 @@ export async function findAllSiteByUser(email) {
 }
 
 export async function findSiteBySitepath(sitepath) {
-  return await Site.findOne({ sitePath: sitepath.toLowerCase() }).populate({
-    path: "theme posts events"
-  });
+  return await Site.findOne({ sitePath: sitepath.toLowerCase() })
+    .populate({
+      path: "theme events"
+    })
+    .populate("posts", "", "", "", { limit: 4 });
 }
 
 export async function checkSiteExist(id) {
@@ -119,10 +121,28 @@ export async function saveDesign(data) {
     id: data.pageId
   });
   if (site) {
-    const sitePathExisting = await Site.findOne({
-      sitePath: data.sitePath
-    });
-    if (sitePathExisting) {
+    if (site.sitePath !== data.sitePath.trim()) {
+      const sitePathExisting = await Site.findOne({
+        sitePath: data.sitePath.trim()
+      });
+      if (!sitePathExisting) {
+        site.fontTitle = data.fontTitle;
+        site.fontBody = data.fontBody;
+        site.title = data.name;
+        site.color = data.color;
+        site.navItems = data.navItems;
+        site.theme = new mongoose.Types.ObjectId(data.findTheme._id);
+        site.whatsapp = data.whatsapp;
+        site.email = data.email;
+        site.instagram = data.instagram;
+        site.youtube = data.youtube;
+        site.phone = data.phone;
+        site.sitePath = data.sitePath;
+        return await site.save();
+      } else {
+        return { msg: "Sitepath existed!" };
+      }
+    } else {
       site.fontTitle = data.fontTitle;
       site.fontBody = data.fontBody;
       site.title = data.name;
@@ -134,10 +154,7 @@ export async function saveDesign(data) {
       site.instagram = data.instagram;
       site.youtube = data.youtube;
       site.phone = data.phone;
-      site.sitePath = data.sitePath;
       return await site.save();
-    } else {
-      return { msg: "Sitepath existed!" };
     }
   } else {
     return { msg: "Site not existed!" };
@@ -687,17 +704,13 @@ export async function findSiteHomeTab(sitePath, skip = 0, limit = 10) {
   });
 }
 export async function findSiteGalleryTab(sitePath, skip = 0, limit = 10) {
-  return await Site.find({ sitePath }).populate("", "", null, null, {
-    skip,
-    limit
-  });
+  return await Site.find({ sitePath }).select("galleries");
 }
 
-export async function findSiteNewsTab(sitePath, skip = 0, limit = 10) {
-  return await Site.find({ sitePath }).populate("", "", null, null, {
-    skip,
-    limit
-  });
+export async function findSiteNewsTab(sitePath, skip = 0, limit = 100) {
+  return await Site.find({ sitePath })
+    .select("posts")
+    .populate("posts", "", "", "", { limit, skip });
 }
 
 export async function findSiteContactTab(sitePath, skip = 0, limit = 10) {
@@ -708,10 +721,7 @@ export async function findSiteContactTab(sitePath, skip = 0, limit = 10) {
 }
 
 export async function findSiteAboutTab(sitePath, skip = 0, limit = 10) {
-  return await Site.find({ sitePath }).populate("", "", null, null, {
-    skip,
-    limit
-  });
+  return await Site.find({ sitePath }).select("about");
 }
 
 export async function findExistedEventObjIdList(pageId) {

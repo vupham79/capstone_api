@@ -1,15 +1,14 @@
-import { Category, Event, mongoose, Post, Site, Theme, User } from "../models";
+import { mongoose, Site, Theme } from "../models";
 import {
   getPageData,
   getSyncData,
   getSyncEvent,
-  getSyncPost,
-  getSyncGallery
+  getSyncGallery,
+  getSyncPost
 } from "../services/FacebookAPI";
-import { findAllUser } from "../services/UserService";
 import * as SiteService from "../services/SiteService";
 import { findOneTheme } from "../services/ThemeService";
-import moment from "moment";
+import { findAllUser } from "../services/UserService";
 
 export async function findOneBySitepath(req, res) {
   try {
@@ -170,14 +169,11 @@ export async function saveDesign(req, res) {
         phone,
         sitePath
       });
-      if (update) {
-        return res.status(200).send(update);
-      } else if (update.msg) {
-        return res.status(400).send({ error: update.msg });
-      }
+      return res.status(200).send(update);
     }
     return res.status(400).send({ error: "Theme not exist!" });
   } catch (error) {
+    console.log(error);
     return res.status(400).send(error);
   }
 }
@@ -492,11 +488,9 @@ export async function syncData(req, res) {
                   postsList
                 );
               }
-
               //event list
               eventList = await SiteService.getFacebookEventSyncData(data);
               //event Id list
-              console.log("Event list: ", eventList.length);
               if (eventList) {
                 //insert and update event
                 await SiteService.insertAndUpdateSyncDataEvents(
@@ -504,7 +498,6 @@ export async function syncData(req, res) {
                   eventList
                 );
               }
-
               if (update) {
                 return res.status(200).send(update);
               } else {
@@ -561,34 +554,34 @@ export async function updateFavicon(req, res) {
 }
 
 export async function findSiteDataByTab(req, res) {
-  const { tab, sitePath, skip, limit } = req.params;
+  const { tab, sitepath, skip, limit } = req.params;
   try {
     if (tab === "home") {
-      const home = await SiteService.findSiteHomeTab(sitePath, skip, limit);
-      return home;
+      const home = await SiteService.findSiteHomeTab(sitepath, skip, limit);
+      return res.status(200).send(home);
     } else if (tab === "event") {
-      const events = await SiteService.findSiteEventTab(sitePath, skip, limit);
-      return events;
+      const events = await SiteService.findSiteEventTab(sitepath, skip, limit);
+      return res.status(200).send(events);
     } else if (tab === "gallery") {
       const gallery = await SiteService.findSiteGalleryTab(
-        sitePath,
+        sitepath,
         skip,
         limit
       );
-      return gallery;
+      return res.status(200).send(gallery);
     } else if (tab === "news") {
-      const news = await SiteService.findSiteNewsTab(sitePath, skip, limit);
-      return news;
+      const news = await SiteService.findSiteNewsTab(sitepath, skip, limit);
+      return res.status(200).send(news);
     } else if (tab === "contact") {
       const contact = await SiteService.findSiteContactTab(
-        sitePath,
+        sitepath,
         skip,
         limit
       );
-      return contact;
+      return res.status(200).send(contact);
     } else if (tab === "about") {
-      const about = await SiteService.findSiteAboutTab(sitePath, skip, limit);
-      return about;
+      const about = await SiteService.findSiteAboutTab(sitepath, skip, limit);
+      return res.status(200).send(about);
     }
   } catch (error) {
     return res.status(400).send({ error });
