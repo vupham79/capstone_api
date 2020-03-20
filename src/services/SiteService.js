@@ -814,6 +814,7 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
   let existedEventObjIdList = [];
   let existedEventIdList = [];
   let fbEventIdList = [];
+  console.log("Event length: " + eventList.length);
   eventList &&
     eventList.forEach(event => {
       fbEventIdList.push(event.id);
@@ -937,4 +938,10 @@ export async function insertAndUpdateSyncGallery(
       }
     }
   );
+}
+
+export async function findExistedSitePath(sitepath) {
+  return await Site.findOne({
+    sitePath: sitepath.toLowerCase()
+  });
 }

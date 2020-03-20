@@ -113,6 +113,16 @@ export async function saveDesign(req, res) {
     sitePath
   } = req.body;
   try {
+    if (
+      !sitePath ||
+      sitePath === undefined ||
+      sitePath.replace(/\s/g, "") === ""
+    ) {
+      return res.status(400).send({ error: "Sitepath must not be empty!" });
+    }
+    if (!name || name === undefined || name.replace(/\s/g, "") === "") {
+      return res.status(400).send({ error: "Name not be empty!" });
+    }
     navItems &&
       navItems.length > 0 &&
       navItems.forEach(navItem => {
@@ -194,9 +204,7 @@ export async function createNewSite(req, res) {
     }
     sitepath = sitepath.replace(/\s/g, "");
     //existed site path
-    const isExistedSitePath = await Site.findOne({
-      sitePath: sitepath.toLowerCase()
-    });
+    const isExistedSitePath = await SiteService.findExistedSitePath(sitepath);
 
     if (isExistedSitePath) {
       return res
@@ -470,12 +478,7 @@ export async function syncData(req, res) {
               //gallery list
               galleryList = await SiteService.getFacebookGalleryData(data);
               //update galleries
-              await Site.updateOne(
-                { id: pageId },
-                {
-                  galleries: galleryList.length > 0 ? galleryList : null
-                }
-              );
+              await SiteService.updateGallery(pageId, galleryList);
               //post Id list
               let postIdList = [];
               if (postsList) {
@@ -530,6 +533,9 @@ export async function updateLogo(req, res) {
 export async function updateCover(req, res) {
   const { pageId, cover } = req.body;
   try {
+    if (!cover || cover === undefined || cover.length === 0) {
+      return res.status(400).send({ error: "Cover must not be empty!" });
+    }
     const update = await SiteService.updateCovers(pageId, cover);
     if (update) {
       return res.status(200).send(update);
