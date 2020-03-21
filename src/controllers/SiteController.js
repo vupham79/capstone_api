@@ -620,27 +620,24 @@ export async function updateFavicon(req, res) {
 }
 
 export async function findSiteDataByTab(req, res) {
-  console.log(req.body);
-  const { id, page, pageNumber, sitePath } = req.body;
+  const { id, page, pageNumber, sitePath } = req.query;
   try {
     if (page === "home") {
-      const home = await SiteService.findSiteHomeTab(id, pageNumber);
+      const home = await SiteService.findSiteHomeTab(id, sitePath);
       return res.status(200).send(home);
     } else if (page === "event") {
-      const events = await SiteService.findSiteEventTab(id, pageNumber);
+      const events = await SiteService.findSiteEventTab(id, sitePath);
       return res.status(200).send(events);
     } else if (page === "gallery") {
-      const gallery = await SiteService.findSiteGalleryTab(id, pageNumber);
+      const gallery = await SiteService.findSiteGalleryTab(
+        id,
+        sitePath,
+        pageNumber
+      );
       return res.status(200).send(gallery);
     } else if (page === "news") {
       const news = await SiteService.findSiteNewsTab(id, sitePath, pageNumber);
       return res.status(200).send(news);
-    } else if (page === "contact") {
-      const contact = await SiteService.findSiteContactTab(id, pageNumber);
-      return res.status(200).send(contact);
-    } else if (page === "about") {
-      const about = await SiteService.findSiteAboutTab(id, pageNumber);
-      return res.status(200).send(about);
     }
     return res.status(400).send();
   } catch (error) {

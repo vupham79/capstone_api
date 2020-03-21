@@ -690,57 +690,88 @@ export async function updateExistingEvent(eventList, existedEventIdList) {
   });
   return newEventList;
 }
-export async function findSiteEventTab(id) {
-  return await Site.find({ id })
-    .populate("events", "", "", "", { skip, limit })
-    .select("events");
+
+export async function findSiteEventTab(id, sitePath) {
+  if (sitePath) {
+    return await Site.find({ sitePath })
+      .populate("events")
+      .select("events");
+  } else
+    return await Site.find({ id })
+      .populate("events")
+      .select("events");
 }
 
-export async function findSiteHomeTab(id) {
-  return await Site.find({ id }).populate("", "", null, null, {
-    skip,
-    limit
-  });
+export async function findSiteHomeTab(id, sitePath) {
+  if (sitePath) {
+    const site = await Site.findOne({ sitePath });
+    return site;
+  } else {
+    const site = await Site.findOne({ id });
+    return site;
+  }
 }
 
-export async function findSiteGalleryTab(id, pageNumber = 1) {
-  const pageCount = await Site.find({ id }, "galleries").countDocuments();
-  const galleries = await Site.find({ id }, "galleries", {
-    limit,
-    skip: (pageNumber - 1) * limit
-  });
-  return {
-    pageCount,
-    data: galleries
-  };
+export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
+  let counter = 0;
+  if (sitePath) {
+    const total = await Site.findOne({ sitePath }, "galleries");
+    await total.posts.map(() => {
+      counter++;
+    });
+    const galleries = await Site.findOne({ sitePath })
+      .select("galleries")
+      .populate("galleries", "", "", "", {
+        limit,
+        skip: (pageNumber - 1) * limit
+      });
+    return {
+      pageCount: Math.ceil(counter / limit),
+      data: galleries
+    };
+  } else {
+    const total = await Site.findOne({ id }, "galleries");
+    await total.posts.map(() => {
+      counter++;
+    });
+    const galleries = await Site.findOne({ id }, "galleries", {
+      limit,
+      skip: (pageNumber - 1) * limit
+    });
+    return {
+      pageCount,
+      data: galleries
+    };
+  }
 }
 
 export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
+  let counter = 0;
   if (sitePath) {
-    const pageCount = await Site.find({ sitePath }, "posts").countDocuments();
-    const posts = await Site.find({ sitePath })
+    const total = await Site.findOne({ sitePath }, "posts");
+    await total.posts.map(() => {
+      counter++;
+    });
+    const posts = await Site.findOne({ sitePath })
       .select("posts")
       .populate("posts", "", "", "", { limit, skip: (pageNumber - 1) * limit });
     return {
-      pageCount,
+      pageCount: Math.ceil(counter / limit),
+      data: posts
+    };
+  } else {
+    const total = await Site.findOne({ id }, "posts");
+    await total.posts.map(() => {
+      counter++;
+    });
+    const posts = await Site.findOne({ id })
+      .select("posts")
+      .populate("posts", "", "", "", { limit, skip: (pageNumber - 1) * limit });
+    return {
+      pageCount: Math.ceil(counter / limit),
       data: posts
     };
   }
-  const pageCount = await Site.find({ id }, "posts").countDocuments();
-  const posts = await Site.find({ id })
-    .select("posts")
-    .populate("posts", "", "", "", { limit, skip: (pageNumber - 1) * limit });
-  return {
-    pageCount,
-    data: posts
-  };
-}
-
-export async function findSiteContactTab(sitePath, skip = 0, limit = 10) {
-  return await Site.find({ sitePath }).populate("", "", null, null, {
-    skip,
-    limit
-  });
 }
 
 export async function findExistedEventObjIdList(pageId) {
