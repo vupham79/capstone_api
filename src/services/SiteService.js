@@ -1,6 +1,9 @@
 import { mongoose, Site, User, Category, Post, Event } from "../models";
 import moment from "moment";
 
+const skip = 0;
+const limit = 5;
+
 export async function insertSite(pageId, body) {
   const insert = await Site.create({
     id: pageId,
@@ -22,7 +25,8 @@ export async function insertSite(pageId, body) {
     sitePath: body.sitePath.toLowerCase(),
     isPublish: body.isPublish,
     about: body.about,
-    events: body.events
+    events: body.events,
+    homepage: body.homepage
   });
   return insert;
 }
@@ -70,9 +74,6 @@ export async function findOneSiteByAccessToken(id, body) {
 }
 
 export async function findOneSite(id) {
-  const site = await Site.findOne({ id: id }).populate({
-    path: "theme posts events"
-  });
   return await Site.findOne({ id: id }).populate({
     path: "theme posts events"
   });
@@ -691,26 +692,50 @@ export async function updateExistingEvent(eventList, existedEventIdList) {
   });
   return newEventList;
 }
-export async function findSiteEventTab(sitePath, skip = 0, limit = 10) {
-  return await Site.find({ sitePath: sitePath })
-    .populate("events", "select", null, null, { skip, limit })
+export async function findSiteEventTab(id) {
+  return await Site.find({ id })
+    .populate("events", "", "", "", { skip, limit })
     .select("events");
 }
 
-export async function findSiteHomeTab(sitePath, skip = 0, limit = 10) {
-  return await Site.find({ sitePath }).populate("", "", null, null, {
+export async function findSiteHomeTab(id) {
+  return await Site.find({ id }).populate("", "", null, null, {
     skip,
     limit
   });
 }
-export async function findSiteGalleryTab(sitePath, skip = 0, limit = 10) {
-  return await Site.find({ sitePath }).select("galleries");
+
+export async function findSiteGalleryTab(id, pageNumber = 1) {
+  const pageCount = await Site.find({ id }, "galleries").countDocuments();
+  const galleries = await Site.find({ id }, "galleries", {
+    limit,
+    skip: (pageNumber - 1) * limit
+  });
+  return {
+    pageCount,
+    data: galleries
+  };
 }
 
-export async function findSiteNewsTab(sitePath, skip = 0, limit = 100) {
-  return await Site.find({ sitePath })
+export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
+  if (sitePath) {
+    const pageCount = await Site.find({ sitePath }, "posts").countDocuments();
+    const posts = await Site.find({ sitePath })
+      .select("posts")
+      .populate("posts", "", "", "", { limit, skip: (pageNumber - 1) * limit });
+    return {
+      pageCount,
+      data: posts
+    };
+  }
+  const pageCount = await Site.find({ id }, "posts").countDocuments();
+  const posts = await Site.find({ id })
     .select("posts")
-    .populate("posts", "", "", "", { limit, skip });
+    .populate("posts", "", "", "", { limit, skip: (pageNumber - 1) * limit });
+  return {
+    pageCount,
+    data: posts
+  };
 }
 
 export async function findSiteContactTab(sitePath, skip = 0, limit = 10) {
@@ -718,10 +743,6 @@ export async function findSiteContactTab(sitePath, skip = 0, limit = 10) {
     skip,
     limit
   });
-}
-
-export async function findSiteAboutTab(sitePath, skip = 0, limit = 10) {
-  return await Site.find({ sitePath }).select("about");
 }
 
 export async function findExistedEventObjIdList(pageId) {

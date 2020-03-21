@@ -10,6 +10,98 @@ import * as SiteService from "../services/SiteService";
 import { findOneTheme } from "../services/ThemeService";
 import { findAllUser } from "../services/UserService";
 
+const defaultNavItems = [
+  {
+    name: "Home",
+    order: 1,
+    isActive: true,
+    original: "home"
+  },
+  {
+    name: "About",
+    order: 2,
+    isActive: true,
+    original: "about"
+  },
+  {
+    name: "Gallery",
+    order: 3,
+    isActive: true,
+    original: "gallery"
+  },
+  {
+    name: "Event",
+    order: 4,
+    isActive: true,
+    original: "event"
+  },
+  {
+    name: "Contact",
+    order: 5,
+    isActive: true,
+    original: "contact"
+  },
+  {
+    name: "News",
+    order: 6,
+    isActive: true,
+    original: "news"
+  }
+];
+
+const defaultHomepageSetting = [
+  {
+    name: "About",
+    order: 2,
+    isActive: false,
+    original: "about",
+    filter: {
+      type: "lastest",
+      items: null
+    }
+  },
+  {
+    name: "Gallery",
+    order: 3,
+    isActive: false,
+    original: "gallery",
+    filter: {
+      type: "lastest",
+      items: null
+    }
+  },
+  {
+    name: "Event",
+    order: 4,
+    isActive: false,
+    original: "event",
+    filter: {
+      type: "lastest",
+      items: null
+    }
+  },
+  {
+    name: "Contact",
+    order: 5,
+    isActive: false,
+    original: "contact",
+    filter: {
+      type: "lastest",
+      items: null
+    }
+  },
+  {
+    name: "News",
+    order: 6,
+    isActive: false,
+    original: "news",
+    filter: {
+      type: "lastest",
+      items: null
+    }
+  }
+];
+
 export async function findOneBySitepath(req, res) {
   try {
     const find = await SiteService.findSiteBySitepath(req.params.sitepath);
@@ -218,45 +310,6 @@ export async function createNewSite(req, res) {
     }).catch(error => {
       return res.status(400).send({ error: "This facebook page not existed!" });
     });
-    //default nav items
-    const defaultNavItems = [
-      {
-        name: "Home",
-        order: 1,
-        isActive: true,
-        original: "home"
-      },
-      {
-        name: "About",
-        order: 2,
-        isActive: true,
-        original: "about"
-      },
-      {
-        name: "Gallery",
-        order: 3,
-        isActive: true,
-        original: "gallery"
-      },
-      {
-        name: "Event",
-        order: 4,
-        isActive: true,
-        original: "event"
-      },
-      {
-        name: "Contact",
-        order: 5,
-        isActive: true,
-        original: "contact"
-      },
-      {
-        name: "News",
-        order: 6,
-        isActive: true,
-        original: "news"
-      }
-    ];
     //if fb api data existed
     if (page.data) {
       if (page.data.statusCode !== undefined) {
@@ -277,6 +330,16 @@ export async function createNewSite(req, res) {
             session.withTransaction(async () => {
               //find theme
               let theme = await Theme.findOne();
+              if (!theme) {
+                return res.status(500).send({ error: "No theme existed!" });
+              }
+              await theme.sections.forEach(section => {
+                defaultHomepageSetting.forEach(homepageSection => {
+                  if (section === homepageSection.original) {
+                    homepageSection.isActive = true;
+                  }
+                });
+              });
               // insert site
               const insert = await SiteService.insertSite(pageId, {
                 phone: page.data.phone,
@@ -305,7 +368,8 @@ export async function createNewSite(req, res) {
                 url: pageUrl,
                 isPublish: isPublish,
                 sitePath: sitepath,
-                about: page.data.about
+                about: page.data.about,
+                homepage: defaultHomepageSetting
               });
               //find user
               await SiteService.updateSiteList(req.user.id, insert);
@@ -560,35 +624,29 @@ export async function updateFavicon(req, res) {
 }
 
 export async function findSiteDataByTab(req, res) {
-  const { tab, sitepath, skip, limit } = req.params;
+  console.log(req.body);
+  const { id, page, pageNumber, sitePath } = req.body;
   try {
-    if (tab === "home") {
-      const home = await SiteService.findSiteHomeTab(sitepath, skip, limit);
+    if (page === "home") {
+      const home = await SiteService.findSiteHomeTab(id, pageNumber);
       return res.status(200).send(home);
-    } else if (tab === "event") {
-      const events = await SiteService.findSiteEventTab(sitepath, skip, limit);
+    } else if (page === "event") {
+      const events = await SiteService.findSiteEventTab(id, pageNumber);
       return res.status(200).send(events);
-    } else if (tab === "gallery") {
-      const gallery = await SiteService.findSiteGalleryTab(
-        sitepath,
-        skip,
-        limit
-      );
+    } else if (page === "gallery") {
+      const gallery = await SiteService.findSiteGalleryTab(id, pageNumber);
       return res.status(200).send(gallery);
-    } else if (tab === "news") {
-      const news = await SiteService.findSiteNewsTab(sitepath, skip, limit);
+    } else if (page === "news") {
+      const news = await SiteService.findSiteNewsTab(id, sitePath, pageNumber);
       return res.status(200).send(news);
-    } else if (tab === "contact") {
-      const contact = await SiteService.findSiteContactTab(
-        sitepath,
-        skip,
-        limit
-      );
+    } else if (page === "contact") {
+      const contact = await SiteService.findSiteContactTab(id, pageNumber);
       return res.status(200).send(contact);
-    } else if (tab === "about") {
-      const about = await SiteService.findSiteAboutTab(sitepath, skip, limit);
+    } else if (page === "about") {
+      const about = await SiteService.findSiteAboutTab(id, pageNumber);
       return res.status(200).send(about);
     }
+    return res.status(400).send();
   } catch (error) {
     return res.status(400).send({ error });
   }

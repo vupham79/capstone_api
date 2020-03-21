@@ -141,6 +141,13 @@ const SiteSchema = new mongoose.Schema(
           type: String,
           required: true
         },
+        isActive: {
+          type: Boolean,
+          default: false
+        },
+        original: {
+          type: String
+        },
         order: {
           type: Number,
           required: true

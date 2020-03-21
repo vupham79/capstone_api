@@ -35,7 +35,13 @@ const ThemeSchema = new mongoose.Schema(
         type: String
       }
     ],
-    categories: [{ type: Schema.Types.ObjectId, ref: "Category" }]
+    categories: [{ type: Schema.Types.ObjectId, ref: "Category" }],
+    sections: [
+      {
+        type: String,
+        enum: ["news", "about", "gallery", "event", "contact"]
+      }
+    ]
   },
   {
     timestamps: true
