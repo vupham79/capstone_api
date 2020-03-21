@@ -417,7 +417,7 @@ export async function syncPost(req, res) {
     });
     if (data) {
       //post list
-      postsList = await SiteService.getFacebookPostData(data, dateFrom, dateTo);
+      postsList = await SiteService.getFacebookPostData(data);
       const siteExist = await SiteService.findOneSite(pageId);
       //post Id list
       let postIdList = [];
@@ -488,11 +488,7 @@ export async function syncEvent(req, res) {
           eventIdList.push(event.id);
         });
         //insert and update event
-        await SiteService.insertAndUpdateSyncEvents(
-          pageId,
-          eventList,
-          eventIdList
-        );
+        await SiteService.insertAndUpdateSyncDataEvents(pageId, eventList);
 
         return res.status(200).send(siteExist);
       } else {
