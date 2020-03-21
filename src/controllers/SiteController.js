@@ -9,6 +9,15 @@ import {
 import * as SiteService from "../services/SiteService";
 import { findOneTheme } from "../services/ThemeService";
 import { findAllUser } from "../services/UserService";
+import nodemailer from "nodemailer";
+
+var transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "fpwg.fptu@gmail.com",
+    pass: "fptu123456"
+  }
+});
 
 const defaultNavItems = [
   {
@@ -202,7 +211,8 @@ export async function saveDesign(req, res) {
     youtube,
     instagram,
     phone,
-    sitePath
+    sitePath,
+    autoSync
   } = req.body;
   try {
     if (
@@ -214,6 +224,32 @@ export async function saveDesign(req, res) {
     }
     if (!name || name === undefined || name.replace(/\s/g, "") === "") {
       return res.status(400).send({ error: "Name not be empty!" });
+    }
+    if (autoSync) {
+      // switch (autoSync.dataType) {
+      //   // sync all data
+      //   case "all":
+      //     SiteService.addCronJob({
+      //       pageId,
+      //       autoSync,
+      //       job: () => autoSyncPost(userEmail, pageId, accessToken)
+      //     });
+      //     break;
+      //   // sync event
+      //   case "event":
+      //     SiteService.addCronJob({ pageId, autoSync, job: autoSyncPost });
+      //     break;
+      //   // sync post
+      //   case "post":
+      //     SiteService.addCronJob({ pageId, autoSync, job: autoSyncPost });
+      //     break;
+      //   // sync gallery
+      //   case "gallery":
+      //     SiteService.addCronJob({ pageId, autoSync, job: autoSyncPost });
+      //     break;
+      //   default:
+      //     break;
+      // }
     }
     navItems &&
       navItems.length > 0 &&
@@ -435,6 +471,57 @@ export async function syncPost(req, res) {
   } catch (error) {
     console.log(error);
     return res.status(400).send({ error });
+  }
+}
+
+export async function autoSyncPost(userEmail, pageId, accessToken) {
+  try {
+    let postsList = [];
+    const data = await getSyncPost({
+      pageId: pageId,
+      accessToken: accessToken
+    });
+    if (data) {
+      //post list
+      postsList = await SiteService.getFacebookPostData(data);
+      const siteExist = await SiteService.findOneSite(pageId);
+      //post Id list
+      let postIdList = [];
+      if (siteExist) {
+        postsList.forEach(post => {
+          postIdList.push(post.id);
+        });
+        //insert and update post
+        await SiteService.insertAndUpdateSyncDataPost(pageId, postsList);
+        // success
+        // send mail with defined transport object
+        let info = await transporter.sendMail({
+          from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+          to: userEmail, // list of receivers
+          subject: "Sync Success ✔", // Subject line
+          text: "Your site has synced data success", // plain text body
+          html: "<b>Hello world?</b>" // html body
+        });
+      }
+      // site not exist
+      let info = await transporter.sendMail({
+        from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+        to: userEmail, // list of receivers
+        subject: "Sync Failed ✔", // Subject line
+        text: "Your site is not exist to sync", // plain text body
+        html: "<b>Hello world?</b>" // html body
+      });
+    }
+    // page not exist
+    let info = await transporter.sendMail({
+      from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+      to: userEmail, // list of receivers
+      subject: "Sync Failed ✔", // Subject line
+      text: "Your Facebook Page is not exist to sync", // plain text body
+      html: "<b>Hello world?</b>" // html body
+    });
+  } catch (error) {
+    console.log(error);
   }
 }
 

@@ -1,7 +1,8 @@
 import { mongoose, Site, User, Category, Post, Event } from "../models";
 import moment from "moment";
+import { CronJob } from "cron";
 
-const skip = 0;
+const cronJobs = [];
 const limit = 5;
 
 export async function insertSite(pageId, body) {
@@ -995,4 +996,51 @@ export async function findExistedSitePath(sitepath) {
   return await Site.findOne({
     sitePath: sitepath.toLowerCase()
   });
+}
+
+export async function addCronJob({ pageId, autoSync, job }) {
+  const { minute, hour, day } = autoSync;
+  let cronjob = new CronJob(
+    `* *${typeof minute === "number" && minute >= 0 && "/"}${typeof minute ===
+      "number" &&
+      minute >= 0 &&
+      minute - 1} *${typeof hour === "number" &&
+      hour >= 0 &&
+      "/"}${typeof hour === "number" && hour >= 0 && hour - 1} *${typeof day ===
+      "number" &&
+      day > 0 &&
+      "/"}${typeof day === "number" && day > 0 && day} * *`,
+    function() {
+      job();
+    }
+  );
+  let exist = false;
+  cronJobs.forEach(cronJob => {
+    if (cronJob.siteId === pageId) {
+      exist = true;
+      if (cronJob.job) {
+        cronJob.job.stop();
+      }
+      cronJob.job = cronjob;
+    }
+  });
+  if (!exist) {
+    cronJobs.push({
+      siteId: pageId,
+      job: cronjob
+    });
+  }
+  cronjob.start();
+  return true;
+}
+
+export async function stopCronJob(siteId) {
+  cronJobs.forEach(cronJob => {
+    if (cronJob.siteId === siteId) {
+      if (cronJob.job) {
+        cronJob.job.stop();
+      }
+    }
+  });
+  return true;
 }
