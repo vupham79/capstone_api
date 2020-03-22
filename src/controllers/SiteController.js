@@ -197,6 +197,67 @@ export async function publish(req, res) {
   }
 }
 
+export async function applyAutoSync(req, res) {
+  const { id, autoSync } = req.body;
+  try {
+    const autoSyncFormatted = {
+      dataType: autoSync.dataType,
+      minute: autoSync.minute ? autoSync.minute : null,
+      hour: autoSync.hour ? autoSync.hour : null,
+      day: autoSync.day ? autoSync.day : null
+    };
+    const update = await SiteService.updateAutoSync(id, autoSyncFormatted);
+    switch (autoSync.dataType) {
+      // sync all data
+      case "all":
+        SiteService.addCronJob({
+          pageId,
+          autoSync,
+          job: () => autoSyncData(pageId, req.user.accessToken, req.user.email)
+        });
+        break;
+      // sync event
+      case "event":
+        SiteService.addCronJob({
+          pageId,
+          autoSync,
+          job: () => autoSyncEvent(pageId, req.user.accessToken, req.user.email)
+        });
+        break;
+      // sync post
+      case "post":
+        SiteService.addCronJob({
+          pageId,
+          autoSync,
+          job: () => autoSyncPost(req.user.email, pageId, req.user.accessToken)
+        });
+        break;
+      // sync gallery
+      case "gallery":
+        SiteService.addCronJob({
+          pageId,
+          autoSync,
+          job: () =>
+            autoSyncGallery(pageId, req.user.accessToken, req.user.email)
+        });
+        break;
+      case "none":
+        SiteService.addCronJob({
+          pageId,
+          autoSync
+        });
+        break;
+      default:
+        break;
+    }
+    if (update) {
+      return res.status(200).send(update);
+    } else return res.status(400).send({ error: "Apply auto sync failed!" });
+  } catch (error) {
+    res.status(400).send({ error: "Apply auto sync failed!" });
+  }
+}
+
 export async function saveDesign(req, res) {
   let {
     fontBody,
@@ -211,8 +272,7 @@ export async function saveDesign(req, res) {
     youtube,
     instagram,
     phone,
-    sitePath,
-    autoSync
+    sitePath
   } = req.body;
   try {
     if (
@@ -224,54 +284,6 @@ export async function saveDesign(req, res) {
     }
     if (!name || name === undefined || name.replace(/\s/g, "") === "") {
       return res.status(400).send({ error: "Name not be empty!" });
-    }
-    if (autoSync) {
-      switch (autoSync.dataType) {
-        // sync all data
-        case "all":
-          SiteService.addCronJob({
-            pageId,
-            autoSync,
-            job: () =>
-              autoSyncData(pageId, req.user.accessToken, req.user.email)
-          });
-          break;
-        // sync event
-        case "event":
-          SiteService.addCronJob({
-            pageId,
-            autoSync,
-            job: () =>
-              autoSyncEvent(pageId, req.user.accessToken, req.user.email)
-          });
-          break;
-        // sync post
-        case "post":
-          SiteService.addCronJob({
-            pageId,
-            autoSync,
-            job: () =>
-              autoSyncPost(req.user.email, pageId, req.user.accessToken)
-          });
-          break;
-        // sync gallery
-        case "gallery":
-          SiteService.addCronJob({
-            pageId,
-            autoSync,
-            job: () =>
-              autoSyncGallery(pageId, req.user.accessToken, req.user.email)
-          });
-          break;
-        case "none":
-          SiteService.addCronJob({
-            pageId,
-            autoSync
-          });
-          break;
-        default:
-          break;
-      }
     }
     navItems &&
       navItems.length > 0 &&
@@ -427,7 +439,10 @@ export async function createNewSite(req, res) {
                 isPublish: isPublish,
                 sitePath: sitepath,
                 about: page.data.about,
-                homepage: defaultHomepageSetting
+                homepage: defaultHomepageSetting,
+                autoSync: {
+                  dataType: "none"
+                }
               });
               //find user
               await SiteService.updateSiteList(req.user.id, insert);

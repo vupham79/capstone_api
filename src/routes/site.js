@@ -31,4 +31,6 @@ router.patch("/syncGallery", authUser, SiteController.syncGallery);
 
 router.patch("/logo", authUser, SiteController.updateLogo);
 
+router.patch("/autoSync", authUser, SiteController.applyAutoSync);
+
 export default router;

@@ -164,7 +164,22 @@ const SiteSchema = new mongoose.Schema(
           ]
         }
       }
-    ]
+    ],
+    autoSync: {
+      dataType: {
+        type: String,
+        default: "none"
+      },
+      minute: {
+        type: Number
+      },
+      hour: {
+        type: Number
+      },
+      day: {
+        type: Number
+      }
+    }
   },
   {
     timestamps: true

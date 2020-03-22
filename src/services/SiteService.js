@@ -142,7 +142,7 @@ export async function saveDesign(data) {
         site.sitePath = data.sitePath;
         return await site.save();
       } else {
-        return { msg: "Sitepath existed!" };
+        return { msg: "Design saved but not sitepath because existed!" };
       }
     } else {
       site.fontTitle = data.fontTitle;
@@ -1011,8 +1011,8 @@ export async function findExistedSitePath(sitepath) {
 }
 
 export async function addCronJob({ pageId, autoSync, job }) {
-  const { minute, hour, day, none } = autoSync;
-  if (none) {
+  const { minute, hour, day, dataType } = autoSync;
+  if (dataType === "none") {
     cronJobs.forEach(cronJob => {
       if (cronJob.siteId === pageId) {
         exist = true;
@@ -1059,13 +1059,13 @@ export async function addCronJob({ pageId, autoSync, job }) {
   return true;
 }
 
-export async function stopCronJob(siteId) {
-  cronJobs.forEach(cronJob => {
-    if (cronJob.siteId === siteId) {
-      if (cronJob.job) {
-        cronJob.job.stop();
-      }
+export async function updateAutoSync(id, autoSync) {
+  Site.findOneAndUpdate(
+    {
+      id
+    },
+    {
+      autoSync
     }
-  });
-  return true;
+  );
 }
