@@ -1,6 +1,6 @@
 import { mongoose, Site, User, Category, Post, Event } from "../models";
 import moment from "moment";
-import { CronJob } from "cron";
+import { CronJob, CronTime } from "cron";
 
 const cronJobs = [];
 const limit = 5;
@@ -1013,27 +1013,36 @@ export async function findExistedSitePath(sitepath) {
 export async function addCronJob({ pageId, autoSync, job }) {
   const { minute, hour, day, dataType } = autoSync;
   if (dataType === "none") {
+    console.log("none");
     cronJobs.forEach(cronJob => {
       if (cronJob.siteId === pageId) {
-        exist = true;
         if (cronJob.job) {
           cronJob.job.stop();
         }
       }
     });
   } else {
-    let cronjob = new CronJob(
-      `* *${typeof minute === "number" && minute >= 0 && "/"}${typeof minute ===
-        "number" &&
-        minute >= 0 &&
-        minute - 1} *${typeof hour === "number" &&
-        hour >= 0 &&
-        "/"}${typeof hour === "number" &&
-        hour >= 0 &&
-        hour - 1} *${typeof day === "number" && day > 0 && "/"}${typeof day ===
+    let convertMinute = "";
+    let convertHour = "";
+    let convertDay = "";
+    if (minute) {
+      convertMinute = `${typeof minute === "number" && minute >= 0 ? "/" : ""}${
+        typeof minute === "number" && minute >= 0 ? minute : ""
+      }`;
+    }
+    if (hour) {
+      convertHour = `${typeof hour === "number" && hour >= 0 ? "/" : ""}${
+        typeof hour === "number" && hour >= 0 ? hour : ""
+      }`;
+    }
+    if (day) {
+      convertDay = `${typeof day === "number" && day > 0 && "/"}${typeof day ===
         "number" &&
         day > 0 &&
-        day} * *`,
+        day}`;
+    }
+    let cronjob = new CronJob(
+      `*${convertMinute} *${convertHour} *${convertDay} * *`,
       function() {
         job();
       }
@@ -1060,7 +1069,7 @@ export async function addCronJob({ pageId, autoSync, job }) {
 }
 
 export async function updateAutoSync(id, autoSync) {
-  Site.findOneAndUpdate(
+  return await Site.updateOne(
     {
       id
     },

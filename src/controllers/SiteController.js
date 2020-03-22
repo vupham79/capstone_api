@@ -210,40 +210,44 @@ export async function applyAutoSync(req, res) {
     switch (autoSync.dataType) {
       // sync all data
       case "all":
+        console.log("all");
         SiteService.addCronJob({
-          pageId,
+          id,
           autoSync,
-          job: () => autoSyncData(pageId, req.user.accessToken, req.user.email)
+          job: () => autoSyncData(id, req.user.accessToken, req.user.email)
         });
         break;
       // sync event
       case "event":
+        console.log("event");
         SiteService.addCronJob({
-          pageId,
+          id,
           autoSync,
-          job: () => autoSyncEvent(pageId, req.user.accessToken, req.user.email)
+          job: () => autoSyncEvent(id, req.user.accessToken, req.user.email)
         });
         break;
       // sync post
       case "post":
+        console.log("post");
         SiteService.addCronJob({
-          pageId,
+          id,
           autoSync,
-          job: () => autoSyncPost(req.user.email, pageId, req.user.accessToken)
+          job: () => autoSyncPost(req.user.email, id, req.user.accessToken)
         });
         break;
       // sync gallery
       case "gallery":
+        console.log("gallery");
         SiteService.addCronJob({
-          pageId,
+          id,
           autoSync,
-          job: () =>
-            autoSyncGallery(pageId, req.user.accessToken, req.user.email)
+          job: () => autoSyncGallery(id, req.user.accessToken, req.user.email)
         });
         break;
       case "none":
+        console.log("none");
         SiteService.addCronJob({
-          pageId,
+          id,
           autoSync
         });
         break;
@@ -975,9 +979,6 @@ export async function updateLogo(req, res) {
 export async function updateCover(req, res) {
   const { pageId, cover } = req.body;
   try {
-    if (!cover || cover === undefined || cover.length === 0) {
-      return res.status(400).send({ error: "Cover must not be empty!" });
-    }
     const update = await SiteService.updateCovers(pageId, cover);
     if (update) {
       return res.status(200).send(update);
