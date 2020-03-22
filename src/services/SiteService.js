@@ -838,19 +838,28 @@ export async function insertAndUpdateSyncDataPost(pageId, postsList) {
           existedPostObjIdList.push(
             new mongoose.Types.ObjectId(postResult._id)
           );
-          await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
+          await Site.updateOne(
+            { id: pageId },
+            { posts: existedPostObjIdList, lastSync: new Date() }
+          );
         } else {
           const postResult = await Post.create(post);
           existedPostObjIdList.push(
             new mongoose.Types.ObjectId(postResult._id)
           );
-          await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
+          await Site.updateOne(
+            { id: pageId },
+            { posts: existedPostObjIdList, lastSync: new Date() }
+          );
         }
       } else {
         await Post.updateOne({ id: post.id }, post);
         const postResult = await Post.findOne({ id: post.id });
         existedPostObjIdList.push(new mongoose.Types.ObjectId(postResult._id));
-        await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
+        await Site.updateOne(
+          { id: pageId },
+          { posts: existedPostObjIdList, lastSync: new Date() }
+        );
       }
     });
 }
@@ -886,7 +895,7 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
           );
           await Site.updateOne(
             { id: pageId },
-            { events: existedEventObjIdList }
+            { events: existedEventObjIdList, lastSync: new Date() }
           );
         } else {
           const eventResult = await Event.create(event);
@@ -896,7 +905,7 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
           );
           await Site.updateOne(
             { id: pageId },
-            { events: existedEventObjIdList }
+            { events: existedEventObjIdList, lastSync: new Date() }
           );
         }
       } else {
@@ -905,7 +914,10 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
         existedEventObjIdList.push(
           new mongoose.Types.ObjectId(eventResult._id)
         );
-        await Site.updateOne({ id: pageId }, { events: existedEventObjIdList });
+        await Site.updateOne(
+          { id: pageId },
+          { events: existedEventObjIdList, lastSync: new Date() }
+        );
       }
     });
 }
@@ -999,38 +1011,51 @@ export async function findExistedSitePath(sitepath) {
 }
 
 export async function addCronJob({ pageId, autoSync, job }) {
-  const { minute, hour, day } = autoSync;
-  let cronjob = new CronJob(
-    `* *${typeof minute === "number" && minute >= 0 && "/"}${typeof minute ===
-      "number" &&
-      minute >= 0 &&
-      minute - 1} *${typeof hour === "number" &&
-      hour >= 0 &&
-      "/"}${typeof hour === "number" && hour >= 0 && hour - 1} *${typeof day ===
-      "number" &&
-      day > 0 &&
-      "/"}${typeof day === "number" && day > 0 && day} * *`,
-    function() {
-      job();
-    }
-  );
-  let exist = false;
-  cronJobs.forEach(cronJob => {
-    if (cronJob.siteId === pageId) {
-      exist = true;
-      if (cronJob.job) {
-        cronJob.job.stop();
+  const { minute, hour, day, none } = autoSync;
+  if (none) {
+    cronJobs.forEach(cronJob => {
+      if (cronJob.siteId === pageId) {
+        exist = true;
+        if (cronJob.job) {
+          cronJob.job.stop();
+        }
       }
-      cronJob.job = cronjob;
-    }
-  });
-  if (!exist) {
-    cronJobs.push({
-      siteId: pageId,
-      job: cronjob
     });
+  } else {
+    let cronjob = new CronJob(
+      `* *${typeof minute === "number" && minute >= 0 && "/"}${typeof minute ===
+        "number" &&
+        minute >= 0 &&
+        minute - 1} *${typeof hour === "number" &&
+        hour >= 0 &&
+        "/"}${typeof hour === "number" &&
+        hour >= 0 &&
+        hour - 1} *${typeof day === "number" && day > 0 && "/"}${typeof day ===
+        "number" &&
+        day > 0 &&
+        day} * *`,
+      function() {
+        job();
+      }
+    );
+    let exist = false;
+    cronJobs.forEach(cronJob => {
+      if (cronJob.siteId === pageId) {
+        exist = true;
+        if (cronJob.job) {
+          cronJob.job.stop();
+        }
+        cronJob.job = cronjob;
+      }
+    });
+    if (!exist) {
+      cronJobs.push({
+        siteId: pageId,
+        job: cronjob
+      });
+    }
+    cronjob.start();
   }
-  cronjob.start();
   return true;
 }
 

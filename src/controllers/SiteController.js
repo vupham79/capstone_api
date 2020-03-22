@@ -226,30 +226,52 @@ export async function saveDesign(req, res) {
       return res.status(400).send({ error: "Name not be empty!" });
     }
     if (autoSync) {
-      // switch (autoSync.dataType) {
-      //   // sync all data
-      //   case "all":
-      //     SiteService.addCronJob({
-      //       pageId,
-      //       autoSync,
-      //       job: () => autoSyncPost(userEmail, pageId, accessToken)
-      //     });
-      //     break;
-      //   // sync event
-      //   case "event":
-      //     SiteService.addCronJob({ pageId, autoSync, job: autoSyncPost });
-      //     break;
-      //   // sync post
-      //   case "post":
-      //     SiteService.addCronJob({ pageId, autoSync, job: autoSyncPost });
-      //     break;
-      //   // sync gallery
-      //   case "gallery":
-      //     SiteService.addCronJob({ pageId, autoSync, job: autoSyncPost });
-      //     break;
-      //   default:
-      //     break;
-      // }
+      switch (autoSync.dataType) {
+        // sync all data
+        case "all":
+          SiteService.addCronJob({
+            pageId,
+            autoSync,
+            job: () =>
+              autoSyncData(pageId, req.user.accessToken, req.user.email)
+          });
+          break;
+        // sync event
+        case "event":
+          SiteService.addCronJob({
+            pageId,
+            autoSync,
+            job: () =>
+              autoSyncEvent(pageId, req.user.accessToken, req.user.email)
+          });
+          break;
+        // sync post
+        case "post":
+          SiteService.addCronJob({
+            pageId,
+            autoSync,
+            job: () =>
+              autoSyncPost(req.user.email, pageId, req.user.accessToken)
+          });
+          break;
+        // sync gallery
+        case "gallery":
+          SiteService.addCronJob({
+            pageId,
+            autoSync,
+            job: () =>
+              autoSyncGallery(pageId, req.user.accessToken, req.user.email)
+          });
+          break;
+        case "none":
+          SiteService.addCronJob({
+            pageId,
+            autoSync
+          });
+          break;
+        default:
+          break;
+      }
     }
     navItems &&
       navItems.length > 0 &&
@@ -495,30 +517,45 @@ export async function autoSyncPost(userEmail, pageId, accessToken) {
         await SiteService.insertAndUpdateSyncDataPost(pageId, postsList);
         // success
         // send mail with defined transport object
-        let info = await transporter.sendMail({
+        await transporter.sendMail({
           from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
           to: userEmail, // list of receivers
           subject: "Sync Success ✔", // Subject line
           text: "Your site has synced data success", // plain text body
-          html: "<b>Hello world?</b>" // html body
+          html: `
+          <h5><strong>FPWG System</strong></h5>
+          <p>Hi,</p>
+          <p>Your site just synced successfully!</p>
+          <br/>
+          ` // html body
         });
       }
       // site not exist
-      let info = await transporter.sendMail({
+      await transporter.sendMail({
         from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
         to: userEmail, // list of receivers
         subject: "Sync Failed ✔", // Subject line
         text: "Your site is not exist to sync", // plain text body
-        html: "<b>Hello world?</b>" // html body
+        html: `
+        <h5><strong>FPWG System</strong></h5>
+        <p>Hi,</p>
+        <p>Your site not exist to sync!</p>
+        <br/>
+        ` // html body
       });
     }
     // page not exist
-    let info = await transporter.sendMail({
+    await transporter.sendMail({
       from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
       to: userEmail, // list of receivers
       subject: "Sync Failed ✔", // Subject line
       text: "Your Facebook Page is not exist to sync", // plain text body
-      html: "<b>Hello world?</b>" // html body
+      html: `
+      <h5><strong>FPWG System</strong></h5>
+      <p>Hi,</p>
+      <p>Cannot find your Facebook Page to sync!</p>
+      <br/>
+      ` // html body
     });
   } catch (error) {
     console.log(error);
@@ -556,6 +593,68 @@ export async function syncGallery(req, res) {
   }
 }
 
+export async function autoSyncGallery(pageId, accessToken, userEmail) {
+  try {
+    let galleryList = [];
+    const data = await getSyncGallery({
+      pageId: pageId,
+      accessToken
+    });
+    if (data) {
+      //gallery list
+      galleryList = await SiteService.getFacebookGalleryData(data);
+      const siteExist = await SiteService.findOneSite(pageId);
+      if (siteExist) {
+        //update galleries
+        await Site.updateOne(
+          { id: pageId },
+          {
+            galleries: galleryList.length > 0 ? galleryList : null
+          }
+        );
+        await transporter.sendMail({
+          from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+          to: userEmail, // list of receivers
+          subject: "Sync Success ✔", // Subject line
+          text: "Your site has synced data success", // plain text body
+          html: `
+          <h5><strong>FPWG System</strong></h5>
+          <p>Hi,</p>
+          <p>Your site just synced successfully!</p>
+          <br/>
+          ` // html body
+        });
+      }
+      await transporter.sendMail({
+        from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+        to: userEmail, // list of receivers
+        subject: "Sync Failed ✔", // Subject line
+        text: "Your site has synced data failed", // plain text body
+        html: `
+        <h5><strong>FPWG System</strong></h5>
+        <p>Hi,</p>
+        <p>Your site is not existed to sync!</p>
+        <br/>
+        ` // html body
+      });
+    }
+    await transporter.sendMail({
+      from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+      to: userEmail, // list of receivers
+      subject: "Sync Failed ✔", // Subject line
+      text: "Your site has synced data failed", // plain text body
+      html: `
+      <h5><strong>FPWG System</strong></h5>
+      <p>Hi,</p>
+      <p>Cannot find your Facebook page to sync!</p>
+      <br/>
+      ` // html body
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 export async function syncEvent(req, res) {
   try {
     let eventList = [];
@@ -586,6 +685,69 @@ export async function syncEvent(req, res) {
   } catch (error) {
     console.log(error);
     return res.status(400).send({ error });
+  }
+}
+
+export async function autoSyncEvent(pageId, accessToken, userEmail) {
+  try {
+    let eventList = [];
+    const data = await getSyncEvent({
+      pageId: pageId,
+      accessToken
+    });
+    if (data) {
+      //event list
+      eventList = await SiteService.getFacebookEventData(data);
+      const siteExist = await SiteService.findOneSite(pageId);
+      if (siteExist) {
+        //event Id list
+        let eventIdList = [];
+        eventList.forEach(event => {
+          eventIdList.push(event.id);
+        });
+        //insert and update event
+        await SiteService.insertAndUpdateSyncDataEvents(pageId, eventList);
+        await transporter.sendMail({
+          from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+          to: userEmail, // list of receivers
+          subject: "Sync Success ✔", // Subject line
+          text: "Your site has synced data success", // plain text body
+          html: `
+          <h5><strong>FPWG System</strong></h5>
+          <p>Hi,</p>
+          <p>Your site just synced successfully!</p>
+          <br/>
+          ` // html body
+        });
+      } else {
+        await transporter.sendMail({
+          from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+          to: userEmail, // list of receivers
+          subject: "Sync Failed ✔", // Subject line
+          text: "Your site has synced data failed", // plain text body
+          html: `
+          <h5><strong>FPWG System</strong></h5>
+          <p>Hi,</p>
+          <p>Your site is not existed to sync</p>
+          <br/>
+          ` // html body
+        });
+      }
+    }
+    await transporter.sendMail({
+      from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+      to: userEmail, // list of receivers
+      subject: "Sync Failed ✔", // Subject line
+      text: "Your site has synced data failed", // plain text body
+      html: `
+      <h5><strong>FPWG System</strong></h5>
+      <p>Hi,</p>
+      <p>Facebook page event not existed!</p>
+      <br/>
+      ` // html body
+    });
+  } catch (error) {
+    console.log(error);
   }
 }
 
@@ -661,6 +823,124 @@ export async function syncData(req, res) {
     return res.status(400).send({ error: "Facebook page data not existed!" });
   } catch (error) {
     return res.status(400).send(error);
+  }
+}
+
+export async function autoSyncData(pageId, accessToken, userEmail) {
+  try {
+    let galleryList = [];
+    let postsList = [];
+    let eventList = [];
+    const data = await getSyncData({
+      pageId,
+      accessToken
+    });
+    if (data) {
+      const siteExist = await SiteService.findOneSite(pageId);
+      if (siteExist) {
+        let session;
+        return Site.createCollection()
+          .then(() => Site.startSession())
+          .then(_session => {
+            session = _session;
+            session.withTransaction(async () => {
+              //update site
+              const update = await SiteService.editSite(pageId, {
+                phone: data.phone,
+                longitude: data.location ? data.location.longitude : null,
+                latitude: data.location ? data.location.latitude : null,
+                address: data.single_line_address,
+                cover: data.cover ? [data.cover.source] : null,
+                categories: data.category_list,
+                about: data.about,
+                genre: data.genre,
+                lastSync: new Date()
+              });
+              //post list
+              postsList = await SiteService.getFacebookPostSyncData(data);
+              //gallery list
+              galleryList = await SiteService.getFacebookGalleryData(data);
+              //update galleries
+              await SiteService.updateGallery(pageId, galleryList);
+              //post Id list
+              let postIdList = [];
+              if (postsList) {
+                postsList.forEach(post => {
+                  postIdList.push(post.id);
+                });
+                //insert and update post
+                await SiteService.insertAndUpdateSyncDataPost(
+                  pageId,
+                  postsList
+                );
+              }
+              //event list
+              eventList = await SiteService.getFacebookEventSyncData(data);
+              //event Id list
+              if (eventList) {
+                //insert and update event
+                await SiteService.insertAndUpdateSyncDataEvents(
+                  pageId,
+                  eventList
+                );
+              }
+              if (update) {
+                await transporter.sendMail({
+                  from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+                  to: userEmail, // list of receivers
+                  subject: "Sync Success ✔", // Subject line
+                  text: "Your site has synced data success", // plain text body
+                  html: `
+                  <h5><strong>FPWG System</strong></h5>
+                  <p>Hi,</p>
+                  <p>Your site just synced successfully!</p>
+                  <br/>
+                  ` // html body
+                });
+              } else {
+                await transporter.sendMail({
+                  from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+                  to: userEmail, // list of receivers
+                  subject: "Sync Failed ✔", // Subject line
+                  text: "Your site has synced data failed", // plain text body
+                  html: `
+                  <h5><strong>FPWG System</strong></h5>
+                  <p>Hi,</p>
+                  <p>Your site just synced successfully!</p>
+                  <br/>
+                  ` // html body
+                });
+              }
+            });
+          });
+      }
+      await transporter.sendMail({
+        from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+        to: userEmail, // list of receivers
+        subject: "Sync Failed ✔", // Subject line
+        text: "Your site is not existed to sync", // plain text body
+        html: `
+        <h5><strong>FPWG System</strong></h5>
+        <p>Hi,</p>
+        <p>Your site just synced successfully!</p>
+        <br/>
+        ` // html body
+      });
+    }
+    await transporter.sendMail({
+      from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+      to: userEmail, // list of receivers
+      subject: "Sync Failed ✔", // Subject line
+      text: "Cannot find your Facebook Page data to sync", // plain text body
+      html: `
+      <h5><strong>FPWG System</strong></h5>
+      <p>Hi,</p>
+      <p>Your site just synced successfully!</p>
+      <br/>
+      ` // html body
+    });
+  } catch (error) {
+    console.log(error);
   }
 }
 

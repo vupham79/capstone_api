@@ -31,9 +31,4 @@ router.patch("/syncGallery", authUser, SiteController.syncGallery);
 
 router.patch("/logo", authUser, SiteController.updateLogo);
 
-router.patch("/favicon", authUser, SiteController.updateFavicon);
-
-router.get("/test", SiteController.startCron);
-router.get("/test1", SiteController.stopCron);
-
 export default router;
