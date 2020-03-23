@@ -1,6 +1,6 @@
 import { mongoose, Site, User, Category, Post, Event } from "../models";
 import moment from "moment";
-import { CronJob, CronTime } from "cron";
+import { CronJob } from "cron";
 
 const cronJobs = [];
 const limit = 5;
@@ -740,6 +740,7 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
           _id: "$galleries"
         }
       },
+      { $sort: { _id: -1 } },
       { $skip: (pageNumber - 1) * limit },
       { $limit: limit }
     ]);
