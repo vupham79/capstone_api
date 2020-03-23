@@ -740,7 +740,7 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
       skip: (pageNumber - 1) * limit
     });
     return {
-      pageCount,
+      pageCount: Math.ceil(counter / limit),
       data: galleries
     };
   }
