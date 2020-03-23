@@ -65,7 +65,7 @@ const defaultHomepageSetting = [
     isActive: false,
     original: "about",
     filter: {
-      type: "lastest",
+      type: "latest",
       items: null
     }
   },
@@ -75,7 +75,7 @@ const defaultHomepageSetting = [
     isActive: false,
     original: "gallery",
     filter: {
-      type: "lastest",
+      type: "latest",
       items: null
     }
   },
@@ -85,7 +85,7 @@ const defaultHomepageSetting = [
     isActive: false,
     original: "event",
     filter: {
-      type: "lastest",
+      type: "latest",
       items: null
     }
   },
@@ -95,7 +95,7 @@ const defaultHomepageSetting = [
     isActive: false,
     original: "contact",
     filter: {
-      type: "lastest",
+      type: "latest",
       items: null
     }
   },
@@ -105,7 +105,7 @@ const defaultHomepageSetting = [
     isActive: false,
     original: "news",
     filter: {
-      type: "lastest",
+      type: "latest",
       items: null
     }
   }

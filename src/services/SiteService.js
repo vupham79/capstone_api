@@ -694,11 +694,11 @@ export async function updateExistingEvent(eventList, existedEventIdList) {
 
 export async function findSiteEventTab(id, sitePath) {
   if (sitePath) {
-    return await Site.find({ sitePath })
+    return await Site.findOne({ sitePath })
       .populate("events")
       .select("events");
   } else
-    return await Site.find({ id })
+    return await Site.findOne({ id })
       .populate("events")
       .select("events");
 }
