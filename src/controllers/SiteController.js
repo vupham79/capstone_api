@@ -286,8 +286,13 @@ export async function saveDesign(req, res) {
     ) {
       return res.status(400).send({ error: "Sitepath must not be empty!" });
     }
-    if (!name || name === undefined || name.replace(/\s/g, "") === "") {
-      return res.status(400).send({ error: "Name not be empty!" });
+    if (
+      !name ||
+      name === undefined ||
+      name.replace(/\s/g, "") === "" ||
+      name.length > 75
+    ) {
+      return res.status(400).send({ error: "Invalid title!" });
     }
     navItems &&
       navItems.length > 0 &&

@@ -36,7 +36,8 @@ const SiteSchema = new mongoose.Schema(
     },
     title: {
       type: String,
-      default: null
+      default: null,
+      maxlength: 75
     },
     address: {
       type: String,
