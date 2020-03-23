@@ -140,11 +140,9 @@ export async function saveDesign(data) {
         site.youtube = data.youtube;
         site.phone = data.phone;
         if (data.logoURL) {
-          console.log("here111");
           site.logo = data.logoURL;
         }
         if (data.coverURL) {
-          console.log("here222");
           site.cover = data.coverURL;
         }
         site.sitePath = data.sitePath;
@@ -165,11 +163,9 @@ export async function saveDesign(data) {
       site.youtube = data.youtube;
       site.phone = data.phone;
       if (data.logoURL) {
-        console.log("here5");
         site.logo = data.logoURL;
       }
       if (data.coverURL) {
-        console.log("here555");
         site.cover = data.coverURL;
       }
       return await site.save();

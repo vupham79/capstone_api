@@ -91,7 +91,8 @@ const SiteSchema = new mongoose.Schema(
     sitePath: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
+      maxlength: 35
     },
     about: {
       type: String,

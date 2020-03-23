@@ -285,9 +285,10 @@ export async function saveDesign(req, res) {
     if (
       !sitePath ||
       sitePath === undefined ||
-      sitePath.replace(/\s/g, "") === ""
+      sitePath.replace(/\s/g, "") === "" ||
+      sitePath.length > 35
     ) {
-      return res.status(400).send({ error: "Sitepath must not be empty!" });
+      return res.status(400).send({ error: "Invalid site path!" });
     }
     if (
       !name ||
@@ -375,9 +376,10 @@ export async function createNewSite(req, res) {
     if (
       !sitepath ||
       sitepath === undefined ||
-      sitepath.replace(/\s/g, "") === ""
+      sitepath.replace(/\s/g, "") === "" ||
+      sitepath.length > 35
     ) {
-      return res.status(400).send({ error: "Sitepath must not be empty!" });
+      return res.status(400).send({ error: "Invalid site path" });
     }
     sitepath = sitepath.replace(/\s/g, "");
     //existed site path
