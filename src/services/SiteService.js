@@ -720,12 +720,10 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
     await total.galleries.map(() => {
       counter++;
     });
-    const galleries = await Site.findOne({ sitePath })
-      .select("galleries")
-      .populate("galleries", "", "", "", {
-        limit,
-        skip: (pageNumber - 1) * limit
-      });
+    const galleries = await Site.findOne({ sitePath }, "galleries", {
+      limit,
+      skip: (pageNumber - 1) * limit
+    });
     return {
       pageCount: Math.ceil(counter / limit),
       data: galleries
