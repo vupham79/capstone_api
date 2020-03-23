@@ -276,7 +276,10 @@ export async function saveDesign(req, res) {
     youtube,
     instagram,
     phone,
-    sitePath
+    sitePath,
+    homepage,
+    logoURL,
+    coverURL
   } = req.body;
   try {
     if (
@@ -348,7 +351,10 @@ export async function saveDesign(req, res) {
         youtube,
         instagram,
         phone,
-        sitePath
+        sitePath,
+        homepage,
+        logoURL,
+        coverURL
       });
       return res.status(200).send(update);
     }
