@@ -720,10 +720,17 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
     await total.galleries.map(() => {
       counter++;
     });
-    const galleries = await Site.findOne({ sitePath }, "galleries", {
-      limit,
-      skip: (pageNumber - 1) * limit
-    });
+    const galleries = await Site.aggregate([
+      { $match: { sitePath: sitePath } },
+      { $unwind: "$galleries" },
+      {
+        $group: {
+          _id: "$galleries"
+        }
+      },
+      { $skip: (pageNumber - 1) * limit },
+      { $limit: limit }
+    ]);
     return {
       pageCount: Math.ceil(counter / limit),
       data: galleries
@@ -733,10 +740,17 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
     await total.galleries.map(() => {
       counter++;
     });
-    const galleries = await Site.findOne({ id }, "galleries", {
-      limit,
-      skip: (pageNumber - 1) * limit
-    });
+    const galleries = await Site.aggregate([
+      { $match: { id: id } },
+      { $unwind: "$galleries" },
+      {
+        $group: {
+          _id: "$galleries"
+        }
+      },
+      { $skip: (pageNumber - 1) * limit },
+      { $limit: limit }
+    ]);
     return {
       pageCount: Math.ceil(counter / limit),
       data: galleries
