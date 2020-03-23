@@ -717,7 +717,7 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
   let counter = 0;
   if (sitePath) {
     const total = await Site.findOne({ sitePath }, "galleries");
-    await total.posts.map(() => {
+    await total.galleries.map(() => {
       counter++;
     });
     const galleries = await Site.findOne({ sitePath })
@@ -732,7 +732,7 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
     };
   } else {
     const total = await Site.findOne({ id }, "galleries");
-    await total.posts.map(() => {
+    await total.galleries.map(() => {
       counter++;
     });
     const galleries = await Site.findOne({ id }, "galleries", {
