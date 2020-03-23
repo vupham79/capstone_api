@@ -26,15 +26,6 @@ const ThemeSchema = new mongoose.Schema(
       type: String,
       default: null
     },
-    previewUrl: {
-      type: String,
-      default: null
-    },
-    backgroundImages: [
-      {
-        type: String
-      }
-    ],
     categories: [{ type: Schema.Types.ObjectId, ref: "Category" }],
     sections: [
       {

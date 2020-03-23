@@ -9,7 +9,7 @@ export async function editTheme(id, body) {
       fontBody: body.fontBody,
       mainColor: body.color,
       categories: body.categories,
-      previewUrl: body.previewUrl,
+      previewImage: body.previewImage,
       categories: body.categories
     }
   );

@@ -155,7 +155,7 @@ const SiteSchema = new mongoose.Schema(
         filter: {
           type: {
             type: String,
-            enum: ["lastest", "optional"]
+            enum: ["latest", "optional"]
           },
           items: [
             {

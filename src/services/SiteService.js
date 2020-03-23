@@ -717,7 +717,7 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
   let counter = 0;
   if (sitePath) {
     const total = await Site.findOne({ sitePath }, "galleries");
-    await total.posts.map(() => {
+    await total.galleries.map(() => {
       counter++;
     });
     const galleries = await Site.findOne({ sitePath })
@@ -732,7 +732,7 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
     };
   } else {
     const total = await Site.findOne({ id }, "galleries");
-    await total.posts.map(() => {
+    await total.galleries.map(() => {
       counter++;
     });
     const galleries = await Site.findOne({ id }, "galleries", {
@@ -1025,21 +1025,14 @@ export async function addCronJob({ pageId, autoSync, job }) {
     let convertMinute = "";
     let convertHour = "";
     let convertDay = "";
-    if (minute) {
-      convertMinute = `${typeof minute === "number" && minute >= 0 ? "/" : ""}${
-        typeof minute === "number" && minute >= 0 ? minute : ""
-      }`;
+    if (minute && typeof minute === "number" && minute >= 0) {
+      convertMinute = `/${minute}`;
     }
-    if (hour) {
-      convertHour = `${typeof hour === "number" && hour >= 0 ? "/" : ""}${
-        typeof hour === "number" && hour >= 0 ? hour : ""
-      }`;
+    if (hour && typeof hour === "number" && hour >= 0) {
+      convertHour = `/${hour}`;
     }
-    if (day) {
-      convertDay = `${typeof day === "number" && day > 0 && "/"}${typeof day ===
-        "number" &&
-        day > 0 &&
-        day}`;
+    if (day && typeof day === "number" && day > 0) {
+      convertDay = `/${day}`;
     }
     let cronjob = new CronJob(
       `*${convertMinute} *${convertHour} *${convertDay} * *`,
