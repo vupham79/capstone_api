@@ -286,7 +286,18 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
       if (dateFrom instanceof Date && dateTo instanceof Date) {
         console.log("use date range");
         if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
-          if (
+          if (!post.attachments || post.attachments === undefined) {
+            console.log(post.attachments);
+            postsList.push({
+              id: post.id,
+              title: null,
+              message: post.message,
+              isActive: true,
+              createdTime: post.created_time,
+              attachments: null,
+              target: null
+            });
+          } else if (
             post.attachments &&
             post.attachments.data[0].media_type === "album"
           ) {
@@ -349,8 +360,17 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
           }
         }
       } else {
-        console.log("no date range");
-        if (
+        if (!post.attachments || post.attachments === undefined) {
+          postsList.push({
+            id: post.id,
+            title: null,
+            message: post.message,
+            isActive: true,
+            createdTime: post.created_time,
+            attachments: null,
+            target: null
+          });
+        } else if (
           post.attachments &&
           post.attachments.data[0].media_type === "album"
         ) {
@@ -907,9 +927,13 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
     };
   } else {
     const total = await Site.findOne({ id }, "galleries");
-    await total.galleries.map(() => {
-      counter++;
-    });
+    console.log(total);
+    if (total && total.galleries) {
+      await total.galleries.map(() => {
+        counter++;
+      });
+    }
+    console.log(counter);
     const galleries = await Site.aggregate([
       { $match: { id: id } },
       { $unwind: "$galleries" },
