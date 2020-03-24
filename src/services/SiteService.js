@@ -146,6 +146,9 @@ export async function saveDesign(data) {
           site.cover = data.coverURL;
         }
         site.sitePath = data.sitePath;
+        if (data.homepage) {
+          site.homepage = data.homepage;
+        }
         return await site.save();
       } else {
         return { msg: "Design saved but not sitepath because existed!" };
@@ -167,6 +170,9 @@ export async function saveDesign(data) {
       }
       if (data.coverURL) {
         site.cover = data.coverURL;
+      }
+      if (data.homepage) {
+        site.homepage = data.homepage;
       }
       return await site.save();
     }
@@ -740,12 +746,133 @@ export async function findSiteEventTab(id, sitePath, pageNumber = 1) {
 }
 
 export async function findSiteHomeTab(id, sitePath) {
+  let events = [];
+  let galleries = [];
+  let posts = [];
   if (sitePath) {
     const site = await Site.findOne({ sitePath });
-    return site;
+    const sections = site.homepage;
+    sections.forEach(async section => {
+      if (section.isActive) {
+        if (section.original === "event") {
+          if (section.filter.type === "optional") {
+            section.filter.items.forEach(async id => {
+              let event = await Event.findOne({ id });
+              if (event) {
+                events.push(event);
+              }
+            });
+          } else {
+            events = await Site.findOne({ sitePath })
+              .select("events")
+              .populate("events", "", "", "", {
+                limit
+              });
+          }
+        } else if (section.original === "gallery") {
+          if (section.filter.type === "optional") {
+            section.filter.items.forEach(async id => {
+              // let gallery = await Site.findOne({ id }).select("galleries");
+              // if (gallery) {
+              //   galleries.push(gallery);
+              // }
+            });
+          } else {
+            galleries = await Site.aggregate([
+              { $match: { sitePath: sitePath } },
+              { $unwind: "$galleries" },
+              {
+                $group: {
+                  _id: "$galleries"
+                }
+              },
+              { $sort: { _id: -1 } },
+              { $limit: limit }
+            ]);
+          }
+        } else if (section.original === "news") {
+          if (section.filter.type === "optional") {
+            section.filter.items.forEach(async id => {
+              let post = await Post.findOne({ id });
+              if (post) {
+                posts.push(post);
+              }
+            });
+          } else {
+            posts = await Site.findOne({ sitePath })
+              .select("posts")
+              .populate("posts", "", "", "", { limit });
+          }
+        }
+      }
+    });
+    return {
+      posts,
+      galleries,
+      events
+    };
   } else {
     const site = await Site.findOne({ id });
-    return site;
+    const sections = site.homepage;
+    sections.forEach(async section => {
+      if (section.isActive) {
+        if (section.original === "event") {
+          if (section.filter.type === "optional") {
+            section.filter.items.forEach(async id => {
+              let event = await Event.findOne({ id });
+              if (event) {
+                events.push(event);
+              }
+            });
+          } else {
+            events = await Site.findOne({ id })
+              .select("events")
+              .populate("events", "", "", "", {
+                limit
+              });
+          }
+        } else if (section.original === "gallery") {
+          if (section.filter.type === "optional") {
+            section.filter.items.forEach(async id => {
+              // let gallery = await Site.findOne({ id }).select("galleries");
+              // if (gallery) {
+              //   galleries.push(gallery);
+              // }
+            });
+          } else {
+            galleries = await Site.aggregate([
+              { $match: { id: id } },
+              { $unwind: "$galleries" },
+              {
+                $group: {
+                  _id: "$galleries"
+                }
+              },
+              { $sort: { _id: -1 } },
+              { $limit: limit }
+            ]);
+          }
+        } else if (section.original === "news") {
+          if (section.filter.type === "optional") {
+            section.filter.items.forEach(async id => {
+              let post = await Post.findOne({ id });
+              if (post) {
+                posts.push(post);
+              }
+            });
+          } else {
+            posts = await Site.findOne({ id })
+              .select("posts")
+              .populate("posts", "", "", "", { limit });
+          }
+        }
+      }
+    });
+    return {
+      posts,
+      galleries,
+      events
+    };
   }
 }
 

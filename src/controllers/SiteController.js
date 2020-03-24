@@ -62,7 +62,7 @@ const defaultHomepageSetting = [
   {
     name: "About",
     order: 2,
-    isActive: false,
+    isActive: true,
     original: "about",
     filter: {
       type: "latest",
@@ -92,7 +92,7 @@ const defaultHomepageSetting = [
   {
     name: "Contact",
     order: 5,
-    isActive: false,
+    isActive: true,
     original: "contact",
     filter: {
       type: "latest",
