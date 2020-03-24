@@ -705,6 +705,7 @@ export async function updateExistingEvent(eventList, existedEventIdList) {
 }
 
 export async function findSiteEventTab(id, sitePath, pageNumber = 1) {
+  let counter = 0;
   if (sitePath) {
     const total = await Site.findOne({ sitePath }, "events");
     await total.events.map(() => {
