@@ -704,15 +704,38 @@ export async function updateExistingEvent(eventList, existedEventIdList) {
   return newEventList;
 }
 
-export async function findSiteEventTab(id, sitePath) {
+export async function findSiteEventTab(id, sitePath, pageNumber = 1) {
   if (sitePath) {
-    return await Site.findOne({ sitePath })
-      .populate("events")
-      .select("events");
-  } else
-    return await Site.findOne({ id })
-      .populate("events")
-      .select("events");
+    const total = await Site.findOne({ sitePath }, "events");
+    await total.events.map(() => {
+      counter++;
+    });
+    const events = await Site.findOne({ sitePath })
+      .select("events")
+      .populate("events", "", "", "", {
+        limit,
+        skip: (pageNumber - 1) * limit
+      });
+    return {
+      pageCount: Math.ceil(counter / limit),
+      data: events
+    };
+  } else {
+    const total = await Site.findOne({ id }, "events");
+    await total.events.map(() => {
+      counter++;
+    });
+    const events = await Site.findOne({ id })
+      .select("events")
+      .populate("events", "", "", "", {
+        limit,
+        skip: (pageNumber - 1) * limit
+      });
+    return {
+      pageCount: Math.ceil(counter / limit),
+      data: events
+    };
+  }
 }
 
 export async function findSiteHomeTab(id, sitePath) {

@@ -1022,7 +1022,11 @@ export async function findSiteDataByTab(req, res) {
       const home = await SiteService.findSiteHomeTab(id, sitePath);
       return res.status(200).send(home);
     } else if (page === "event") {
-      const events = await SiteService.findSiteEventTab(id, sitePath);
+      const events = await SiteService.findSiteEventTab(
+        id,
+        sitePath,
+        pageNumber
+      );
       return res.status(200).send(events);
     } else if (page === "gallery") {
       const gallery = await SiteService.findSiteGalleryTab(
