@@ -1,4 +1,12 @@
-import { mongoose, Site, User, Category, Post, Event } from "../models";
+import {
+  mongoose,
+  Site,
+  User,
+  Category,
+  Post,
+  Event,
+  SyncRecord
+} from "../models";
 import moment from "moment";
 import { CronJob } from "cron";
 
@@ -276,7 +284,7 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
     data.posts.data.forEach(async post => {
       // console.log(moment(post.created_time).isBetween(dateFrom, dateTo));
       if (dateFrom instanceof Date && dateTo instanceof Date) {
-        console.log("dateFrom is not Date");
+        console.log("use date range");
         if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
           if (
             post.attachments &&
@@ -341,7 +349,7 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
           }
         }
       } else {
-        console.log("dateFrom is Date");
+        console.log("no date range");
         if (
           post.attachments &&
           post.attachments.data[0].media_type === "album"
@@ -789,9 +797,9 @@ export async function findSiteHomeTab(id, sitePath) {
             ]);
           }
         } else if (section.original === "news") {
-          if (section.filter.type === "optional") {
+          if (section.filter.type === "manual") {
             section.filter.items.forEach(async id => {
-              let post = await Post.findOne({ id });
+              let post = await Post.findOne({ _id: id });
               if (post) {
                 posts.push(post);
               }
