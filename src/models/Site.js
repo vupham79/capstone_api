@@ -101,19 +101,17 @@ const SiteSchema = new mongoose.Schema(
     galleries: [
       {
         url: {
-          type: String,
-          default: null
+          type: String
         },
         target: {
-          type: String,
-          default: null
+          type: String
+        },
+        createdTime: {
+          type: String
         }
       }
     ],
-    lastSync: {
-      type: Date,
-      default: null
-    },
+    syncRecords: [{ type: Schema.Types.ObjectId, ref: "SyncRecord" }],
     whatsapp: {
       type: String,
       default: null
@@ -157,7 +155,7 @@ const SiteSchema = new mongoose.Schema(
         filter: {
           type: {
             type: String,
-            enum: ["latest", "optional"]
+            enum: ["latest", "manual"]
           },
           items: [
             {

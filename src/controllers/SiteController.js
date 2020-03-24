@@ -1,4 +1,4 @@
-import { mongoose, Site, Theme } from "../models";
+import { mongoose, Site, Theme, SyncRecord } from "../models";
 import {
   getPageData,
   getSyncData,
@@ -357,6 +357,9 @@ export async function saveDesign(req, res) {
         logoURL,
         coverURL
       });
+      if (update.msg) {
+        return res.status(400).send(update);
+      }
       return res.status(200).send(update);
     }
     return res.status(400).send({ error: "Theme not exist!" });
@@ -788,7 +791,7 @@ export async function syncData(req, res) {
     let galleryList = [];
     let postsList = [];
     let eventList = [];
-    const { pageId, lastSync } = req.body;
+    const { pageId } = req.body;
     const data = await getSyncData({
       pageId: pageId,
       accessToken: req.user.accessToken
@@ -803,6 +806,9 @@ export async function syncData(req, res) {
             session = _session;
             session.withTransaction(async () => {
               //update site
+              const record = await SyncRecord.create({
+                dataType: "All"
+              });
               const update = await SiteService.editSite(pageId, {
                 phone: data.phone,
                 longitude: data.location ? data.location.longitude : null,
@@ -812,7 +818,7 @@ export async function syncData(req, res) {
                 categories: data.category_list,
                 about: data.about,
                 genre: data.genre,
-                lastSync: lastSync
+                syncRecord: record
               });
               //post list
               postsList = await SiteService.getFacebookPostSyncData(data);
@@ -843,6 +849,9 @@ export async function syncData(req, res) {
                 );
               }
               if (update) {
+                await record.update({
+                  status: true
+                });
                 return res.status(200).send(update);
               } else {
                 return res.status(400).send({ error: "Edit failed!" });
@@ -877,6 +886,9 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
             session = _session;
             session.withTransaction(async () => {
               //update site
+              const record = await SyncRecord.create({
+                dataType: "All"
+              });
               const update = await SiteService.editSite(pageId, {
                 phone: data.phone,
                 longitude: data.location ? data.location.longitude : null,
@@ -886,7 +898,7 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
                 categories: data.category_list,
                 about: data.about,
                 genre: data.genre,
-                lastSync: new Date()
+                syncRecord: record
               });
               //post list
               postsList = await SiteService.getFacebookPostSyncData(data);
@@ -917,6 +929,9 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
                 );
               }
               if (update) {
+                await record.update({
+                  status: true
+                });
                 await transporter.sendMail({
                   from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
                   to: userEmail, // list of receivers
