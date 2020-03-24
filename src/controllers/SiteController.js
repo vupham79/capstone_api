@@ -564,34 +564,36 @@ export async function autoSyncPost(userEmail, pageId, accessToken) {
           <br/>
           ` // html body
         });
-      }
-      // site not exist
-      await transporter.sendMail({
-        from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
-        to: userEmail, // list of receivers
-        subject: "Sync Failed ✔", // Subject line
-        text: "Your site is not exist to sync", // plain text body
-        html: `
+      } else {
+        // site not exist
+        await transporter.sendMail({
+          from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+          to: userEmail, // list of receivers
+          subject: "Sync Failed ✔", // Subject line
+          text: "Your site is not exist to sync", // plain text body
+          html: `
         <h5><strong>FPWG System</strong></h5>
         <p>Hi,</p>
         <p>Your site not exist to sync!</p>
         <br/>
         ` // html body
-      });
-    }
-    // page not exist
-    await transporter.sendMail({
-      from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
-      to: userEmail, // list of receivers
-      subject: "Sync Failed ✔", // Subject line
-      text: "Your Facebook Page is not exist to sync", // plain text body
-      html: `
+        });
+      }
+    } else {
+      // page not exist
+      await transporter.sendMail({
+        from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+        to: userEmail, // list of receivers
+        subject: "Sync Failed ✔", // Subject line
+        text: "Your Facebook Page is not exist to sync", // plain text body
+        html: `
       <h5><strong>FPWG System</strong></h5>
       <p>Hi,</p>
       <p>Cannot find your Facebook Page to sync!</p>
       <br/>
       ` // html body
-    });
+      });
+    }
   } catch (error) {
     console.log(error);
   }
@@ -659,32 +661,34 @@ export async function autoSyncGallery(pageId, accessToken, userEmail) {
           <br/>
           ` // html body
         });
+      } else {
+        await transporter.sendMail({
+          from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+          to: userEmail, // list of receivers
+          subject: "Sync Failed ✔", // Subject line
+          text: "Your site has synced data failed", // plain text body
+          html: `
+        <h5><strong>FPWG System</strong></h5>
+        <p>Hi,</p>
+        <p>Your site is not existed to sync!</p>
+        <br/>
+        ` // html body
+        });
       }
+    } else {
       await transporter.sendMail({
         from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
         to: userEmail, // list of receivers
         subject: "Sync Failed ✔", // Subject line
         text: "Your site has synced data failed", // plain text body
         html: `
-        <h5><strong>FPWG System</strong></h5>
-        <p>Hi,</p>
-        <p>Your site is not existed to sync!</p>
-        <br/>
-        ` // html body
-      });
-    }
-    await transporter.sendMail({
-      from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
-      to: userEmail, // list of receivers
-      subject: "Sync Failed ✔", // Subject line
-      text: "Your site has synced data failed", // plain text body
-      html: `
       <h5><strong>FPWG System</strong></h5>
       <p>Hi,</p>
       <p>Cannot find your Facebook page to sync!</p>
       <br/>
       ` // html body
-    });
+      });
+    }
   } catch (error) {
     console.log(error);
   }
@@ -768,19 +772,20 @@ export async function autoSyncEvent(pageId, accessToken, userEmail) {
           ` // html body
         });
       }
-    }
-    await transporter.sendMail({
-      from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
-      to: userEmail, // list of receivers
-      subject: "Sync Failed ✔", // Subject line
-      text: "Your site has synced data failed", // plain text body
-      html: `
+    } else {
+      await transporter.sendMail({
+        from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+        to: userEmail, // list of receivers
+        subject: "Sync Failed ✔", // Subject line
+        text: "Your site has synced data failed", // plain text body
+        html: `
       <h5><strong>FPWG System</strong></h5>
       <p>Hi,</p>
       <p>Facebook page event not existed!</p>
       <br/>
       ` // html body
-    });
+      });
+    }
   } catch (error) {
     console.log(error);
   }
@@ -960,32 +965,34 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
               }
             });
           });
-      }
-      await transporter.sendMail({
-        from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
-        to: userEmail, // list of receivers
-        subject: "Sync Failed ✔", // Subject line
-        text: "Your site is not existed to sync", // plain text body
-        html: `
+      } else {
+        await transporter.sendMail({
+          from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+          to: userEmail, // list of receivers
+          subject: "Sync Failed ✔", // Subject line
+          text: "Your site is not existed to sync", // plain text body
+          html: `
         <h5><strong>FPWG System</strong></h5>
         <p>Hi,</p>
         <p>Your site just synced successfully!</p>
         <br/>
         ` // html body
-      });
-    }
-    await transporter.sendMail({
-      from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
-      to: userEmail, // list of receivers
-      subject: "Sync Failed ✔", // Subject line
-      text: "Cannot find your Facebook Page data to sync", // plain text body
-      html: `
+        });
+      }
+    } else {
+      await transporter.sendMail({
+        from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+        to: userEmail, // list of receivers
+        subject: "Sync Failed ✔", // Subject line
+        text: "Cannot find your Facebook Page data to sync", // plain text body
+        html: `
       <h5><strong>FPWG System</strong></h5>
       <p>Hi,</p>
       <p>Your site just synced successfully!</p>
       <br/>
       ` // html body
-    });
+      });
+    }
   } catch (error) {
     console.log(error);
   }
