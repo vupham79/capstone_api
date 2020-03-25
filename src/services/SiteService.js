@@ -80,7 +80,7 @@ export async function findOneSiteByAccessToken(id, body) {
 
 export async function findOneSite(id) {
   return await Site.findOne({ id: id }).populate({
-    path: "theme posts events"
+    path: "theme posts events syncRecords"
   });
 }
 
@@ -101,10 +101,10 @@ export async function findAllSiteByUser(email) {
 
 export async function findSiteBySitepath(sitepath) {
   return await Site.findOne({ sitePath: sitepath.toLowerCase() })
-    .populate({
-      path: "theme events"
-    })
-    .populate("posts", "", "", "", { limit: 4 });
+    .select(
+      "id phone longitude latitude color logo fontTitle fontBody title address navItems isPublish cover categories url sitePath about whatsapp instagram email youtube theme homepage"
+    )
+    .populate("theme");
 }
 
 export async function checkSiteExist(id) {
@@ -771,23 +771,23 @@ export async function findSiteEventTab(id, sitePath, pageNumber = 1) {
   }
 }
 
-export async function findSiteHomeTab(id, sitePath) {
+function findDataBySection(sitePath) {
   let events = [];
   let galleries = [];
   let posts = [];
-  if (sitePath) {
+  return new Promise(async (resolve, reject) => {
     const site = await Site.findOne({ sitePath });
     const sections = site.homepage;
-    sections.forEach(async section => {
+    for (const section of sections) {
       if (section.isActive) {
         if (section.original === "event") {
-          if (section.filter.type === "optional") {
-            section.filter.items.forEach(async id => {
-              let event = await Event.findOne({ id });
+          if (section.filter.type === "manual") {
+            for (const _id of section.filter.items) {
+              let event = await Event.findOne({ _id });
               if (event) {
                 events.push(event);
               }
-            });
+            }
           } else {
             events = await Site.findOne({ sitePath })
               .select("events")
@@ -796,7 +796,7 @@ export async function findSiteHomeTab(id, sitePath) {
               });
           }
         } else if (section.original === "gallery") {
-          if (section.filter.type === "optional") {
+          if (section.filter.type === "manual") {
             section.filter.items.forEach(async id => {
               // let gallery = await Site.findOne({ id }).select("galleries");
               // if (gallery) {
@@ -818,12 +818,12 @@ export async function findSiteHomeTab(id, sitePath) {
           }
         } else if (section.original === "news") {
           if (section.filter.type === "manual") {
-            section.filter.items.forEach(async id => {
-              let post = await Post.findOne({ _id: id });
+            for (const _id of section.filter.items) {
+              let post = await Post.findOne({ _id });
               if (post) {
                 posts.push(post);
               }
-            });
+            }
           } else {
             posts = await Site.findOne({ sitePath })
               .select("posts")
@@ -831,12 +831,20 @@ export async function findSiteHomeTab(id, sitePath) {
           }
         }
       }
-    });
-    return {
+    }
+    resolve({
       posts,
-      galleries,
-      events
-    };
+      events,
+      galleries
+    });
+  });
+}
+export async function findSiteHomeTab(id, sitePath) {
+  let events = [];
+  let galleries = [];
+  let posts = [];
+  if (sitePath) {
+    return await findDataBySection(sitePath);
   } else {
     const site = await Site.findOne({ id });
     const sections = site.homepage;
