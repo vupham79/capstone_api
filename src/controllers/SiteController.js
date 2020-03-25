@@ -307,6 +307,7 @@ export async function saveDesign(req, res) {
           navItem.name === undefined ||
           navItem.name.replace(/\s/g, "") === ""
         ) {
+          console.log("Nav items empty");
           return res
             .status(400)
             .send({ error: "Navigation item must not be empty!" });
@@ -339,6 +340,7 @@ export async function saveDesign(req, res) {
       ) {
         whatsapp = null;
       }
+
       const update = await SiteService.saveDesign({
         pageId,
         fontTitle,

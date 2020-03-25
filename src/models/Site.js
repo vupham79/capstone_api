@@ -43,10 +43,6 @@ const SiteSchema = new mongoose.Schema(
       type: String,
       default: null
     },
-    color: {
-      type: String,
-      default: null
-    },
     navItems: [
       {
         name: {
@@ -131,10 +127,6 @@ const SiteSchema = new mongoose.Schema(
     posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
     theme: { type: Schema.Types.ObjectId, ref: "Theme" },
     events: [{ type: Schema.Types.ObjectId, ref: "Event" }],
-    favicon: {
-      type: String,
-      default: null
-    },
     homepage: [
       {
         name: {
