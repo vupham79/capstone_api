@@ -517,11 +517,20 @@ export async function syncPost(req, res) {
       //post Id list
       let postIdList = [];
       if (siteExist) {
+        const record = await SyncRecord.create({
+          dataType: "News",
+          dateFrom: dateFrom,
+          dateTo: dateTo
+        });
+        siteExist.updateOne({ id: pageId, syncRecord: record });
         postsList.forEach(post => {
           postIdList.push(post.id);
         });
         //insert and update post
         await SiteService.insertAndUpdateSyncDataPost(pageId, postsList);
+        await record.update({
+          status: true
+        });
         return res.status(200).send(siteExist);
       }
       return res.status(400).send({ error: "Site not existed!" });
@@ -602,23 +611,34 @@ export async function autoSyncPost(userEmail, pageId, accessToken) {
 export async function syncGallery(req, res) {
   try {
     let galleryList = [];
-    const { pageId } = req.body;
+    const { pageId, dateFrom, dateTo } = req.body;
     const data = await getSyncGallery({
       pageId: pageId,
       accessToken: req.user.accessToken
     });
     if (data) {
+      const record = await SyncRecord.create({
+        dataType: "Gallery",
+        dateFrom: dateFrom,
+        dateTo: dateTo
+      });
       //gallery list
       galleryList = await SiteService.getFacebookGalleryData(data);
       const siteExist = await SiteService.findOneSite(pageId);
       if (siteExist) {
         //update galleries
-        await Site.updateOne(
+        const update = await Site.updateOne(
           { id: pageId },
           {
-            galleries: galleryList.length > 0 ? galleryList : null
+            galleries: galleryList.length > 0 ? galleryList : null,
+            syncRecord: record
           }
         );
+        if (update) {
+          await record.update({
+            status: true
+          });
+        }
         return res.status(200).send(siteExist);
       }
       return res.status(400).send({ error: "Site not existed!" });
@@ -695,7 +715,7 @@ export async function autoSyncGallery(pageId, accessToken, userEmail) {
 export async function syncEvent(req, res) {
   try {
     let eventList = [];
-    const { pageId } = req.body;
+    const { pageId, dateFrom, dateTo } = req.body;
     const data = await getSyncEvent({
       pageId: pageId,
       accessToken: req.user.accessToken
@@ -705,6 +725,12 @@ export async function syncEvent(req, res) {
       eventList = await SiteService.getFacebookEventData(data);
       const siteExist = await SiteService.findOneSite(pageId);
       if (siteExist) {
+        const record = await SyncRecord.create({
+          dataType: "Event",
+          dateFrom: dateFrom,
+          dateTo: dateTo
+        });
+        siteExist.updateOne({ id: pageId, syncRecord: record });
         //event Id list
         let eventIdList = [];
         eventList.forEach(event => {
@@ -712,6 +738,9 @@ export async function syncEvent(req, res) {
         });
         //insert and update event
         await SiteService.insertAndUpdateSyncDataEvents(pageId, eventList);
+        await record.update({
+          status: true
+        });
 
         return res.status(200).send(siteExist);
       } else {
@@ -793,7 +822,8 @@ export async function syncData(req, res) {
     let galleryList = [];
     let postsList = [];
     let eventList = [];
-    const { pageId } = req.body;
+    const { pageId, dateFrom, dateTo } = req.body;
+    console.log(req.body);
     const data = await getSyncData({
       pageId: pageId,
       accessToken: req.user.accessToken
@@ -809,7 +839,9 @@ export async function syncData(req, res) {
             session.withTransaction(async () => {
               //update site
               const record = await SyncRecord.create({
-                dataType: "All"
+                dataType: "All",
+                dateFrom: dateFrom,
+                dateTo: dateTo
               });
               const update = await SiteService.editSite(pageId, {
                 phone: data.phone,
