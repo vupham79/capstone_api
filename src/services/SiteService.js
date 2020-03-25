@@ -287,7 +287,7 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
         console.log("use date range");
         if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
           if (!post.attachments || post.attachments === undefined) {
-            console.log(post.attachments);
+            // console.log(post.attachments);
             postsList.push({
               id: post.id,
               title: null,
@@ -755,9 +755,11 @@ export async function findSiteEventTab(id, sitePath, pageNumber = 1) {
     };
   } else {
     const total = await Site.findOne({ id }, "events");
-    await total.events.map(() => {
-      counter++;
-    });
+    if (total && total.events) {
+      await total.events.map(() => {
+        counter++;
+      });
+    }
     const events = await Site.findOne({ id })
       .select("events")
       .populate("events", "", "", "", {
@@ -935,13 +937,13 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
     };
   } else {
     const total = await Site.findOne({ id }, "galleries");
-    console.log(total);
+    // console.log(total);
     if (total && total.galleries) {
       await total.galleries.map(() => {
         counter++;
       });
     }
-    console.log(counter);
+    // console.log(counter);
     const galleries = await Site.aggregate([
       { $match: { id: id } },
       { $unwind: "$galleries" },
@@ -1116,7 +1118,7 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
           );
         } else {
           const eventResult = await Event.create(event);
-          console.log(eventResult);
+          // console.log(eventResult);
           existedEventObjIdList.push(
             new mongoose.Types.ObjectId(eventResult._id)
           );
