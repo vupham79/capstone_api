@@ -774,9 +774,6 @@ export async function findSiteEventTab(id, sitePath, pageNumber = 1) {
 }
 
 function findDataBySection(sitePath) {
-  let events = [];
-  let galleries = [];
-  let posts = [];
   return new Promise(async (resolve, reject) => {
     const site = await Site.findOne({ sitePath });
     const sections = site.homepage;
@@ -787,11 +784,14 @@ function findDataBySection(sitePath) {
             for (const _id of section.filter.items) {
               let event = await Event.findOne({ _id });
               if (event) {
-                events.push(event);
+                let index = section.filter.items.findIndex(
+                  item => item === _id
+                );
+                section.filter.items[index] = event;
               }
             }
           } else {
-            events = await Site.findOne({ sitePath })
+            section.filter.items = await Site.findOne({ sitePath })
               .select("events")
               .populate("events", "", "", "", {
                 limit
@@ -806,7 +806,7 @@ function findDataBySection(sitePath) {
               // }
             });
           } else {
-            galleries = await Site.aggregate([
+            section.filter.items = await Site.aggregate([
               { $match: { sitePath: sitePath } },
               { $unwind: "$galleries" },
               {
@@ -823,93 +823,25 @@ function findDataBySection(sitePath) {
             for (const _id of section.filter.items) {
               let post = await Post.findOne({ _id });
               if (post) {
-                posts.push(post);
+                let index = section.filter.items.findIndex(
+                  item => item === _id
+                );
+                section.filter.items[index] = post;
               }
             }
           } else {
-            posts = await Site.findOne({ sitePath })
+            section.filter.items = await Site.findOne({ sitePath })
               .select("posts")
               .populate("posts", "", "", "", { limit });
           }
         }
       }
     }
-    resolve({
-      posts,
-      events,
-      galleries
-    });
+    resolve(sections);
   });
 }
 export async function findSiteHomeTab(id, sitePath) {
-  let events = [];
-  let galleries = [];
-  let posts = [];
-  if (sitePath) {
-    return await findDataBySection(sitePath);
-  } else {
-    const site = await Site.findOne({ id });
-    const sections = site.homepage;
-    sections.forEach(async section => {
-      if (section.isActive) {
-        if (section.original === "event") {
-          if (section.filter.type === "optional") {
-            section.filter.items.forEach(async id => {
-              let event = await Event.findOne({ id });
-              if (event) {
-                events.push(event);
-              }
-            });
-          } else {
-            events = await Site.findOne({ id })
-              .select("events")
-              .populate("events", "", "", "", {
-                limit
-              });
-          }
-        } else if (section.original === "gallery") {
-          if (section.filter.type === "optional") {
-            section.filter.items.forEach(async id => {
-              // let gallery = await Site.findOne({ id }).select("galleries");
-              // if (gallery) {
-              //   galleries.push(gallery);
-              // }
-            });
-          } else {
-            galleries = await Site.aggregate([
-              { $match: { id: id } },
-              { $unwind: "$galleries" },
-              {
-                $group: {
-                  _id: "$galleries"
-                }
-              },
-              { $sort: { _id: -1 } },
-              { $limit: limit }
-            ]);
-          }
-        } else if (section.original === "news") {
-          if (section.filter.type === "optional") {
-            section.filter.items.forEach(async id => {
-              let post = await Post.findOne({ id });
-              if (post) {
-                posts.push(post);
-              }
-            });
-          } else {
-            posts = await Site.findOne({ id })
-              .select("posts")
-              .populate("posts", "", "", "", { limit });
-          }
-        }
-      }
-    });
-    return {
-      posts,
-      galleries,
-      events
-    };
-  }
+  return await findDataBySection(sitePath);
 }
 
 export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
