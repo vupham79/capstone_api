@@ -791,20 +791,21 @@ function findDataBySection(sitePath) {
               }
             }
           } else {
-            section.filter.items = await Site.findOne({ sitePath })
+            const events = await Site.find({ sitePath })
               .select("events")
               .populate("events", "", "", "", {
                 limit
               });
+            section.filter.items = events[0].events;
           }
         } else if (section.original === "gallery") {
           if (section.filter.type === "manual") {
-            section.filter.items.forEach(async id => {
-              // let gallery = await Site.findOne({ id }).select("galleries");
-              // if (gallery) {
-              //   galleries.push(gallery);
-              // }
-            });
+            //section.filter.items.forEach(async id => {
+            // let gallery = await Site.findOne({ id }).select("galleries");
+            // if (gallery) {
+            //   galleries.push(gallery);
+            // }
+            //});
           } else {
             section.filter.items = await Site.aggregate([
               { $match: { sitePath: sitePath } },
@@ -830,9 +831,10 @@ function findDataBySection(sitePath) {
               }
             }
           } else {
-            section.filter.items = await Site.findOne({ sitePath })
+            const posts = await Site.find({ sitePath })
               .select("posts")
               .populate("posts", "", "", "", { limit });
+            section.filter.items = posts[0].posts;
           }
         }
       }
