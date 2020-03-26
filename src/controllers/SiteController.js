@@ -505,6 +505,7 @@ export async function createNewSite(req, res) {
 export async function syncPost(req, res) {
   try {
     let postsList = [];
+    let postIdList = [];
     const { pageId, dateFrom, dateTo } = req.body;
     const data = await getSyncPost({
       pageId: pageId,
@@ -514,21 +515,13 @@ export async function syncPost(req, res) {
       //post list
       postsList = await SiteService.getFacebookPostData(data);
       const siteExist = await Site.findOne({ id: pageId });
-      let syncRecordList = [];
-      siteExist &&
-        siteExist.syncRecords &&
-        siteExist.syncRecords.forEach(record => {
-          syncRecordList.push(new mongoose.Types.ObjectId(record));
-        });
-      //post Id list
-      let postIdList = [];
-      const record = await SyncRecord.create({
-        dataType: "News",
-        dateFrom: dateFrom,
-        dateTo: dateTo
-      });
-      syncRecordList.push(new mongoose.Types.ObjectId(record._id));
       if (siteExist) {
+        const record = await SyncRecord.create({
+          dataType: "News",
+          dateFrom: dateFrom,
+          dateTo: dateTo
+        });
+        let syncRecordList = SiteService.addSyncRecord(record, siteExist);
         await siteExist.updateOne({
           id: pageId,
           syncRecords: syncRecordList
@@ -633,21 +626,15 @@ export async function syncGallery(req, res) {
       //gallery list
       galleryList = await SiteService.getFacebookGalleryData(data);
       const siteExist = await Site.findOne({ id: pageId });
-      let syncRecordList = [];
-      siteExist &&
-        siteExist.syncRecords &&
-        siteExist.syncRecords.forEach(record => {
-          syncRecordList.push(new mongoose.Types.ObjectId(record));
-        });
-      const record = await SyncRecord.create({
-        dataType: "Gallery",
-        dateFrom: dateFrom,
-        dateTo: dateTo
-      });
-      syncRecordList.push(new mongoose.Types.ObjectId(record._id));
       if (siteExist) {
+        const record = await SyncRecord.create({
+          dataType: "Gallery",
+          dateFrom: dateFrom,
+          dateTo: dateTo
+        });
+        let syncRecordList = SiteService.addSyncRecord(record, siteExist);
         //update galleries
-        await Site.updateOne(
+        const update = await Site.updateOne(
           { id: pageId },
           {
             galleries: galleryList.length > 0 ? galleryList : null,
@@ -659,8 +646,8 @@ export async function syncGallery(req, res) {
             status: true
           });
         }
-        const update = await SiteService.findOneSite(pageId);
-        return res.status(200).send(update);
+        const siteResult = await SiteService.findOneSite(pageId);
+        return res.status(200).send(siteResult);
       }
       return res.status(400).send({ error: "Site not existed!" });
     }
@@ -747,19 +734,13 @@ export async function syncEvent(req, res) {
       //event list
       eventList = await SiteService.getFacebookEventData(data);
       const siteExist = await Site.findOne({ id: pageId });
-      let syncRecordList = [];
-      siteExist &&
-        siteExist.syncRecords &&
-        siteExist.syncRecords.forEach(record => {
-          syncRecordList.push(new mongoose.Types.ObjectId(record));
-        });
-      const record = await SyncRecord.create({
-        dataType: "Gallery",
-        dateFrom: dateFrom,
-        dateTo: dateTo
-      });
-      syncRecordList.push(new mongoose.Types.ObjectId(record._id));
       if (siteExist) {
+        const record = await SyncRecord.create({
+          dataType: "Event",
+          dateFrom: dateFrom,
+          dateTo: dateTo
+        });
+        let syncRecordList = SiteService.addSyncRecord(record, siteExist);
         await siteExist.updateOne({ id: pageId, syncRecords: syncRecordList });
         //event Id list
         let eventIdList = [];
@@ -853,26 +834,14 @@ export async function syncData(req, res) {
     let galleryList = [];
     let postsList = [];
     let eventList = [];
+    let postIdList = [];
     const { pageId, dateFrom, dateTo } = req.body;
-    console.log(req.body);
     const data = await getSyncData({
       pageId: pageId,
       accessToken: req.user.accessToken
     });
+    const siteExist = await Site.findOne({ id: pageId });
     if (data) {
-      const siteExist = await Site.findOne({ id: pageId });
-      let syncRecordList = [];
-      siteExist &&
-        siteExist.syncRecords &&
-        siteExist.syncRecords.forEach(record => {
-          syncRecordList.push(new mongoose.Types.ObjectId(record));
-        });
-      const record = await SyncRecord.create({
-        dataType: "Gallery",
-        dateFrom: dateFrom,
-        dateTo: dateTo
-      });
-      syncRecordList.push(new mongoose.Types.ObjectId(record._id));
       if (siteExist) {
         let session;
         return Site.createCollection()
@@ -886,6 +855,7 @@ export async function syncData(req, res) {
                 dateFrom: dateFrom,
                 dateTo: dateTo
               });
+              let syncRecordList = SiteService.addSyncRecord(record, siteExist);
               const update = await SiteService.editSite(pageId, {
                 phone: data.phone,
                 longitude: data.location ? data.location.longitude : null,
@@ -904,7 +874,6 @@ export async function syncData(req, res) {
               //update galleries
               await SiteService.updateGallery(pageId, galleryList);
               //post Id list
-              let postIdList = [];
               if (postsList) {
                 postsList.forEach(post => {
                   postIdList.push(post.id);
@@ -929,8 +898,8 @@ export async function syncData(req, res) {
                 await record.update({
                   status: true
                 });
-                const update = await SiteService.findOneSite(pageId);
-                return res.status(200).send(update);
+                const siteResult = await SiteService.findOneSite(pageId);
+                return res.status(200).send(siteResult);
               } else {
                 return res.status(400).send({ error: "Edit failed!" });
               }
