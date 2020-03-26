@@ -49,7 +49,8 @@ export async function editSite(id, body) {
   site.cover = body.cover;
   site.categories = body.categories;
   site.about = body.about;
-  site.syncRecords = [...site.syncRecords, body.syncRecord];
+  site.syncRecords = body.syncRecords;
+  // site.syncRecords = [...site.syncRecords, body.syncRecord];
   return await site.save();
 }
 
@@ -82,6 +83,17 @@ export async function findOneSite(id) {
   return await Site.findOne({ id: id }).populate({
     path: "theme posts events syncRecords"
   });
+}
+
+export function addSyncRecord(record, siteExist) {
+  let syncRecordList = [];
+  siteExist &&
+    siteExist.syncRecords &&
+    siteExist.syncRecords.forEach(record => {
+      syncRecordList.push(new mongoose.Types.ObjectId(record));
+    });
+  syncRecordList.push(new mongoose.Types.ObjectId(record._id));
+  return syncRecordList;
 }
 
 export async function findAllSiteByUser(email) {
