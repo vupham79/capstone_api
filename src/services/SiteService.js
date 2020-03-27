@@ -805,10 +805,12 @@ function findDataBySection(sitePath) {
           } else {
             const events = await Site.find({ sitePath })
               .select("events")
-              .populate("events", "", "", "", {
-                limit
-              });
-            section.filter.items = events[0].events;
+              .populate("events", "", "", "", { limit, sort: { _id: 1 } });
+            section.filter.items = [];
+            for (let index = 0; index < events[0].events.length; index++) {
+              const element = events[0].events[index];
+              section.filter.items[index] = element;
+            }
           }
         } else if (section.original === "gallery") {
           if (section.filter.type === "manual") {
@@ -819,7 +821,7 @@ function findDataBySection(sitePath) {
             // }
             //});
           } else {
-            section.filter.items = await Site.aggregate([
+            const galleries = await Site.aggregate([
               { $match: { sitePath: sitePath } },
               { $unwind: "$galleries" },
               {
@@ -830,6 +832,13 @@ function findDataBySection(sitePath) {
               { $sort: { _id: -1 } },
               { $limit: limit }
             ]);
+            section.filter.items = [];
+            for (let index = 0; index < galleries.length; index++) {
+              const element = galleries[index]._id;
+              console.log(element.createdTime);
+              section.filter.items[index] = element;
+            }
+            section.filter.items = galleries;
           }
         } else if (section.original === "news") {
           if (section.filter.type === "manual") {
@@ -845,8 +854,12 @@ function findDataBySection(sitePath) {
           } else {
             const posts = await Site.find({ sitePath })
               .select("posts")
-              .populate("posts", "", "", "", { limit });
-            section.filter.items = posts[0].posts;
+              .populate("posts", "", "", "", { limit, sort: { _id: 1 } });
+            section.filter.items = [];
+            for (let index = 0; index < posts[0].posts.length; index++) {
+              const element = posts[0].posts[index];
+              section.filter.items[index] = element;
+            }
           }
         }
       }
