@@ -676,6 +676,13 @@ export async function autoSyncGallery(pageId, accessToken, userEmail) {
       //gallery list
       galleryList = await SiteService.getFacebookGalleryData(data);
       const siteExist = await SiteService.findOneSite(pageId);
+      galleryList.forEach(item => {
+        siteExist.galleries.forEach(siteItem => {
+          if (item.target === siteItem.target) {
+            item._id = new mongoose.Types.ObjectId(siteItem._id);
+          }
+        });
+      });
       if (siteExist) {
         //update galleries
         await Site.updateOne(
@@ -878,6 +885,13 @@ export async function syncData(req, res) {
               postsList = await SiteService.getFacebookPostSyncData(data);
               //gallery list
               galleryList = await SiteService.getFacebookGalleryData(data);
+              galleryList.forEach(item => {
+                siteExist.galleries.forEach(siteItem => {
+                  if (item.target === siteItem.target) {
+                    item._id = new mongoose.Types.ObjectId(siteItem._id);
+                  }
+                });
+              });
               //update galleries
               await SiteService.updateGallery(pageId, galleryList);
               //post Id list
@@ -958,6 +972,13 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
               postsList = await SiteService.getFacebookPostSyncData(data);
               //gallery list
               galleryList = await SiteService.getFacebookGalleryData(data);
+              galleryList.forEach(item => {
+                siteExist.galleries.forEach(siteItem => {
+                  if (item.target === siteItem.target) {
+                    item._id = new mongoose.Types.ObjectId(siteItem._id);
+                  }
+                });
+              });
               //update galleries
               await SiteService.updateGallery(pageId, galleryList);
               //post Id list
