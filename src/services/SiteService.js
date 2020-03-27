@@ -814,12 +814,15 @@ function findDataBySection(sitePath) {
           }
         } else if (section.original === "gallery") {
           if (section.filter.type === "manual") {
-            //section.filter.items.forEach(async id => {
-            // let gallery = await Site.findOne({ id }).select("galleries");
-            // if (gallery) {
-            //   galleries.push(gallery);
-            // }
-            //});
+            let gallery = await Site.findOne({ sitePath }).select("galleries");
+            gallery.galleries.forEach(image => {
+              if (section.filter.items.includes(image._id)) {
+                const index = section.filter.items.findIndex(
+                  item => item === image._id
+                );
+                section.filter.items[index] = image;
+              }
+            });
           } else {
             const galleries = await Site.aggregate([
               { $match: { sitePath: sitePath } },
