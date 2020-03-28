@@ -296,7 +296,7 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
     data.posts.data.forEach(async post => {
       // console.log(moment(post.created_time).isBetween(dateFrom, dateTo));
       if (dateFrom instanceof Date && dateTo instanceof Date) {
-        console.log("use date range");
+        // console.log("use date range");
         if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
           if (!post.attachments || post.attachments === undefined) {
             // console.log(post.attachments);
@@ -1019,7 +1019,7 @@ export async function insertAndUpdateSyncDataPost(pageId, postsList) {
             );
             await Site.updateOne(
               { id: pageId },
-              { posts: existedPostObjIdList, lastSync: new Date() }
+              { posts: existedPostObjIdList }
             );
           } else {
             const postResult = await Post.create(post);
@@ -1028,7 +1028,7 @@ export async function insertAndUpdateSyncDataPost(pageId, postsList) {
             );
             await Site.updateOne(
               { id: pageId },
-              { posts: existedPostObjIdList, lastSync: new Date() }
+              { posts: existedPostObjIdList }
             );
           }
         } else {
@@ -1037,10 +1037,7 @@ export async function insertAndUpdateSyncDataPost(pageId, postsList) {
           existedPostObjIdList.push(
             new mongoose.Types.ObjectId(postResult._id)
           );
-          await Site.updateOne(
-            { id: pageId },
-            { posts: existedPostObjIdList, lastSync: new Date() }
-          );
+          await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
         }
       });
   }
@@ -1067,7 +1064,6 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
   if (eventList) {
     eventList.forEach(async event => {
       if (!existedEventIdList.includes(event.id)) {
-        console.log("Event exist but not inside Site: " + event.id);
         const existedEvent = await Event.findOne({ id: event.id });
         if (existedEvent) {
           await Event.updateOne({ id: event.id }, event);
@@ -1078,19 +1074,17 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
           await Site.updateOne(
             { id: pageId },
             {
-              events: existedEventObjIdList,
-              lastSync: new Date()
+              events: existedEventObjIdList
             }
           );
         } else {
           const eventResult = await Event.create(event);
-          // console.log(eventResult);
           existedEventObjIdList.push(
             new mongoose.Types.ObjectId(eventResult._id)
           );
           await Site.updateOne(
             { id: pageId },
-            { events: existedEventObjIdList, lastSync: new Date() }
+            { events: existedEventObjIdList }
           );
         }
       } else {
@@ -1099,10 +1093,7 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
         existedEventObjIdList.push(
           new mongoose.Types.ObjectId(eventResult._id)
         );
-        await Site.updateOne(
-          { id: pageId },
-          { events: existedEventObjIdList, lastSync: new Date() }
-        );
+        await Site.updateOne({ id: pageId }, { events: existedEventObjIdList });
       }
     });
   }
@@ -1117,7 +1108,6 @@ export async function findExistedSitePath(sitepath) {
 export async function addCronJob({ pageId, autoSync, job }) {
   const { minute, hour, day, dataType } = autoSync;
   if (dataType === "none") {
-    console.log("none");
     cronJobs.forEach(cronJob => {
       if (cronJob.siteId === pageId) {
         if (cronJob.job) {
