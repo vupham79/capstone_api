@@ -747,6 +747,11 @@ export async function syncEvent(req, res) {
     if (data) {
       //event list
       eventList = await SiteService.getFacebookEventData(data);
+      if (!eventList) {
+        return res
+          .status(200)
+          .send({ msg: "Facebook page has no event existed!" });
+      }
       const siteExist = await Site.findOne({ id: pageId });
       if (siteExist) {
         const record = await SyncRecord.create({
@@ -763,7 +768,7 @@ export async function syncEvent(req, res) {
         });
         //insert and update event
         await SiteService.insertAndUpdateSyncDataEvents(pageId, eventList);
-        await record.update({
+        await record.updateOne({
           status: true
         });
         const update = await SiteService.findOneSite(pageId);
