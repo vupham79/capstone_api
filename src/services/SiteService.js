@@ -793,13 +793,15 @@ function findDataBySection(sitePath) {
       if (section.isActive) {
         if (section.original === "event") {
           if (section.filter.type === "manual") {
-            for (const _id of section.filter.items) {
-              let event = await Event.findOne({ _id });
-              if (event) {
-                let index = section.filter.items.findIndex(
-                  item => item === _id
-                );
-                section.filter.items[index] = event;
+            if (!section.filter.items) {
+              for (const _id of section.filter.items) {
+                let event = await Event.findOne({ _id });
+                if (event) {
+                  let index = section.filter.items.findIndex(
+                    item => item === _id
+                  );
+                  section.filter.items[index] = event;
+                }
               }
             }
           } else {
@@ -845,13 +847,15 @@ function findDataBySection(sitePath) {
           }
         } else if (section.original === "news") {
           if (section.filter.type === "manual") {
-            for (const _id of section.filter.items) {
-              let post = await Post.findOne({ _id });
-              if (post) {
-                let index = section.filter.items.findIndex(
-                  item => item === _id
-                );
-                section.filter.items[index] = post;
+            if (!section.filter.items) {
+              for (const _id of section.filter.items) {
+                let post = await Post.findOne({ _id });
+                if (post) {
+                  let index = section.filter.items.findIndex(
+                    item => item === _id
+                  );
+                  section.filter.items[index] = post;
+                }
               }
             }
           } else {
