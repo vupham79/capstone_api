@@ -17,7 +17,7 @@ app.use(passport.session());
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://fpwg.netlify.com",
     credentials: true
   })
 );
