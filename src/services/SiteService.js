@@ -299,7 +299,6 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
         // console.log("use date range");
         if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
           if (!post.attachments || post.attachments === undefined) {
-            // console.log(post.attachments);
             postsList.push({
               id: post.id,
               title: null,
@@ -485,7 +484,20 @@ export async function getFacebookPostSyncData(data) {
   let postsList = [];
   data.posts &&
     data.posts.data.forEach(post => {
-      if (post.attachments && post.attachments.data[0].media_type === "album") {
+      if (!post.attachments || post.attachments === undefined) {
+        postsList.push({
+          id: post.id,
+          title: null,
+          message: post.message,
+          isActive: true,
+          createdTime: post.created_time,
+          attachments: null,
+          target: null
+        });
+      } else if (
+        post.attachments &&
+        post.attachments.data[0].media_type === "album"
+      ) {
         const subAttachmentList = [];
         post.attachments.data[0].subattachments.data.forEach(subAttachment => {
           subAttachmentList.push(subAttachment.media.image.src);
