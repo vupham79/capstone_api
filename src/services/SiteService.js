@@ -787,7 +787,7 @@ function findDataBySection(sitePath) {
       if (section.isActive) {
         if (section.original === "event") {
           if (section.filter.type === "manual") {
-            if (!section.filter.items) {
+            if (section.filter.items) {
               for (const _id of section.filter.items) {
                 let event = await Event.findOne({ _id });
                 if (event) {
@@ -840,13 +840,13 @@ function findDataBySection(sitePath) {
           }
         } else if (section.original === "news") {
           if (section.filter.type === "manual") {
-            if (!section.filter.items) {
+            if (section.filter.items) {
               for (const _id of section.filter.items) {
                 let post = await Post.findOne({ _id });
                 if (post) {
-                  let index = section.filter.items.findIndex(
-                    item => item === _id
-                  );
+                  let index = section.filter.items.findIndex(item => {
+                    return item === _id;
+                  });
                   section.filter.items[index] = post;
                 }
               }
