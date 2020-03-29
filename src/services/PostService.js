@@ -38,7 +38,8 @@ export async function insertAllPost(body) {
 // }
 
 export async function activePost(body) {
-  await Post.updateMany(
+  console.log(body.activeList.length, body.deactiveList.length);
+  const activeUpdate = await Post.updateMany(
     {
       id: { $in: body.activeList.map(post => post.id) }
     },
@@ -46,7 +47,8 @@ export async function activePost(body) {
       isActive: true
     }
   );
-  await Post.updateMany(
+  console.log(activeUpdate);
+  const deactiveUpdate = await Post.updateMany(
     {
       id: { $in: body.deactiveList.map(post => post.id) }
     },
@@ -54,6 +56,7 @@ export async function activePost(body) {
       isActive: false
     }
   );
+  console.log(deactiveUpdate);
   return body;
 }
 

@@ -5,9 +5,10 @@ export async function activePosts(req, res) {
   try {
     const activeList = posts.filter(post => post.isActive === true);
     const deactiveList = posts.filter(post => post.isActive === false);
+
     const update = await activePost({
-      activeList: activeList && activeList.length > 0 && activeList,
-      deactiveList: deactiveList && deactiveList.length > 0 && deactiveList
+      activeList: activeList && activeList,
+      deactiveList: deactiveList && deactiveList
     });
     if (update) {
       return res.status(200).send(posts);

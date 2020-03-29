@@ -1,8 +1,22 @@
 import {
+  insertTheme,
   editTheme,
   findOneTheme,
   findAllTheme
 } from "../services/ThemeService";
+
+export async function insert(req, res) {
+  try {
+    console.log(req.params.id, req.body);
+    const insert = await insertTheme(req.params.id, req.body);
+    if (insert) {
+      return res.status(200).send(insert);
+    }
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(400).send({ error });
+  }
+}
 
 export async function update(req, res) {
   try {
