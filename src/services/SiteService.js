@@ -139,57 +139,39 @@ export async function saveDesign(data) {
     id: data.pageId
   });
   if (site) {
+    site.fontTitle = data.fontTitle;
+    site.fontBody = data.fontBody;
+    site.title = data.name;
+    site.color = data.color;
+    site.navItems = data.navItems;
+    site.theme = new mongoose.Types.ObjectId(data.findTheme._id);
+    site.whatsapp = data.whatsapp;
+    site.email = data.email;
+    site.instagram = data.instagram;
+    site.youtube = data.youtube;
+    site.phone = data.phone;
+    site.address = data.address;
+    if (data.logoURL) {
+      site.logo = data.logoURL;
+    }
+    if (data.coverURL) {
+      site.cover = data.coverURL;
+    }
+    site.sitePath = data.sitePath;
+    if (data.homepage) {
+      site.homepage = data.homepage;
+    }
     if (site.sitePath !== data.sitePath.trim()) {
       const sitePathExisting = await Site.findOne({
         sitePath: data.sitePath.trim()
       });
+
       if (!sitePathExisting) {
-        site.fontTitle = data.fontTitle;
-        site.fontBody = data.fontBody;
-        site.title = data.name;
-        site.color = data.color;
-        site.navItems = data.navItems;
-        site.theme = new mongoose.Types.ObjectId(data.findTheme._id);
-        site.whatsapp = data.whatsapp;
-        site.email = data.email;
-        site.instagram = data.instagram;
-        site.youtube = data.youtube;
-        site.phone = data.phone;
-        if (data.logoURL) {
-          site.logo = data.logoURL;
-        }
-        if (data.coverURL) {
-          site.cover = data.coverURL;
-        }
-        site.sitePath = data.sitePath;
-        if (data.homepage) {
-          site.homepage = data.homepage;
-        }
         return await site.save();
       } else {
         return { msg: "Design saved but not sitepath because existed!" };
       }
     } else {
-      site.fontTitle = data.fontTitle;
-      site.fontBody = data.fontBody;
-      site.title = data.name;
-      site.color = data.color;
-      site.navItems = data.navItems;
-      site.theme = new mongoose.Types.ObjectId(data.findTheme._id);
-      site.whatsapp = data.whatsapp;
-      site.email = data.email;
-      site.instagram = data.instagram;
-      site.youtube = data.youtube;
-      site.phone = data.phone;
-      if (data.logoURL) {
-        site.logo = data.logoURL;
-      }
-      if (data.coverURL) {
-        site.cover = data.coverURL;
-      }
-      if (data.homepage) {
-        site.homepage = data.homepage;
-      }
       return await site.save();
     }
   } else {

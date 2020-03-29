@@ -294,9 +294,11 @@ export async function saveDesign(req, res) {
     sitePath,
     homepage,
     logoURL,
-    coverURL
+    coverURL,
+    address
   } = req.body;
   try {
+    console.log(address);
     if (
       !sitePath ||
       sitePath === undefined ||
@@ -372,7 +374,8 @@ export async function saveDesign(req, res) {
         sitePath,
         homepage,
         logoURL,
-        coverURL
+        coverURL,
+        address
       });
       if (update.msg) {
         return res.status(400).send(update);

@@ -7,8 +7,7 @@ const CategorySchema = new mongoose.Schema(
       unique: [true, "Category already existed!"]
     },
     picture: {
-      type: String,
-      required: true
+      type: String
     },
     themes: [
       {
