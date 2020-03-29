@@ -38,23 +38,27 @@ export async function insertAllPost(body) {
 // }
 
 export async function activePost(body) {
-  await Post.updateMany(
-    {
-      id: { $in: body.activeList.map(post => post.id) }
-    },
-    {
-      isActive: true
-    }
-  );
-  await Post.updateMany(
-    {
-      id: { $in: body.deactiveList.map(post => post.id) }
-    },
-    {
-      isActive: false
-    }
-  );
-  return body;
+  if (body.activeList) {
+    await Post.updateMany(
+      {
+        id: { $in: body.activeList.map(post => post.id) }
+      },
+      {
+        isActive: true
+      }
+    );
+  }
+  if (body.deactiveList) {
+    await Post.updateMany(
+      {
+        id: { $in: body.deactiveList.map(post => post.id) }
+      },
+      {
+        isActive: false
+      }
+    );
+  }
+  return true;
 }
 
 export async function findAllPost() {
