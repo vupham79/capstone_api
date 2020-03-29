@@ -813,9 +813,9 @@ function findDataBySection(sitePath) {
             let gallery = await Site.findOne({ sitePath }).select("galleries");
             gallery.galleries.forEach(image => {
               if (section.filter.items.includes(image._id)) {
-                const index = section.filter.items.findIndex(
-                  item => item === image._id
-                );
+                const index = section.filter.items.findIndex(item => {
+                  return item === image.id;
+                });
                 section.filter.items[index] = image;
               }
             });
@@ -834,7 +834,6 @@ function findDataBySection(sitePath) {
             section.filter.items = [];
             for (let index = 0; index < galleries.length; index++) {
               const element = galleries[index]._id;
-              console.log(element.createdTime);
               section.filter.items[index] = element;
             }
             section.filter.items = galleries;
@@ -897,13 +896,11 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
     };
   } else {
     const total = await Site.findOne({ id }, "galleries");
-    // console.log(total);
     if (total && total.galleries) {
       await total.galleries.map(() => {
         counter++;
       });
     }
-    // console.log(counter);
     const galleries = await Site.aggregate([
       { $match: { id: id } },
       { $unwind: "$galleries" },
