@@ -1,4 +1,4 @@
-import { mongoose, Site, Theme, SyncRecord } from "../models";
+import { mongoose, Site, Theme, SyncRecord, User } from "../models";
 import {
   getPageData,
   getSyncData,
@@ -185,6 +185,21 @@ export async function publish(req, res) {
   try {
     const siteExist = await SiteService.checkSiteExist(id);
     if (siteExist) {
+      let userActivated = false;
+      const siteResut = await Site.findOne({ id: id });
+      const userCheck = await User.find();
+      userCheck &&
+        userCheck.forEach(user => {
+          if (
+            user.sites.includes(new mongoose.Types.ObjectId(siteResut._id)) &&
+            user.isActivated
+          ) {
+            userActivated = true;
+          }
+        });
+      if (userActivated === false) {
+        return res.status(400).send({ error: "User is not activated!" });
+      }
       const publish = await SiteService.publishSite(id, isPublish);
       if (publish) {
         return res.status(200).send(publish);
