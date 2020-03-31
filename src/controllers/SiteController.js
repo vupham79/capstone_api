@@ -571,13 +571,13 @@ export async function autoSyncPost(userEmail, pageId, accessToken) {
       pageId: pageId,
       accessToken: accessToken
     });
-    if (data) {
-      //post list
-      postsList = await SiteService.getFacebookPostData(data);
-      const siteExist = await SiteService.findOneSite(pageId);
-      //post Id list
-      let postIdList = [];
-      if (siteExist) {
+    const siteExist = await SiteService.findOneSite(pageId);
+    if (siteExist) {
+      if (data) {
+        //post list
+        postsList = await SiteService.getFacebookPostData(data);
+        //post Id list
+        let postIdList = [];
         postsList.forEach(post => {
           postIdList.push(post.id);
         });
@@ -593,7 +593,7 @@ export async function autoSyncPost(userEmail, pageId, accessToken) {
           html: `
           <h5><strong>FPWG System</strong></h5>
           <p>Hi,</p>
-          <p>Your site just synced successfully!</p>
+          <p>Your site ${siteExist.title} just synced successfully!</p>
           <br/>
           ` // html body
         });
@@ -607,7 +607,7 @@ export async function autoSyncPost(userEmail, pageId, accessToken) {
           html: `
         <h5><strong>FPWG System</strong></h5>
         <p>Hi,</p>
-        <p>Your site not exist to sync!</p>
+        <p>Cannot find your Facebook Page ${siteExist.title}'s post to sync!</p>
         <br/>
         ` // html body
         });
@@ -622,7 +622,7 @@ export async function autoSyncPost(userEmail, pageId, accessToken) {
         html: `
       <h5><strong>FPWG System</strong></h5>
       <p>Hi,</p>
-      <p>Cannot find your Facebook Page to sync!</p>
+      <p>Your site is not existed to sync!</p>
       <br/>
       ` // html body
       });
@@ -690,18 +690,18 @@ export async function autoSyncGallery(pageId, accessToken, userEmail) {
       pageId: pageId,
       accessToken
     });
-    if (data) {
-      //gallery list
-      galleryList = await SiteService.getFacebookGalleryData(data);
-      const siteExist = await SiteService.findOneSite(pageId);
-      galleryList.forEach(item => {
-        siteExist.galleries.forEach(siteItem => {
-          if (item.target === siteItem.target) {
-            item._id = new mongoose.Types.ObjectId(siteItem._id);
-          }
+    const siteExist = await SiteService.findOneSite(pageId);
+    if (siteExist) {
+      if (data) {
+        //gallery list
+        galleryList = await SiteService.getFacebookGalleryData(data);
+        galleryList.forEach(item => {
+          siteExist.galleries.forEach(siteItem => {
+            if (item.target === siteItem.target) {
+              item._id = new mongoose.Types.ObjectId(siteItem._id);
+            }
+          });
         });
-      });
-      if (siteExist) {
         //update galleries
         await Site.updateOne(
           { id: pageId },
@@ -717,7 +717,7 @@ export async function autoSyncGallery(pageId, accessToken, userEmail) {
           html: `
           <h5><strong>FPWG System</strong></h5>
           <p>Hi,</p>
-          <p>Your site just synced successfully!</p>
+          <p>Your site ${siteExist.title} just synced gallery successfully!</p>
           <br/>
           ` // html body
         });
@@ -730,7 +730,7 @@ export async function autoSyncGallery(pageId, accessToken, userEmail) {
           html: `
         <h5><strong>FPWG System</strong></h5>
         <p>Hi,</p>
-        <p>Your site is not existed to sync!</p>
+        <p>Cannot find your Facebook page ${siteExist.title}'s gallery to sync!</p>
         <br/>
         ` // html body
         });
@@ -744,7 +744,7 @@ export async function autoSyncGallery(pageId, accessToken, userEmail) {
         html: `
       <h5><strong>FPWG System</strong></h5>
       <p>Hi,</p>
-      <p>Cannot find your Facebook page to sync!</p>
+      <p>Your site is not existed to sync!</p>
       <br/>
       ` // html body
       });
@@ -809,11 +809,11 @@ export async function autoSyncEvent(pageId, accessToken, userEmail) {
       pageId: pageId,
       accessToken
     });
-    if (data) {
-      //event list
-      eventList = await SiteService.getFacebookEventData(data);
-      const siteExist = await SiteService.findOneSite(pageId);
-      if (siteExist) {
+    const siteExist = await SiteService.findOneSite(pageId);
+    if (siteExist) {
+      if (data) {
+        //event list
+        eventList = await SiteService.getFacebookEventData(data);
         //event Id list
         let eventIdList = [];
         eventList.forEach(event => {
@@ -829,7 +829,7 @@ export async function autoSyncEvent(pageId, accessToken, userEmail) {
           html: `
           <h5><strong>FPWG System</strong></h5>
           <p>Hi,</p>
-          <p>Your site just synced successfully!</p>
+          <p>Your site ${siteExist.title} just synced successfully!</p>
           <br/>
           ` // html body
         });
@@ -842,7 +842,7 @@ export async function autoSyncEvent(pageId, accessToken, userEmail) {
           html: `
           <h5><strong>FPWG System</strong></h5>
           <p>Hi,</p>
-          <p>Your site is not existed to sync</p>
+          <p>Cannot find Facebook page ${siteExist.title}'s event to sync!</p>
           <br/>
           ` // html body
         });
@@ -856,7 +856,7 @@ export async function autoSyncEvent(pageId, accessToken, userEmail) {
         html: `
       <h5><strong>FPWG System</strong></h5>
       <p>Hi,</p>
-      <p>Facebook page event not existed!</p>
+      <p>Your site is not existed to sync!</p>
       <br/>
       ` // html body
       });
@@ -967,9 +967,9 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
       pageId,
       accessToken
     });
-    if (data) {
-      const siteExist = await SiteService.findOneSite(pageId);
-      if (siteExist) {
+    const siteExist = await SiteService.findOneSite(pageId);
+    if (siteExist) {
+      if (data) {
         let session;
         return Site.createCollection()
           .then(() => Site.startSession())
@@ -1038,7 +1038,7 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
                   html: `
                   <h5><strong>FPWG System</strong></h5>
                   <p>Hi,</p>
-                  <p>Your site just synced successfully!</p>
+                  <p>Your site ${siteExist.title} just synced successfully!</p>
                   <br/>
                   ` // html body
                 });
@@ -1051,7 +1051,7 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
                   html: `
                   <h5><strong>FPWG System</strong></h5>
                   <p>Hi,</p>
-                  <p>Your site just synced successfully!</p>
+                  <p>Your site ${siteExist.title} has synced data failed!</p>
                   <br/>
                   ` // html body
                 });
@@ -1067,7 +1067,7 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
           html: `
         <h5><strong>FPWG System</strong></h5>
         <p>Hi,</p>
-        <p>Your site just synced successfully!</p>
+        <p>Cannot find your Facebook Page ${siteExist.title}'s data to sync!</p>
         <br/>
         ` // html body
         });
@@ -1081,7 +1081,7 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
         html: `
       <h5><strong>FPWG System</strong></h5>
       <p>Hi,</p>
-      <p>Your site just synced successfully!</p>
+      <p>Your site is not existed to sync!</p>
       <br/>
       ` // html body
       });
