@@ -20,6 +20,7 @@ app.use(
     origin: [
       "https://fpwg.now.sh",
       "https://fpwg.netlify.com",
+      "https://fpwg1.netlify.com",
       "http://localhost:3000"
     ],
     credentials: true
