@@ -1,4 +1,5 @@
-import { mongoose, Site, Theme, SyncRecord, User } from "../models";
+import nodemailer from "nodemailer";
+import { mongoose, Site, SyncRecord, Theme, User } from "../models";
 import {
   getPageData,
   getSyncData,
@@ -9,7 +10,6 @@ import {
 import * as SiteService from "../services/SiteService";
 import { findOneTheme } from "../services/ThemeService";
 import { findAllUser } from "../services/UserService";
-import nodemailer from "nodemailer";
 
 var transporter = nodemailer.createTransport({
   service: "gmail",
@@ -574,6 +574,9 @@ export async function autoSyncPost(userEmail, pageId, accessToken) {
     const siteExist = await SiteService.findOneSite(pageId);
     if (siteExist) {
       if (data) {
+        const record = await SyncRecord.create({
+          dataType: "News"
+        });
         //post list
         postsList = await SiteService.getFacebookPostData(data);
         //post Id list
@@ -584,6 +587,9 @@ export async function autoSyncPost(userEmail, pageId, accessToken) {
         //insert and update post
         await SiteService.insertAndUpdateSyncDataPost(pageId, postsList);
         // success
+        await record.update({
+          status: true
+        });
         // send mail with defined transport object
         await transporter.sendMail({
           from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
@@ -693,6 +699,9 @@ export async function autoSyncGallery(pageId, accessToken, userEmail) {
     const siteExist = await SiteService.findOneSite(pageId);
     if (siteExist) {
       if (data) {
+        const record = await SyncRecord.create({
+          dataType: "Gallery"
+        });
         //gallery list
         galleryList = await SiteService.getFacebookGalleryData(data);
         galleryList.forEach(item => {
@@ -709,6 +718,9 @@ export async function autoSyncGallery(pageId, accessToken, userEmail) {
             galleries: galleryList.length > 0 ? galleryList : null
           }
         );
+        await record.updateOne({
+          status: true
+        });
         await transporter.sendMail({
           from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
           to: userEmail, // list of receivers
@@ -812,6 +824,9 @@ export async function autoSyncEvent(pageId, accessToken, userEmail) {
     const siteExist = await SiteService.findOneSite(pageId);
     if (siteExist) {
       if (data) {
+        const record = await SyncRecord.create({
+          dataType: "Event"
+        });
         //event list
         eventList = await SiteService.getFacebookEventData(data);
         //event Id list
@@ -821,6 +836,9 @@ export async function autoSyncEvent(pageId, accessToken, userEmail) {
         });
         //insert and update event
         await SiteService.insertAndUpdateSyncDataEvents(pageId, eventList);
+        await record.updateOne({
+          status: true
+        });
         await transporter.sendMail({
           from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
           to: userEmail, // list of receivers
