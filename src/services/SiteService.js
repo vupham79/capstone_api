@@ -854,7 +854,11 @@ function findDataBySection(sitePath) {
           } else {
             const posts = await Site.find({ sitePath })
               .select("posts")
-              .populate("posts", "", "", "", { limit, sort: { _id: 1 } });
+              .populate({
+                path: "posts",
+                match: { isActive: true },
+                options: { limit, sort: { _id: 1 } }
+              });
             section.filter.items = [];
             for (let index = 0; index < posts[0].posts.length; index++) {
               const element = posts[0].posts[index];
