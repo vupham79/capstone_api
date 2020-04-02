@@ -171,6 +171,18 @@ const SiteSchema = new mongoose.Schema(
       day: {
         type: Number
       }
+    },
+    showDesEvent: {
+      type: Boolean,
+      default: true
+    },
+    showPlaceEvent: {
+      type: Boolean,
+      default: true
+    },
+    showCoverEvent: {
+      type: Boolean,
+      default: true
     }
   },
   {

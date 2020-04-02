@@ -295,7 +295,10 @@ export async function saveDesign(req, res) {
     homepage,
     logoURL,
     coverURL,
-    address
+    address,
+    showDesEvent,
+    showPlaceEvent,
+    showCoverEvent
   } = req.body;
   try {
     if (
@@ -374,7 +377,10 @@ export async function saveDesign(req, res) {
         homepage,
         logoURL,
         coverURL,
-        address
+        address,
+        showDesEvent,
+        showPlaceEvent,
+        showCoverEvent
       });
       if (update.msg) {
         return res.status(400).send(update);
@@ -930,9 +936,17 @@ export async function syncData(req, res) {
                 syncRecords: syncRecordList
               });
               //post list
-              postsList = await SiteService.getFacebookPostData(data, dateFrom, dateTo);
+              postsList = await SiteService.getFacebookPostData(
+                data,
+                dateFrom,
+                dateTo
+              );
               //gallery list
-              galleryList = await SiteService.getFacebookGalleryData(data, dateFrom, dateTo);
+              galleryList = await SiteService.getFacebookGalleryData(
+                data,
+                dateFrom,
+                dateTo
+              );
               galleryList.forEach(item => {
                 siteExist.galleries.forEach(siteItem => {
                   if (item.target === siteItem.target) {
@@ -954,7 +968,11 @@ export async function syncData(req, res) {
                 );
               }
               //event list
-              eventList = await SiteService.getFacebookEventData(data, dateFrom, dateTo);
+              eventList = await SiteService.getFacebookEventData(
+                data,
+                dateFrom,
+                dateTo
+              );
               //event Id list
               if (eventList) {
                 //insert and update event

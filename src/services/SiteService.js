@@ -151,6 +151,9 @@ export async function saveDesign(data) {
     site.youtube = data.youtube;
     site.phone = data.phone;
     site.address = data.address;
+    site.showDesEvent = data.showDesEvent;
+    site.showPlaceEvent = data.showPlaceEvent;
+    site.showCoverEvent = data.showCoverEvent;
     if (data.logoURL) {
       site.logo = data.logoURL;
     }
