@@ -298,7 +298,6 @@ export async function saveDesign(req, res) {
     address
   } = req.body;
   try {
-    console.log(address);
     if (
       !sitePath ||
       sitePath === undefined ||
@@ -531,7 +530,7 @@ export async function syncPost(req, res) {
     });
     if (data) {
       //post list
-      postsList = await SiteService.getFacebookPostData(data);
+      postsList = await SiteService.getFacebookPostData(data, dateFrom, dateTo);
       const siteExist = await Site.findOne({ id: pageId });
       if (siteExist) {
         const record = await SyncRecord.create({
@@ -648,7 +647,11 @@ export async function syncGallery(req, res) {
     });
     if (data) {
       //gallery list
-      galleryList = await SiteService.getFacebookGalleryData(data);
+      galleryList = await SiteService.getFacebookGalleryData(
+        data,
+        dateFrom,
+        dateTo
+      );
       const siteExist = await Site.findOne({ id: pageId });
       galleryList.forEach(item => {
         siteExist.galleries.forEach(siteItem => {
@@ -776,7 +779,11 @@ export async function syncEvent(req, res) {
     });
     if (data) {
       //event list
-      eventList = await SiteService.getFacebookEventData(data);
+      eventList = await SiteService.getFacebookEventData(
+        data,
+        dateFrom,
+        dateTo
+      );
       if (!eventList) {
         return res
           .status(200)
@@ -923,9 +930,9 @@ export async function syncData(req, res) {
                 syncRecords: syncRecordList
               });
               //post list
-              postsList = await SiteService.getFacebookPostSyncData(data);
+              postsList = await SiteService.getFacebookPostData(data, dateFrom, dateTo);
               //gallery list
-              galleryList = await SiteService.getFacebookGalleryData(data);
+              galleryList = await SiteService.getFacebookGalleryData(data, dateFrom, dateTo);
               galleryList.forEach(item => {
                 siteExist.galleries.forEach(siteItem => {
                   if (item.target === siteItem.target) {
@@ -947,7 +954,7 @@ export async function syncData(req, res) {
                 );
               }
               //event list
-              eventList = await SiteService.getFacebookEventSyncData(data);
+              eventList = await SiteService.getFacebookEventData(data, dateFrom, dateTo);
               //event Id list
               if (eventList) {
                 //insert and update event

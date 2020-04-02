@@ -276,9 +276,7 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
   data.posts &&
     data.posts.data &&
     data.posts.data.forEach(async post => {
-      // console.log(moment(post.created_time).isBetween(dateFrom, dateTo));
       if (dateFrom instanceof Date && dateTo instanceof Date) {
-        // console.log("use date range");
         if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
           if (!post.attachments || post.attachments === undefined) {
             postsList.push({
@@ -429,7 +427,7 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
   return postsList;
 }
 
-export async function getFacebookGalleryData(data) {
+export async function getFacebookGalleryData(data, dateFrom, dateTo) {
   let galleryList = [];
   if (data.posts === undefined) {
     return null;
@@ -437,23 +435,56 @@ export async function getFacebookGalleryData(data) {
   data.posts &&
     data.posts.data &&
     data.posts.data.forEach(async post => {
-      if (post.attachments && post.attachments.data[0].media_type === "album") {
-        post.attachments.data[0].subattachments.data.forEach(subAttachment => {
+      if (dateFrom instanceof Date && dateTo instanceof Date) {
+        if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
+          if (
+            post.attachments &&
+            post.attachments.data[0].media_type === "album"
+          ) {
+            post.attachments.data[0].subattachments.data.forEach(
+              subAttachment => {
+                galleryList.push({
+                  url: subAttachment.media.image.src,
+                  target: subAttachment.target.url,
+                  createdTime: post.created_time
+                });
+              }
+            );
+          } else if (
+            post.attachments &&
+            post.attachments.data[0].media_type === "photo"
+          ) {
+            galleryList.push({
+              url: post.attachments.data[0].media.image.src,
+              target: post.attachments.data[0].target.url,
+              createdTime: post.created_time
+            });
+          }
+        }
+      } else {
+        if (
+          post.attachments &&
+          post.attachments.data[0].media_type === "album"
+        ) {
+          post.attachments.data[0].subattachments.data.forEach(
+            subAttachment => {
+              galleryList.push({
+                url: subAttachment.media.image.src,
+                target: subAttachment.target.url,
+                createdTime: post.created_time
+              });
+            }
+          );
+        } else if (
+          post.attachments &&
+          post.attachments.data[0].media_type === "photo"
+        ) {
           galleryList.push({
-            url: subAttachment.media.image.src,
-            target: subAttachment.target.url,
+            url: post.attachments.data[0].media.image.src,
+            target: post.attachments.data[0].target.url,
             createdTime: post.created_time
           });
-        });
-      } else if (
-        post.attachments &&
-        post.attachments.data[0].media_type === "photo"
-      ) {
-        galleryList.push({
-          url: post.attachments.data[0].media.image.src,
-          target: post.attachments.data[0].target.url,
-          createdTime: post.created_time
-        });
+        }
       }
     });
   return galleryList;
@@ -539,7 +570,7 @@ export async function getFacebookPostSyncData(data) {
   return postsList;
 }
 
-export async function getFacebookEventData(data) {
+export async function getFacebookEventData(data, dateFrom, dateTo) {
   let eventList = [];
   if (data.events === undefined) {
     return null;
@@ -547,44 +578,86 @@ export async function getFacebookEventData(data) {
   data.events &&
     data.events.data &&
     data.events.data.forEach(event => {
-      //set place
-      let place = {
-        name: null,
-        street: null,
-        city: null,
-        country: null
-      };
-      if (event.place) {
-        place.name = event.place.name;
-        if (event.place.location) {
-          place.street =
-            event.place.location.street !== undefined
-              ? event.place.location.street
-              : null;
-          place.city =
-            event.place.location.city !== undefined
-              ? event.place.location.city
-              : null;
-          place.country =
-            event.place.location.country !== undefined
-              ? event.place.location.country
-              : null;
+      if (dateFrom instanceof Date && dateTo instanceof Date) {
+        if (moment(event.start_time).isBetween(dateFrom, dateTo)) {
+          //set place
+          let place = {
+            name: null,
+            street: null,
+            city: null,
+            country: null
+          };
+          if (event.place) {
+            place.name = event.place.name;
+            if (event.place.location) {
+              place.street =
+                event.place.location.street !== undefined
+                  ? event.place.location.street
+                  : null;
+              place.city =
+                event.place.location.city !== undefined
+                  ? event.place.location.city
+                  : null;
+              place.country =
+                event.place.location.country !== undefined
+                  ? event.place.location.country
+                  : null;
+            }
+          } else {
+            place = null;
+          }
+          //event list
+          eventList.push({
+            id: event.id,
+            name: event.name,
+            description: event.description,
+            cover: event.cover ? event.cover.source : null,
+            startTime: event.start_time,
+            endTime: event.end_time,
+            place: place,
+            isCanceled: event.is_canceled,
+            url: "facebook.com/" + event.id
+          });
         }
       } else {
-        place = null;
+        let place = {
+          name: null,
+          street: null,
+          city: null,
+          country: null
+        };
+        if (event.place) {
+          place.name = event.place.name;
+          if (event.place.location) {
+            place.street =
+              event.place.location.street !== undefined
+                ? event.place.location.street
+                : null;
+            place.city =
+              event.place.location.city !== undefined
+                ? event.place.location.city
+                : null;
+            place.country =
+              event.place.location.country !== undefined
+                ? event.place.location.country
+                : null;
+          }
+        } else {
+          place = null;
+        }
+        //event list
+        eventList.push({
+          id: event.id,
+          name: event.name,
+          description: event.description,
+          cover: event.cover ? event.cover.source : null,
+          startTime: event.start_time,
+          endTime: event.end_time,
+          place: place,
+          isCanceled: event.is_canceled,
+          url: "facebook.com/" + event.id
+        });
       }
-      //event list
-      eventList.push({
-        id: event.id,
-        name: event.name,
-        description: event.description,
-        cover: event.cover ? event.cover.source : null,
-        startTime: event.start_time,
-        endTime: event.end_time,
-        place: place,
-        isCanceled: event.is_canceled,
-        url: "facebook.com/" + event.id
-      });
     });
   return eventList;
 }
