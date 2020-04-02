@@ -114,7 +114,7 @@ export async function findAllSiteByUser(email) {
 export async function findSiteBySitepath(sitepath) {
   return await Site.findOne({ sitePath: sitepath.toLowerCase() })
     .select(
-      "id phone longitude latitude color logo fontTitle fontBody title address navItems isPublish cover categories url sitePath about whatsapp instagram email youtube theme homepage"
+      "id phone longitude latitude color logo fontTitle fontBody title address navItems isPublish cover categories url sitePath about whatsapp instagram email youtube theme homepage showDesEvent showCoverEvent showPlaceEvent"
     )
     .populate("theme");
 }
