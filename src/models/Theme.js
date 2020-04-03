@@ -2,40 +2,37 @@ import mongoose, { Schema } from "mongoose";
 
 const ThemeSchema = new mongoose.Schema(
   {
-    id: {
-      type: String,
-      unique: [true, "Id already existed!"]
-    },
     name: {
       type: String,
-      default: null
+      default: null,
+      unique: [true, "Name is already existed!"],
     },
     fontTitle: {
       type: String,
-      default: null
+      default: null,
     },
     fontBody: {
       type: String,
-      default: null
+      default: null,
     },
     mainColor: {
       type: String,
-      default: null
+      default: null,
     },
     previewImage: {
       type: String,
-      default: null
+      default: null,
     },
     sections: [
       {
         type: String,
-        enum: ["news", "about", "gallery", "event", "contact"]
-      }
+        enum: ["news", "about", "gallery", "event", "contact"],
+      },
     ],
-    category: { type: Schema.Types.ObjectId, ref: "Category" }
+    category: { type: Schema.Types.ObjectId, ref: "Category" },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

@@ -2,17 +2,18 @@ import {
   insertTheme,
   editTheme,
   findOneTheme,
-  findAllTheme
+  findAllTheme,
 } from "../services/ThemeService";
 
 export async function insert(req, res) {
   try {
-    const insert = await insertTheme(req.params.id, req.body);
+    const insert = await insertTheme(req.body);
     if (insert) {
       return res.status(200).send(insert);
     }
     return res.status(204).send();
   } catch (error) {
+    console.log(error);
     return res.status(400).send({ error });
   }
 }

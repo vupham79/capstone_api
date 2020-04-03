@@ -3,7 +3,7 @@ import { authAdmin, authAll } from "../controllers/AuthController";
 import * as ThemeController from "../controllers/ThemeController";
 const router = Router();
 
-router.post("/insert/:id", authAdmin, ThemeController.insert);
+router.post("/insert", authAdmin, ThemeController.insert);
 
 router.patch("/update/:id", authAdmin, ThemeController.update);
 

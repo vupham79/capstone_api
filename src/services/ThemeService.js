@@ -1,41 +1,34 @@
 import { Theme, Category } from "../models";
-import mongoose from "mongoose";
 
-export async function insertTheme(id, body) {
-  const themeResult = await Theme.findOne({ id: id });
+export async function insertTheme(body) {
+  console.log("body: ", body);
+  const themeResult = await Theme.findOne({ name: body.name });
   let insert = null;
   if (!themeResult) {
+    let category = await Category.findOne({ _id: body.category });
     insert = await Theme.create({
-      id: id,
       name: body.name,
       fontTitle: body.fontTitle,
       fontBody: body.fontBody,
       mainColor: body.color,
-      previewImage: body.previewImage
+      previewImage: body.previewImage,
+      category: category,
     });
-    let category = await Category.findOne({ name: body.categoryName });
-    if (category) {
-      let themeList = category.themes;
-      themeList.push(new mongoose.Types.ObjectId(insert._id));
-      await Category.updateOne(
-        { name: body.categoryName },
-        { themes: themeList }
-      );
-    }
   }
   return insert;
 }
 
 export async function editTheme(id, body) {
+  let category = await Category.findOne({ _id: body.category });
   const edit = await Theme.updateOne(
-    { id: id },
+    { _id: id },
     {
       name: body.name,
       fontTitle: body.fontTitle,
       fontBody: body.fontBody,
       mainColor: body.color,
       previewImage: body.previewImage,
-      category: body.category
+      category: category,
     }
   );
   return edit;
