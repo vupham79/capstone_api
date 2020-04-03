@@ -16,7 +16,8 @@ export async function update(req, res) {
   try {
     const update = await CategoryService.editCategory(
       req.params.id,
-      req.body.name
+      req.body.name,
+      req.body.picture
     );
     if (update) {
       return res.status(200).send(update);

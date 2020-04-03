@@ -34,14 +34,15 @@ export async function editTheme(id, body) {
       fontTitle: body.fontTitle,
       fontBody: body.fontBody,
       mainColor: body.color,
-      previewImage: body.previewImage
+      previewImage: body.previewImage,
+      category: body.category
     }
   );
   return edit;
 }
 
 export async function findAllTheme() {
-  return await Theme.find();
+  return await Theme.find().populate("category");
 }
 
 export async function findOneTheme(id) {

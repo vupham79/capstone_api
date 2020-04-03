@@ -7,7 +7,6 @@ import {
 
 export async function insert(req, res) {
   try {
-    console.log(req.params.id, req.body);
     const insert = await insertTheme(req.params.id, req.body);
     if (insert) {
       return res.status(200).send(insert);

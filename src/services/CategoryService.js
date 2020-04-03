@@ -2,16 +2,17 @@ import { Category } from "../models";
 
 export async function insertCategory(body) {
   return await Category.collection.insertOne({
-    id: body.id,
-    name: body.name
+    name: body.name,
+    picture: body.picture
   });
 }
 
-export async function editCategory(id, name) {
+export async function editCategory(id, name, picture) {
   const edit = await Category.updateOne(
-    { id: id },
+    { _id: id },
     {
-      name: name
+      name: name,
+      picture: picture
     }
   );
   return edit;
