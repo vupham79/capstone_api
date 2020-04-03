@@ -35,7 +35,7 @@ export async function findAllUser() {
   return await User.find()
     .select("id displayName sites picture email isActivated")
     .populate({
-      path: "sites",
+      path: "sites categories",
       select: "id title categories theme sitePath isPublish phone",
       populate: {
         path: "theme",

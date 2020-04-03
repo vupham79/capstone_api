@@ -8,13 +8,7 @@ const CategorySchema = new mongoose.Schema(
     },
     picture: {
       type: String
-    },
-    themes: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Theme"
-      }
-    ]
+    }
   },
   {
     timestamps: true
