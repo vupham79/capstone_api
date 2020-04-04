@@ -5,7 +5,7 @@ import {
   Category,
   Post,
   Event,
-  SyncRecord
+  SyncRecord,
 } from "../models";
 import moment from "moment";
 import { CronJob } from "cron";
@@ -35,7 +35,7 @@ export async function insertSite(pageId, body) {
     isPublish: body.isPublish,
     about: body.about,
     events: body.events,
-    homepage: body.homepage
+    homepage: body.homepage,
   });
   return insert;
 }
@@ -57,7 +57,7 @@ export async function editSite(id, body) {
 export async function deleteSite(id) {
   const SiteResult = await Site.findOne({ id: id });
   await SiteResult.updateOne({
-    isPublish: false
+    isPublish: false,
   });
   return SiteResult;
 }
@@ -66,22 +66,22 @@ export async function findAllSite() {
   return await Site.find().populate({
     path: "theme posts events",
     populate: {
-      path: "events.place"
-    }
+      path: "events.place",
+    },
   });
 }
 
 export async function findOneSiteByAccessToken(id, body) {
   return await Site.findOne({
-    id: id
+    id: id,
   }).populate({
-    path: "theme posts events"
+    path: "theme posts events",
   });
 }
 
 export async function findOneSite(id) {
   return await Site.findOne({ id: id }).populate({
-    path: "theme posts events syncRecords"
+    path: "theme posts events syncRecords",
   });
 }
 
@@ -89,7 +89,7 @@ export function addSyncRecord(record, siteExist) {
   let syncRecordList = [];
   siteExist &&
     siteExist.syncRecords &&
-    siteExist.syncRecords.forEach(record => {
+    siteExist.syncRecords.forEach((record) => {
       syncRecordList.push(new mongoose.Types.ObjectId(record));
     });
   syncRecordList.push(new mongoose.Types.ObjectId(record._id));
@@ -98,12 +98,12 @@ export function addSyncRecord(record, siteExist) {
 
 export async function findAllSiteByUser(email) {
   const sites = await User.findOne({
-    email: email
+    email: email,
   })
     .select("sites")
     .populate({
       path: "sites",
-      select: "id title isPublish logo categories sitePath"
+      select: "id title isPublish logo categories sitePath",
     });
   if (sites) {
     return sites;
@@ -126,17 +126,17 @@ export async function checkSiteExist(id) {
 export async function publishSite(id, isPublish) {
   return await Site.updateOne(
     {
-      id
+      id,
     },
     {
-      isPublish
+      isPublish,
     }
   );
 }
 
 export async function saveDesign(data) {
   const site = await Site.findOne({
-    id: data.pageId
+    id: data.pageId,
   });
   if (site) {
     site.fontTitle = data.fontTitle;
@@ -166,7 +166,7 @@ export async function saveDesign(data) {
     }
     if (site.sitePath !== data.sitePath.trim()) {
       const sitePathExisting = await Site.findOne({
-        sitePath: data.sitePath.trim()
+        sitePath: data.sitePath.trim(),
       });
 
       if (!sitePathExisting) {
@@ -185,10 +185,10 @@ export async function saveDesign(data) {
 export async function updateLogo(id, logo) {
   return await Site.updateOne(
     {
-      id
+      id,
     },
     {
-      logo
+      logo,
     }
   );
 }
@@ -196,10 +196,10 @@ export async function updateLogo(id, logo) {
 export async function updateFavicon(id, favicon) {
   return await Site.updateOne(
     {
-      id
+      id,
     },
     {
-      favicon
+      favicon,
     }
   );
 }
@@ -207,10 +207,10 @@ export async function updateFavicon(id, favicon) {
 export async function updateCovers(pageId, cover) {
   return await Site.updateOne(
     {
-      id: pageId
+      id: pageId,
     },
     {
-      cover: cover ? cover : null
+      cover: cover ? cover : null,
     }
   );
 }
@@ -221,13 +221,13 @@ export async function insertAndUpdatePosts(pageId, postsList) {
       return error;
     } else {
       const postIdList = [];
-      docs.forEach(doc => {
+      docs.forEach((doc) => {
         postIdList.push(doc._id);
       });
       await Site.updateOne(
         { id: pageId },
         {
-          posts: postIdList.length > 0 ? postIdList : null
+          posts: postIdList.length > 0 ? postIdList : null,
         }
       );
     }
@@ -239,14 +239,14 @@ export async function updateGallery(pageId, galleryList) {
     await Site.updateOne(
       { id: pageId },
       {
-        galleries: null
+        galleries: null,
       }
     );
   } else {
     await Site.updateOne(
       { id: pageId },
       {
-        galleries: galleryList.length > 0 ? galleryList : null
+        galleries: galleryList.length > 0 ? galleryList : null,
       }
     );
   }
@@ -258,13 +258,13 @@ export async function insertAndUpdateEvents(pageId, eventList) {
       return error;
     } else {
       const eventIdList = [];
-      docs.forEach(doc => {
+      docs.forEach((doc) => {
         eventIdList.push(doc._id);
       });
       await Site.updateOne(
         { id: pageId },
         {
-          events: eventIdList.length > 0 ? eventIdList : null
+          events: eventIdList.length > 0 ? eventIdList : null,
         }
       );
     }
@@ -278,7 +278,7 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
   }
   data.posts &&
     data.posts.data &&
-    data.posts.data.forEach(async post => {
+    data.posts.data.forEach(async (post) => {
       if (dateFrom instanceof Date && dateTo instanceof Date) {
         if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
           if (!post.attachments || post.attachments === undefined) {
@@ -289,7 +289,7 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
               isActive: true,
               createdTime: post.created_time,
               attachments: null,
-              target: null
+              target: null,
             });
           } else if (
             post.attachments &&
@@ -297,7 +297,7 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
           ) {
             const subAttachmentList = [];
             post.attachments.data[0].subattachments.data.forEach(
-              subAttachment => {
+              (subAttachment) => {
                 subAttachmentList.push(subAttachment.media.image.src);
               }
             );
@@ -311,9 +311,9 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
                 id: post.id,
                 media_type: "album",
                 images: subAttachmentList,
-                video: null
+                video: null,
               },
-              target: post.attachments.data[0].target.url
+              target: post.attachments.data[0].target.url,
             });
           } else if (
             post.attachments &&
@@ -329,9 +329,9 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
                 id: post.id,
                 media_type: "photo",
                 images: [post.attachments.data[0].media.image.src],
-                video: null
+                video: null,
               },
-              target: post.attachments.data[0].target.url
+              target: post.attachments.data[0].target.url,
             });
           } else if (
             post.attachments &&
@@ -347,9 +347,9 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
                 id: post.id,
                 media_type: "video",
                 images: null,
-                video: post.attachments.data[0].media.source
+                video: post.attachments.data[0].media.source,
               },
-              target: post.attachments.data[0].target.url
+              target: post.attachments.data[0].target.url,
             });
           }
         }
@@ -362,7 +362,7 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
             isActive: true,
             createdTime: post.created_time,
             attachments: null,
-            target: null
+            target: null,
           });
         } else if (
           post.attachments &&
@@ -370,7 +370,7 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
         ) {
           const subAttachmentList = [];
           post.attachments.data[0].subattachments.data.forEach(
-            subAttachment => {
+            (subAttachment) => {
               subAttachmentList.push(subAttachment.media.image.src);
             }
           );
@@ -384,9 +384,9 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
               id: post.id,
               media_type: "album",
               images: subAttachmentList,
-              video: null
+              video: null,
             },
-            target: post.attachments.data[0].target.url
+            target: post.attachments.data[0].target.url,
           });
         } else if (
           post.attachments &&
@@ -402,9 +402,9 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
               id: post.id,
               media_type: "photo",
               images: [post.attachments.data[0].media.image.src],
-              video: null
+              video: null,
             },
-            target: post.attachments.data[0].target.url
+            target: post.attachments.data[0].target.url,
           });
         } else if (
           post.attachments &&
@@ -420,9 +420,9 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
               id: post.id,
               media_type: "video",
               images: null,
-              video: post.attachments.data[0].media.source
+              video: post.attachments.data[0].media.source,
             },
-            target: post.attachments.data[0].target.url
+            target: post.attachments.data[0].target.url,
           });
         }
       }
@@ -437,7 +437,7 @@ export async function getFacebookGalleryData(data, dateFrom, dateTo) {
   }
   data.posts &&
     data.posts.data &&
-    data.posts.data.forEach(async post => {
+    data.posts.data.forEach(async (post) => {
       if (dateFrom instanceof Date && dateTo instanceof Date) {
         if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
           if (
@@ -445,11 +445,11 @@ export async function getFacebookGalleryData(data, dateFrom, dateTo) {
             post.attachments.data[0].media_type === "album"
           ) {
             post.attachments.data[0].subattachments.data.forEach(
-              subAttachment => {
+              (subAttachment) => {
                 galleryList.push({
                   url: subAttachment.media.image.src,
                   target: subAttachment.target.url,
-                  createdTime: post.created_time
+                  createdTime: post.created_time,
                 });
               }
             );
@@ -460,7 +460,7 @@ export async function getFacebookGalleryData(data, dateFrom, dateTo) {
             galleryList.push({
               url: post.attachments.data[0].media.image.src,
               target: post.attachments.data[0].target.url,
-              createdTime: post.created_time
+              createdTime: post.created_time,
             });
           }
         }
@@ -470,11 +470,11 @@ export async function getFacebookGalleryData(data, dateFrom, dateTo) {
           post.attachments.data[0].media_type === "album"
         ) {
           post.attachments.data[0].subattachments.data.forEach(
-            subAttachment => {
+            (subAttachment) => {
               galleryList.push({
                 url: subAttachment.media.image.src,
                 target: subAttachment.target.url,
-                createdTime: post.created_time
+                createdTime: post.created_time,
               });
             }
           );
@@ -485,7 +485,7 @@ export async function getFacebookGalleryData(data, dateFrom, dateTo) {
           galleryList.push({
             url: post.attachments.data[0].media.image.src,
             target: post.attachments.data[0].target.url,
-            createdTime: post.created_time
+            createdTime: post.created_time,
           });
         }
       }
@@ -499,7 +499,7 @@ export async function getFacebookPostSyncData(data) {
   }
   let postsList = [];
   data.posts &&
-    data.posts.data.forEach(post => {
+    data.posts.data.forEach((post) => {
       if (!post.attachments || post.attachments === undefined) {
         postsList.push({
           id: post.id,
@@ -508,16 +508,18 @@ export async function getFacebookPostSyncData(data) {
           isActive: true,
           createdTime: post.created_time,
           attachments: null,
-          target: null
+          target: null,
         });
       } else if (
         post.attachments &&
         post.attachments.data[0].media_type === "album"
       ) {
         const subAttachmentList = [];
-        post.attachments.data[0].subattachments.data.forEach(subAttachment => {
-          subAttachmentList.push(subAttachment.media.image.src);
-        });
+        post.attachments.data[0].subattachments.data.forEach(
+          (subAttachment) => {
+            subAttachmentList.push(subAttachment.media.image.src);
+          }
+        );
         postsList.push({
           id: post.id,
           title: post.attachments.data[0].title,
@@ -528,9 +530,9 @@ export async function getFacebookPostSyncData(data) {
             id: post.id,
             media_type: "album",
             images: subAttachmentList,
-            video: null
+            video: null,
           },
-          target: post.attachments.data[0].target.url
+          target: post.attachments.data[0].target.url,
         });
       } else if (
         post.attachments &&
@@ -546,9 +548,9 @@ export async function getFacebookPostSyncData(data) {
             id: post.id,
             media_type: "photo",
             images: [post.attachments.data[0].media.image.src],
-            video: null
+            video: null,
           },
-          target: post.attachments.data[0].target.url
+          target: post.attachments.data[0].target.url,
         });
       } else if (
         post.attachments &&
@@ -564,9 +566,9 @@ export async function getFacebookPostSyncData(data) {
             id: post.id,
             media_type: "video",
             images: null,
-            video: post.attachments.data[0].media.source
+            video: post.attachments.data[0].media.source,
           },
-          target: post.attachments.data[0].target.url
+          target: post.attachments.data[0].target.url,
         });
       }
     });
@@ -580,7 +582,7 @@ export async function getFacebookEventData(data, dateFrom, dateTo) {
   }
   data.events &&
     data.events.data &&
-    data.events.data.forEach(event => {
+    data.events.data.forEach((event) => {
       if (dateFrom instanceof Date && dateTo instanceof Date) {
         if (moment(event.start_time).isBetween(dateFrom, dateTo)) {
           //set place
@@ -588,7 +590,7 @@ export async function getFacebookEventData(data, dateFrom, dateTo) {
             name: null,
             street: null,
             city: null,
-            country: null
+            country: null,
           };
           if (event.place) {
             place.name = event.place.name;
@@ -619,7 +621,7 @@ export async function getFacebookEventData(data, dateFrom, dateTo) {
             endTime: event.end_time,
             place: place,
             isCanceled: event.is_canceled,
-            url: "facebook.com/" + event.id
+            url: "facebook.com/" + event.id,
           });
         }
       } else {
@@ -627,7 +629,7 @@ export async function getFacebookEventData(data, dateFrom, dateTo) {
           name: null,
           street: null,
           city: null,
-          country: null
+          country: null,
         };
         if (event.place) {
           place.name = event.place.name;
@@ -658,7 +660,7 @@ export async function getFacebookEventData(data, dateFrom, dateTo) {
           endTime: event.end_time,
           place: place,
           isCanceled: event.is_canceled,
-          url: "facebook.com/" + event.id
+          url: "facebook.com/" + event.id,
         });
       }
     });
@@ -672,13 +674,13 @@ export async function getFacebookEventSyncData(data) {
   let eventList = [];
   data.events &&
     data.events.data &&
-    data.events.data.forEach(event => {
+    data.events.data.forEach((event) => {
       //set place
       let place = {
         name: null,
         street: null,
         city: null,
-        country: null
+        country: null,
       };
       if (event.place) {
         place.name = event.place.name;
@@ -709,7 +711,7 @@ export async function getFacebookEventSyncData(data) {
         endTime: event.end_time,
         place: place,
         isCanceled: event.is_canceled,
-        url: "facebook.com/" + event.id
+        url: "facebook.com/" + event.id,
       });
     });
   return eventList;
@@ -717,14 +719,14 @@ export async function getFacebookEventSyncData(data) {
 
 export async function getFacebookCategoryObjIdData(categoryInDB, categories) {
   let categoryObjIdList = [];
-  categories.forEach(async category => {
+  categories.forEach(async (category) => {
     if (!categoryInDB.includes(category.name)) {
       await Category.create({
-        name: category.name
+        name: category.name,
       });
     }
     let find = await Category.findOne({
-      name: category.name
+      name: category.name,
     });
     if (find) {
       categoryObjIdList.push(new mongoose.Types.ObjectId(find._id));
@@ -736,11 +738,11 @@ export async function getFacebookCategoryObjIdData(categoryInDB, categories) {
 export async function updateSiteList(userId, insert) {
   return await User.findOne({ id: userId })
     .select("sites")
-    .then(async result => {
+    .then(async (result) => {
       let siteList = result.sites;
       siteList.push(insert._id);
       await result.updateOne({
-        sites: siteList
+        sites: siteList,
       });
     });
 }
@@ -756,14 +758,14 @@ export async function createAndSaveNewPost(pageId, newPostList) {
     if (docs) {
       //save new post
       let newPostObjIdList = [];
-      docs.forEach(post => {
+      docs.forEach((post) => {
         newPostObjIdList.push(new mongoose.Types.ObjectId(post._id));
       });
       if (newPostObjIdList.length > 0) {
         await Site.updateOne(
           { id: pageId },
           {
-            posts: newPostObjIdList
+            posts: newPostObjIdList,
           }
         );
       }
@@ -779,15 +781,15 @@ export async function createAndSaveNewEvent(pageId, newEventList) {
     if (docs) {
       //save new event
       let newEventObjList = [];
-      docs.forEach(event => {
+      docs.forEach((event) => {
         newEventObjList.push(new mongoose.Types.ObjectId(event._id));
       });
       await Site.updateOne(
         { id: pageId },
         {
           $push: {
-            events: newEventObjList.length > 0 ? newEventObjList : null
-          }
+            events: newEventObjList.length > 0 ? newEventObjList : null,
+          },
         }
       );
     }
@@ -796,7 +798,7 @@ export async function createAndSaveNewEvent(pageId, newEventList) {
 
 export async function updateExistingPost(existedPostList, existedPostIdList) {
   let newPostList = [];
-  existedPostList.forEach(async post => {
+  existedPostList.forEach(async (post) => {
     if (!existedPostIdList.includes(post.id)) {
       newPostList.push(post);
     } else {
@@ -808,7 +810,7 @@ export async function updateExistingPost(existedPostList, existedPostIdList) {
 
 export async function updateExistingEvent(eventList, existedEventIdList) {
   let newEventList = [];
-  eventList.forEach(async event => {
+  eventList.forEach(async (event) => {
     if (!existedEventIdList.includes(event.id)) {
       newEventList.push(event);
     } else {
@@ -829,11 +831,11 @@ export async function findSiteEventTab(id, sitePath, pageNumber = 1) {
       .select("events")
       .populate("events", "", "", "", {
         limit,
-        skip: (pageNumber - 1) * limit
+        skip: (pageNumber - 1) * limit,
       });
     return {
       pageCount: Math.ceil(counter / limit),
-      data: events
+      data: events,
     };
   } else {
     const total = await Site.findOne({ id }, "events");
@@ -846,11 +848,11 @@ export async function findSiteEventTab(id, sitePath, pageNumber = 1) {
       .select("events")
       .populate("events", "", "", "", {
         limit,
-        skip: (pageNumber - 1) * limit
+        skip: (pageNumber - 1) * limit,
       });
     return {
       pageCount: Math.ceil(counter / limit),
-      data: events
+      data: events,
     };
   }
 }
@@ -868,7 +870,7 @@ function findDataBySection(sitePath) {
                 let event = await Event.findOne({ _id });
                 if (event) {
                   let index = section.filter.items.findIndex(
-                    item => item === _id
+                    (item) => item === _id
                   );
                   section.filter.items[index] = event;
                 }
@@ -887,9 +889,9 @@ function findDataBySection(sitePath) {
         } else if (section.original === "gallery") {
           if (section.filter.type === "manual") {
             let gallery = await Site.findOne({ sitePath }).select("galleries");
-            gallery.galleries.forEach(image => {
+            gallery.galleries.forEach((image) => {
               if (section.filter.items.includes(image._id)) {
-                const index = section.filter.items.findIndex(item => {
+                const index = section.filter.items.findIndex((item) => {
                   return item === image.id;
                 });
                 section.filter.items[index] = image;
@@ -901,11 +903,11 @@ function findDataBySection(sitePath) {
               { $unwind: "$galleries" },
               {
                 $group: {
-                  _id: "$galleries"
-                }
+                  _id: "$galleries",
+                },
               },
               { $sort: { _id: -1 } },
-              { $limit: limit }
+              { $limit: limit },
             ]);
             section.filter.items = [];
             for (let index = 0; index < galleries.length; index++) {
@@ -920,7 +922,7 @@ function findDataBySection(sitePath) {
               for (const _id of section.filter.items) {
                 let post = await Post.findOne({ _id });
                 if (post) {
-                  let index = section.filter.items.findIndex(item => {
+                  let index = section.filter.items.findIndex((item) => {
                     return item === _id;
                   });
                   section.filter.items[index] = post;
@@ -933,7 +935,7 @@ function findDataBySection(sitePath) {
               .populate({
                 path: "posts",
                 match: { isActive: true },
-                options: { limit, sort: { _id: 1 } }
+                options: { limit, sort: { _id: 1 } },
               });
             section.filter.items = [];
             for (let index = 0; index < posts[0].posts.length; index++) {
@@ -963,16 +965,16 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
       { $unwind: "$galleries" },
       {
         $group: {
-          _id: "$galleries"
-        }
+          _id: "$galleries",
+        },
       },
       { $sort: { _id: -1 } },
       { $skip: (pageNumber - 1) * limit },
-      { $limit: limit }
+      { $limit: limit },
     ]);
     return {
       pageCount: Math.ceil(counter / limit),
-      data: galleries
+      data: galleries,
     };
   } else {
     const total = await Site.findOne({ id }, "galleries");
@@ -986,15 +988,15 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
       { $unwind: "$galleries" },
       {
         $group: {
-          _id: "$galleries"
-        }
+          _id: "$galleries",
+        },
       },
       { $skip: (pageNumber - 1) * limit },
-      { $limit: limit }
+      { $limit: limit },
     ]);
     return {
       pageCount: Math.ceil(counter / limit),
-      data: galleries
+      data: galleries,
     };
   }
 }
@@ -1011,7 +1013,7 @@ export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
       .populate("posts", "", "", "", { limit, skip: (pageNumber - 1) * limit });
     return {
       pageCount: Math.ceil(counter / limit),
-      data: posts
+      data: posts,
     };
   } else {
     const total = await Site.findOne({ id }, "posts");
@@ -1023,7 +1025,7 @@ export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
       .populate("posts", "", "", "", { limit, skip: (pageNumber - 1) * limit });
     return {
       pageCount: Math.ceil(counter / limit),
-      data: posts
+      data: posts,
     };
   }
 }
@@ -1033,7 +1035,7 @@ export async function findExistedEventObjIdList(pageId) {
     .select("events")
     .populate("events");
   let existedEventObjIdList = [];
-  site.events.forEach(existedEvent => {
+  site.events.forEach((existedEvent) => {
     existedEventObjIdList.push(new mongoose.Types.ObjectId(existedEvent._id));
   });
   return existedEventObjIdList;
@@ -1044,7 +1046,7 @@ export async function findExistedEventIdList(pageId) {
     .select("events")
     .populate("events");
   let existedEventIdList = [];
-  site.events.forEach(existedEvent => {
+  site.events.forEach((existedEvent) => {
     existedEventIdList.push(existedEvent.id);
   });
   return existedEventIdList;
@@ -1056,7 +1058,7 @@ export async function findExistedPostObjId(pageId) {
     .populate("events");
   let existedEventObjIdList = [];
   let existedEventIdList = [];
-  site.events.forEach(existedEvent => {
+  site.events.forEach((existedEvent) => {
     existedEventObjIdList.push(new mongoose.Types.ObjectId(existedEvent._id));
     existedEventIdList.push(existedEvent.id);
   });
@@ -1072,18 +1074,18 @@ export async function insertAndUpdateSyncDataPost(pageId, postsList) {
   let existedPostIdList = [];
   let fbPostIdList = [];
   postsList &&
-    postsList.forEach(post => {
+    postsList.forEach((post) => {
       fbPostIdList.push(post.id);
     });
   site.posts &&
-    site.posts.forEach(existedPost => {
+    site.posts.forEach((existedPost) => {
       if (fbPostIdList.includes(existedPost.id)) {
         existedPostIdList.push(existedPost.id);
       }
     });
   if (postsList) {
     postsList &&
-      postsList.forEach(async post => {
+      postsList.forEach(async (post) => {
         if (!existedPostIdList.includes(post.id)) {
           const existedPost = await Post.findOne({ id: post.id });
           if (existedPost) {
@@ -1127,17 +1129,17 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
   let existedEventIdList = [];
   let fbEventIdList = [];
   eventList &&
-    eventList.forEach(event => {
+    eventList.forEach((event) => {
       fbEventIdList.push(event.id);
     });
   site.events &&
-    site.events.forEach(existedEvent => {
+    site.events.forEach((existedEvent) => {
       if (fbEventIdList.includes(existedEvent.id)) {
         existedEventIdList.push(existedEvent.id);
       }
     });
   if (eventList) {
-    eventList.forEach(async event => {
+    eventList.forEach(async (event) => {
       if (!existedEventIdList.includes(event.id)) {
         const existedEvent = await Event.findOne({ id: event.id });
         if (existedEvent) {
@@ -1149,7 +1151,7 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
           await Site.updateOne(
             { id: pageId },
             {
-              events: existedEventObjIdList
+              events: existedEventObjIdList,
             }
           );
         } else {
@@ -1176,14 +1178,14 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
 
 export async function findExistedSitePath(sitepath) {
   return await Site.findOne({
-    sitePath: sitepath.toLowerCase()
+    sitePath: sitepath.toLowerCase(),
   });
 }
 
 export async function addCronJob({ pageId, autoSync, job }) {
   const { minute, hour, day, dataType } = autoSync;
   if (dataType === "none") {
-    cronJobs.forEach(cronJob => {
+    cronJobs.forEach((cronJob) => {
       if (cronJob.siteId === pageId) {
         if (cronJob.job) {
           cronJob.job.stop();
@@ -1205,12 +1207,12 @@ export async function addCronJob({ pageId, autoSync, job }) {
     }
     let cronjob = new CronJob(
       `*${convertMinute} *${convertHour} *${convertDay} * *`,
-      function() {
+      function () {
         job();
       }
     );
     let exist = false;
-    cronJobs.forEach(cronJob => {
+    cronJobs.forEach((cronJob) => {
       if (cronJob.siteId === pageId) {
         exist = true;
         if (cronJob.job) {
@@ -1222,7 +1224,7 @@ export async function addCronJob({ pageId, autoSync, job }) {
     if (!exist) {
       cronJobs.push({
         siteId: pageId,
-        job: cronjob
+        job: cronjob,
       });
     }
     cronjob.start();
@@ -1233,10 +1235,10 @@ export async function addCronJob({ pageId, autoSync, job }) {
 export async function updateAutoSync(id, autoSync) {
   return await Site.updateOne(
     {
-      id
+      id,
     },
     {
-      autoSync
+      autoSync,
     }
   );
 }

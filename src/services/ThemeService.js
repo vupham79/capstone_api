@@ -39,5 +39,5 @@ export async function findAllTheme() {
 }
 
 export async function findOneTheme(id) {
-  return await Theme.findOne({ id: id });
+  return await Theme.findOne({ _id: id });
 }
