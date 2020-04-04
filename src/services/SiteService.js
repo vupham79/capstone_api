@@ -154,6 +154,7 @@ export async function saveDesign(data) {
     site.showDesEvent = data.showDesEvent;
     site.showPlaceEvent = data.showPlaceEvent;
     site.showCoverEvent = data.showCoverEvent;
+    site.about = data.about;
     if (data.logoURL) {
       site.logo = data.logoURL;
     }
