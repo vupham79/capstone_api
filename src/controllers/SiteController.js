@@ -302,12 +302,14 @@ export async function saveDesign(req, res) {
     about,
   } = req.body;
   try {
-    console.log(about);
     if (
       !sitePath ||
       sitePath === undefined ||
       sitePath.replace(/\s/g, "") === "" ||
-      sitePath.length > 35
+      sitePath.length > 35 ||
+      sitePath === "admin" ||
+      sitePath === "edit" ||
+      sitePath === "view"
     ) {
       return res.status(400).send({ error: "Invalid site path!" });
     }
@@ -408,7 +410,10 @@ export async function createNewSite(req, res) {
       !sitepath ||
       sitepath === undefined ||
       sitepath.replace(/\s/g, "") === "" ||
-      sitepath.length > 35
+      sitepath.length > 35 ||
+      sitePath === "admin" ||
+      sitePath === "edit" ||
+      sitePath === "view"
     ) {
       return res.status(400).send({ error: "Invalid site path" });
     }
