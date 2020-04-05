@@ -11,7 +11,7 @@ import moment from "moment";
 import { CronJob } from "cron";
 
 const cronJobs = [];
-const limit = 5;
+const limit = 3;
 
 export async function insertSite(pageId, body) {
   const insert = await Site.create({
