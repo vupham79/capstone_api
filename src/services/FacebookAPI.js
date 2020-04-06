@@ -84,7 +84,6 @@ export async function getPageData({ pageId, accessToken }) {
     },
     url: process.env.facebookAPI + pageId + "/picture?height=9999&redirect=0",
   });
-  console.log("here1: ", data.data.cover.pageId);
   const cover = await axios({
     params: {
       access_token: accessToken,
@@ -92,7 +91,6 @@ export async function getPageData({ pageId, accessToken }) {
     },
     url: process.env.facebookAPI + data.data.cover.id,
   });
-  console.log("here");
   return {
     data: data.data,
     logo: logo.data.data.url,
