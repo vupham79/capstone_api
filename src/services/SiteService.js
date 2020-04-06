@@ -1005,7 +1005,10 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
 export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
   let counter = 0;
   if (sitePath) {
-    const total = await Site.findOne({ sitePath }, "posts");
+    const total = await Site.findOne({ sitePath }).populate({
+      path: "posts",
+      match: { isActive: true },
+    });
     await total.posts.map(() => {
       counter++;
     });
@@ -1021,7 +1024,10 @@ export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
       data: posts,
     };
   } else {
-    const total = await Site.findOne({ id }, "posts");
+    const total = await Site.findOne({ id }).populate({
+      path: "posts",
+      match: { isActive: true },
+    });
     await total.posts.map(() => {
       counter++;
     });
