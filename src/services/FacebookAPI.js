@@ -84,16 +84,19 @@ export async function getPageData({ pageId, accessToken }) {
     },
     url: process.env.facebookAPI + pageId + "/picture?height=9999&redirect=0",
   });
-  const cover = await axios({
-    params: {
-      access_token: accessToken,
-      fields: "images",
-    },
-    url: process.env.facebookAPI + data.data.cover.id,
-  });
+  let cover = null;
+  if (data.data.cover) {
+    cover = await axios({
+      params: {
+        access_token: accessToken,
+        fields: "images",
+      },
+      url: process.env.facebookAPI + data.data.cover.id,
+    });
+  }
   return {
     data: data.data,
     logo: logo.data.data.url,
-    cover: cover.data.images[0].source,
+    cover: cover ? cover.data.images[0].source : null,
   };
 }
