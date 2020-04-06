@@ -411,9 +411,9 @@ export async function createNewSite(req, res) {
       sitepath === undefined ||
       sitepath.replace(/\s/g, "") === "" ||
       sitepath.length > 35 ||
-      sitePath === "admin" ||
-      sitePath === "edit" ||
-      sitePath === "view"
+      sitepath === "admin" ||
+      sitepath === "edit" ||
+      sitepath === "view"
     ) {
       return res.status(400).send({ error: "Invalid site path" });
     }
@@ -487,7 +487,16 @@ export async function createNewSite(req, res) {
                 address: page.data.single_line_address,
                 navItems: defaultNavItems,
                 theme: new mongoose.Types.ObjectId(theme._id),
-                cover: page.data.cover ? [page.data.cover.source] : null,
+                cover: page.cover
+                  ? [
+                      page.cover
+                        .replace(/\&amp\;/g, "&")
+                        .replace(/\&gt\;/g, ">")
+                        .replace(/\&lt\;/g, "<")
+                        .replace(/\&quot\;/g, "'")
+                        .replace(/\&\#39\;/g, "'"),
+                    ]
+                  : null,
                 url: pageUrl,
                 isPublish: isPublish,
                 sitePath: sitepath,
@@ -528,7 +537,6 @@ export async function createNewSite(req, res) {
     }
     return res.status(400).send({ error: "Facebook page data not existed!" });
   } catch (error) {
-    console.log(error);
     return res.status(400).send(error);
   }
 }
