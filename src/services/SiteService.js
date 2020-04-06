@@ -1011,7 +1011,11 @@ export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
     });
     const posts = await Site.findOne({ sitePath })
       .select("posts")
-      .populate("posts", "", "", "", { limit, skip: (pageNumber - 1) * limit });
+      .populate({
+        path: "posts",
+        match: { isActive: true },
+        options: { limit, skip: (pageNumber - 1) * limit },
+      });
     return {
       pageCount: Math.ceil(counter / limit),
       data: posts,
