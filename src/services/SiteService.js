@@ -36,6 +36,7 @@ export async function insertSite(pageId, body) {
     about: body.about,
     events: body.events,
     homepage: body.homepage,
+    story: body.story,
   });
   return insert;
 }
@@ -114,7 +115,12 @@ export async function findAllSiteByUser(email) {
 export async function findSiteBySitepath(sitepath) {
   return await Site.findOne({ sitePath: sitepath.toLowerCase() })
     .select(
-      "id phone longitude latitude color logo fontTitle fontBody title address navItems isPublish cover categories url sitePath about whatsapp instagram email youtube theme homepage showDesEvent showCoverEvent showPlaceEvent"
+      "id phone longitude latitude color " +
+        "logo fontTitle fontBody title address " +
+        "navItems isPublish cover categories url " +
+        "sitePath about whatsapp instagram email " +
+        "youtube theme homepage showDesEvent " +
+        "showCoverEvent showPlaceEvent story"
     )
     .populate("theme");
 }

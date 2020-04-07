@@ -505,6 +505,17 @@ export async function createNewSite(req, res) {
                 autoSync: {
                   dataType: "none",
                 },
+                story: page.data.page_about_story
+                  ? {
+                      id: page.data.page_about_story.id,
+                      title: page.data.page_about_story.title,
+                      composedText: page.data.page_about_story.composed_text
+                        ? page.data.page_about_story.composed_text.map(
+                            (val) => val.text
+                          )
+                        : null,
+                    }
+                  : null,
               });
               //find user
               await SiteService.updateSiteList(req.user.id, insert);
