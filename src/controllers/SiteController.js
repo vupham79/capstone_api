@@ -300,6 +300,9 @@ export async function saveDesign(req, res) {
     showPlaceEvent,
     showCoverEvent,
     about,
+    limitNews,
+    limitGallery,
+    limitEvent,
   } = req.body;
   try {
     if (
