@@ -277,10 +277,10 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
   if (data.posts === undefined) {
     return null;
   }
-  data.posts &&
-    data.posts.data &&
-    data.posts.data.forEach(async (post) => {
-      if (dateFrom instanceof Date && dateTo instanceof Date) {
+  if (moment(dateFrom).isValid() && moment(dateTo).isValid()) {
+    data.posts &&
+      data.posts.data &&
+      data.posts.data.forEach(async (post) => {
         if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
           if (!post.attachments || post.attachments === undefined) {
             postsList.push({
@@ -354,7 +354,11 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
             });
           }
         }
-      } else {
+      });
+  } else {
+    data.posts &&
+      data.posts.data &&
+      data.posts.data.forEach(async (post) => {
         if (!post.attachments || post.attachments === undefined) {
           postsList.push({
             id: post.id,
@@ -426,8 +430,8 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
             target: post.attachments.data[0].target.url,
           });
         }
-      }
-    });
+      });
+  }
   return postsList;
 }
 
@@ -436,10 +440,11 @@ export async function getFacebookGalleryData(data, dateFrom, dateTo) {
   if (data.posts === undefined) {
     return null;
   }
-  data.posts &&
-    data.posts.data &&
-    data.posts.data.forEach(async (post) => {
-      if (dateFrom instanceof Date && dateTo instanceof Date) {
+
+  if (moment(dateFrom).isValid() && moment(dateTo).isValid()) {
+    data.posts &&
+      data.posts.data &&
+      data.posts.data.forEach(async (post) => {
         if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
           if (
             post.attachments &&
@@ -465,7 +470,11 @@ export async function getFacebookGalleryData(data, dateFrom, dateTo) {
             });
           }
         }
-      } else {
+      });
+  } else {
+    data.posts &&
+      data.posts.data &&
+      data.posts.data.forEach(async (post) => {
         if (
           post.attachments &&
           post.attachments.data[0].media_type === "album"
@@ -489,8 +498,8 @@ export async function getFacebookGalleryData(data, dateFrom, dateTo) {
             createdTime: post.created_time,
           });
         }
-      }
-    });
+      });
+  }
   return galleryList;
 }
 
@@ -581,10 +590,11 @@ export async function getFacebookEventData(data, dateFrom, dateTo) {
   if (data.events === undefined) {
     return null;
   }
-  data.events &&
-    data.events.data &&
-    data.events.data.forEach((event) => {
-      if (dateFrom instanceof Date && dateTo instanceof Date) {
+
+  if (moment(dateFrom).isValid() && moment(dateTo).isValid()) {
+    data.events &&
+      data.events.data &&
+      data.events.data.forEach((event) => {
         if (moment(event.start_time).isBetween(dateFrom, dateTo)) {
           //set place
           let place = {
@@ -625,7 +635,12 @@ export async function getFacebookEventData(data, dateFrom, dateTo) {
             url: "facebook.com/" + event.id,
           });
         }
-      } else {
+      });
+  } else {
+    data.events &&
+      data.events.data &&
+      data.events.data.forEach((event) => {
+        //set place
         let place = {
           name: null,
           street: null,
@@ -663,8 +678,9 @@ export async function getFacebookEventData(data, dateFrom, dateTo) {
           isCanceled: event.is_canceled,
           url: "facebook.com/" + event.id,
         });
-      }
-    });
+      });
+  }
+
   return eventList;
 }
 
