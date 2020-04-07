@@ -120,7 +120,7 @@ export async function findSiteBySitepath(sitepath) {
         "navItems isPublish cover categories url " +
         "sitePath about whatsapp instagram email " +
         "youtube theme homepage showDesEvent " +
-        "showCoverEvent showPlaceEvent story"
+        "showCoverEvent showPlaceEvent story limitNews limitGallery limitEvent"
     )
     .populate("theme");
 }
