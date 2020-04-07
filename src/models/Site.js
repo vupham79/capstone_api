@@ -202,15 +202,15 @@ const SiteSchema = new mongoose.Schema(
     },
     limitNews: {
       type: Number,
-      default: "none",
+      default: 3,
     },
     limitGallery: {
       type: Number,
-      default: "none",
+      default: 3,
     },
     limitEvent: {
       type: Number,
-      default: "none",
+      default: 3,
     },
   },
   {

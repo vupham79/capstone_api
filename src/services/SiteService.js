@@ -161,6 +161,9 @@ export async function saveDesign(data) {
     site.showPlaceEvent = data.showPlaceEvent;
     site.showCoverEvent = data.showCoverEvent;
     site.about = data.about;
+    site.limitNews = data.limitNews;
+    site.limitGallery = data.limitGallery;
+    site.limitEvent = data.limitEvent;
     if (data.logoURL) {
       site.logo = data.logoURL;
     }

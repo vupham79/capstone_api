@@ -386,6 +386,9 @@ export async function saveDesign(req, res) {
         showPlaceEvent,
         showCoverEvent,
         about,
+        limitNews,
+        limitGallery,
+        limitEvent,
       });
       if (update.msg) {
         return res.status(400).send(update);
