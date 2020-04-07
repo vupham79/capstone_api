@@ -78,6 +78,7 @@ export async function getPageData({ pageId, accessToken }) {
     },
     url: process.env.facebookAPI + pageId,
   });
+  console.log(data);
   const logo = await axios({
     params: {
       access_token: accessToken,

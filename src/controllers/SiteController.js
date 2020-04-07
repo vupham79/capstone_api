@@ -300,6 +300,10 @@ export async function saveDesign(req, res) {
     showPlaceEvent,
     showCoverEvent,
     about,
+    limitNews,
+    limitGallery,
+    limitEvent,
+    showStory,
   } = req.body;
   try {
     if (
@@ -389,6 +393,7 @@ export async function saveDesign(req, res) {
         limitNews,
         limitGallery,
         limitEvent,
+        showStory,
       });
       if (update.msg) {
         return res.status(400).send(update);
@@ -408,6 +413,7 @@ export async function createNewSite(req, res) {
     let galleryList = [];
     let postsList = [];
     let { pageUrl, pageId, sitepath, isPublish } = req.body;
+    console.log(req.body);
     //site path is empty, undefined or null
     if (
       !sitepath ||
@@ -430,6 +436,7 @@ export async function createNewSite(req, res) {
         .send({ error: "A website with this sitepath already existed!" });
     }
     //get page data
+    console.log(pageId, req.user.accessToken);
     const page = await getPageData({
       pageId: pageId,
       accessToken: req.user.accessToken,
