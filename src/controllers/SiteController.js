@@ -696,13 +696,14 @@ export async function syncGallery(req, res) {
         dateTo
       );
       const siteExist = await Site.findOne({ id: pageId });
-      galleryList.forEach((item) => {
-        siteExist.galleries.forEach((siteItem) => {
-          if (item.target === siteItem.target) {
-            item._id = new mongoose.Types.ObjectId(siteItem._id);
-          }
+      galleryList &&
+        galleryList.forEach((item) => {
+          siteExist.galleries.forEach((siteItem) => {
+            if (item.target === siteItem.target) {
+              item._id = new mongoose.Types.ObjectId(siteItem._id);
+            }
+          });
         });
-      });
       if (siteExist) {
         const record = await SyncRecord.create({
           dataType: "Gallery",
