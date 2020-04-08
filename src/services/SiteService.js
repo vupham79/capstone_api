@@ -47,7 +47,6 @@ export async function editSite(id, body) {
   site.longitude = body.longitude;
   site.latitude = body.latitude;
   site.address = body.address;
-  site.cover = body.cover;
   site.categories = body.categories;
   site.about = body.about;
   site.syncRecords = body.syncRecords;

@@ -697,11 +697,12 @@ export async function syncGallery(req, res) {
       );
       const siteExist = await Site.findOne({ id: pageId });
       galleryList.forEach((item) => {
-        siteExist.galleries.forEach((siteItem) => {
-          if (item.target === siteItem.target) {
-            item._id = new mongoose.Types.ObjectId(siteItem._id);
-          }
-        });
+        siteExist.galleries &&
+          siteExist.galleries.forEach((siteItem) => {
+            if (item.target === siteItem.target) {
+              item._id = new mongoose.Types.ObjectId(siteItem._id);
+            }
+          });
       });
       if (siteExist) {
         const record = await SyncRecord.create({
@@ -966,7 +967,6 @@ export async function syncData(req, res) {
                 longitude: data.location ? data.location.longitude : null,
                 latitude: data.location ? data.location.latitude : null,
                 address: data.single_line_address,
-                cover: data.cover ? [data.cover.source] : null,
                 categories: data.category_list,
                 about: data.about,
                 genre: data.genre,
