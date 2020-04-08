@@ -586,9 +586,10 @@ export async function syncPost(req, res) {
           id: pageId,
           syncRecords: syncRecordList,
         });
-        postsList.forEach((post) => {
-          postIdList.push(post.id);
-        });
+        postsList &&
+          postsList.forEach((post) => {
+            postIdList.push(post.id);
+          });
         //insert and update post
         await SiteService.insertAndUpdateSyncDataPost(pageId, postsList);
         await record.update({
@@ -623,9 +624,10 @@ export async function autoSyncPost(userEmail, pageId, accessToken) {
         postsList = await SiteService.getFacebookPostData(data);
         //post Id list
         let postIdList = [];
-        postsList.forEach((post) => {
-          postIdList.push(post.id);
-        });
+        postsList &&
+          postsList.forEach((post) => {
+            postIdList.push(post.id);
+          });
         //insert and update post
         await SiteService.insertAndUpdateSyncDataPost(pageId, postsList);
         // success
@@ -696,14 +698,14 @@ export async function syncGallery(req, res) {
         dateTo
       );
       const siteExist = await Site.findOne({ id: pageId });
-      galleryList.forEach((item) => {
-        siteExist.galleries &&
+      galleryList &&
+        galleryList.forEach((item) => {
           siteExist.galleries.forEach((siteItem) => {
             if (item.target === siteItem.target) {
               item._id = new mongoose.Types.ObjectId(siteItem._id);
             }
           });
-      });
+        });
       if (siteExist) {
         const record = await SyncRecord.create({
           dataType: "Gallery",
@@ -751,13 +753,14 @@ export async function autoSyncGallery(pageId, accessToken, userEmail) {
         });
         //gallery list
         galleryList = await SiteService.getFacebookGalleryData(data);
-        galleryList.forEach((item) => {
-          siteExist.galleries.forEach((siteItem) => {
-            if (item.target === siteItem.target) {
-              item._id = new mongoose.Types.ObjectId(siteItem._id);
-            }
+        galleryList &&
+          galleryList.forEach((item) => {
+            siteExist.galleries.forEach((siteItem) => {
+              if (item.target === siteItem.target) {
+                item._id = new mongoose.Types.ObjectId(siteItem._id);
+              }
+            });
           });
-        });
         //update galleries
         await Site.updateOne(
           { id: pageId },
@@ -844,9 +847,10 @@ export async function syncEvent(req, res) {
         await siteExist.updateOne({ id: pageId, syncRecords: syncRecordList });
         //event Id list
         let eventIdList = [];
-        eventList.forEach((event) => {
-          eventIdList.push(event.id);
-        });
+        eventList &&
+          eventList.forEach((event) => {
+            eventIdList.push(event.id);
+          });
         //insert and update event
         await SiteService.insertAndUpdateSyncDataEvents(pageId, eventList);
         await record.updateOne({
@@ -882,9 +886,10 @@ export async function autoSyncEvent(pageId, accessToken, userEmail) {
         eventList = await SiteService.getFacebookEventData(data);
         //event Id list
         let eventIdList = [];
-        eventList.forEach((event) => {
-          eventIdList.push(event.id);
-        });
+        eventList &&
+          eventList.forEach((event) => {
+            eventIdList.push(event.id);
+          });
         //insert and update event
         await SiteService.insertAndUpdateSyncDataEvents(pageId, eventList);
         await record.updateOne({
@@ -984,20 +989,22 @@ export async function syncData(req, res) {
                 dateFrom,
                 dateTo
               );
-              galleryList.forEach((item) => {
-                siteExist.galleries.forEach((siteItem) => {
-                  if (item.target === siteItem.target) {
-                    item._id = new mongoose.Types.ObjectId(siteItem._id);
-                  }
+              galleryList &&
+                galleryList.forEach((item) => {
+                  siteExist.galleries.forEach((siteItem) => {
+                    if (item.target === siteItem.target) {
+                      item._id = new mongoose.Types.ObjectId(siteItem._id);
+                    }
+                  });
                 });
-              });
               //update galleries
               await SiteService.updateGallery(pageId, galleryList);
               //post Id list
               if (postsList) {
-                postsList.forEach((post) => {
-                  postIdList.push(post.id);
-                });
+                postsList &&
+                  postsList.forEach((post) => {
+                    postIdList.push(post.id);
+                  });
                 //insert and update post
                 await SiteService.insertAndUpdateSyncDataPost(
                   pageId,
@@ -1075,21 +1082,23 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
               postsList = await SiteService.getFacebookPostSyncData(data);
               //gallery list
               galleryList = await SiteService.getFacebookGalleryData(data);
-              galleryList.forEach((item) => {
-                siteExist.galleries.forEach((siteItem) => {
-                  if (item.target === siteItem.target) {
-                    item._id = new mongoose.Types.ObjectId(siteItem._id);
-                  }
+              galleryList &&
+                galleryList.forEach((item) => {
+                  siteExist.galleries.forEach((siteItem) => {
+                    if (item.target === siteItem.target) {
+                      item._id = new mongoose.Types.ObjectId(siteItem._id);
+                    }
+                  });
                 });
-              });
               //update galleries
               await SiteService.updateGallery(pageId, galleryList);
               //post Id list
               let postIdList = [];
               if (postsList) {
-                postsList.forEach((post) => {
-                  postIdList.push(post.id);
-                });
+                postsList &&
+                  postsList.forEach((post) => {
+                    postIdList.push(post.id);
+                  });
                 //insert and update post
                 await SiteService.insertAndUpdateSyncDataPost(
                   pageId,
