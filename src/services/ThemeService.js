@@ -1,7 +1,6 @@
 import { Theme, Category } from "../models";
 
 export async function insertTheme(body) {
-  console.log("body: ", body);
   const themeResult = await Theme.findOne({ name: body.name });
   let insert = null;
   if (!themeResult) {

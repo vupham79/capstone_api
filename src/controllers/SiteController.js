@@ -413,7 +413,6 @@ export async function createNewSite(req, res) {
     let galleryList = [];
     let postsList = [];
     let { pageUrl, pageId, sitepath, isPublish } = req.body;
-    console.log(req.body);
     //site path is empty, undefined or null
     if (
       !sitepath ||
@@ -436,7 +435,7 @@ export async function createNewSite(req, res) {
         .send({ error: "A website with this sitepath already existed!" });
     }
     //get page data
-    console.log(pageId, req.user.accessToken);
+    // console.log(pageId, req.user.accessToken);
     const page = await getPageData({
       pageId: pageId,
       accessToken: req.user.accessToken,
@@ -531,6 +530,7 @@ export async function createNewSite(req, res) {
               await SiteService.updateSiteList(req.user.id, insert);
               if (insert) {
                 //post list
+                // console.log("Data: ", page.data);
                 postsList = await SiteService.getFacebookPostData(page.data);
                 //gallery list
                 galleryList = await SiteService.getFacebookGalleryData(
