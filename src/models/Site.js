@@ -212,6 +212,10 @@ const SiteSchema = new mongoose.Schema(
       type: Number,
       default: 3,
     },
+    showStory: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,
