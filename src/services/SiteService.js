@@ -50,6 +50,7 @@ export async function editSite(id, body) {
   site.categories = body.categories;
   site.about = body.about;
   site.syncRecords = body.syncRecords;
+  site.showStory = body.showStory;
   // site.syncRecords = [...site.syncRecords, body.syncRecord];
   return await site.save();
 }

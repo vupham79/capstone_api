@@ -946,7 +946,11 @@ export async function syncData(req, res) {
     let postsList = [];
     let eventList = [];
     let postIdList = [];
-    const { pageId, dateFrom, dateTo } = req.body;
+    const { pageId, dateFrom, dateTo, showStory } = req.body;
+    let showStoryValue = showStory;
+    if (showStory === undefined) {
+      showStoryValue = false;
+    }
     const data = await getSyncData({
       pageId: pageId,
       accessToken: req.user.accessToken,
@@ -966,6 +970,7 @@ export async function syncData(req, res) {
                 dateFrom: dateFrom,
                 dateTo: dateTo,
               });
+              console.log("Show story: ", showStoryValue);
               let syncRecordList = SiteService.addSyncRecord(record, siteExist);
               const update = await SiteService.editSite(pageId, {
                 phone: data.phone,
@@ -976,6 +981,7 @@ export async function syncData(req, res) {
                 about: data.about,
                 genre: data.genre,
                 syncRecords: syncRecordList,
+                showStory: showStoryValue,
               });
               //post list
               postsList = await SiteService.getFacebookPostData(
