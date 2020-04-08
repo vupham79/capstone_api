@@ -287,7 +287,15 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
   if (data.posts === undefined) {
     return null;
   }
-  if (moment(dateFrom).isValid() && moment(dateTo).isValid()) {
+  let dateFromTime = dateFrom;
+  if (dateFrom === undefined) {
+    dateFromTime = null;
+  }
+  let dateToTime = dateTo;
+  if (dateTo === undefined) {
+    dateToTime = null;
+  }
+  if (moment(dateFromTime).isValid() && moment(dateFromTime).isValid()) {
     data.posts &&
       data.posts.data &&
       data.posts.data.forEach(async (post) => {
@@ -451,7 +459,15 @@ export async function getFacebookGalleryData(data, dateFrom, dateTo) {
     return null;
   }
 
-  if (moment(dateFrom).isValid() && moment(dateTo).isValid()) {
+  let dateFromTime = dateFrom;
+  if (dateFrom === undefined) {
+    dateFromTime = null;
+  }
+  let dateToTime = dateTo;
+  if (dateTo === undefined) {
+    dateToTime = null;
+  }
+  if (moment(dateFromTime).isValid() && moment(dateFromTime).isValid()) {
     data.posts &&
       data.posts.data &&
       data.posts.data.forEach(async (post) => {
@@ -601,7 +617,15 @@ export async function getFacebookEventData(data, dateFrom, dateTo) {
     return null;
   }
 
-  if (moment(dateFrom).isValid() && moment(dateTo).isValid()) {
+  let dateFromTime = dateFrom;
+  if (dateFrom === undefined) {
+    dateFromTime = null;
+  }
+  let dateToTime = dateTo;
+  if (dateTo === undefined) {
+    dateToTime = null;
+  }
+  if (moment(dateFromTime).isValid() && moment(dateFromTime).isValid()) {
     data.events &&
       data.events.data &&
       data.events.data.forEach((event) => {
@@ -855,7 +879,7 @@ export async function findSiteEventTab(id, sitePath, pageNumber = 1) {
       counter++;
     });
     const events = await Site.findOne({ sitePath })
-      .select("events")
+      .select("events limitEvent")
       .populate("events", "", "", "", {
         limit,
         skip: (pageNumber - 1) * limit,
@@ -872,7 +896,7 @@ export async function findSiteEventTab(id, sitePath, pageNumber = 1) {
       });
     }
     const events = await Site.findOne({ id })
-      .select("events")
+      .select("events limitEvent")
       .populate("events", "", "", "", {
         limit,
         skip: (pageNumber - 1) * limit,
@@ -905,7 +929,7 @@ function findDataBySection(sitePath) {
             }
           } else {
             const events = await Site.find({ sitePath })
-              .select("events")
+              .select("events limitEvent")
               .populate("events", "", "", "", { limit, sort: { _id: 1 } });
             section.filter.items = [];
             for (let index = 0; index < events[0].events.length; index++) {
@@ -915,7 +939,9 @@ function findDataBySection(sitePath) {
           }
         } else if (section.original === "gallery") {
           if (section.filter.type === "manual") {
-            let gallery = await Site.findOne({ sitePath }).select("galleries");
+            let gallery = await Site.findOne({ sitePath }).select(
+              "galleries limitGallery"
+            );
             gallery.galleries.forEach((image) => {
               if (section.filter.items.includes(image._id)) {
                 const index = section.filter.items.findIndex((item) => {
@@ -958,7 +984,7 @@ function findDataBySection(sitePath) {
             }
           } else {
             const posts = await Site.find({ sitePath })
-              .select("posts")
+              .select("posts limitNews")
               .populate({
                 path: "posts",
                 match: { isActive: true },
@@ -1039,7 +1065,7 @@ export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
       counter++;
     });
     const posts = await Site.findOne({ sitePath })
-      .select("posts")
+      .select("posts limitNews")
       .populate({
         path: "posts",
         match: { isActive: true },
@@ -1058,7 +1084,7 @@ export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
       counter++;
     });
     const posts = await Site.findOne({ id })
-      .select("posts")
+      .select("posts limitNews")
       .populate("posts", "", "", "", { limit, skip: (pageNumber - 1) * limit });
     return {
       pageCount: Math.ceil(counter / limit),
