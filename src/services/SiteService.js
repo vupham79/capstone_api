@@ -471,6 +471,7 @@ export async function getFacebookGalleryData(data, dateFrom, dateTo) {
       data.posts.data &&
       data.posts.data.forEach(async (post) => {
         if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
+          console.log(post.created_time);
           if (
             post.attachments &&
             post.attachments.data[0].media_type === "album"
@@ -624,11 +625,14 @@ export async function getFacebookEventData(data, dateFrom, dateTo) {
   if (dateTo === undefined) {
     dateToTime = null;
   }
+  console.log(data.events.data.length);
   if (moment(dateFromTime).isValid() && moment(dateFromTime).isValid()) {
     data.events &&
       data.events.data &&
       data.events.data.forEach((event) => {
+        console.log("Event start time: " + event.start_time);
         if (moment(event.start_time).isBetween(dateFrom, dateTo)) {
+          console.log("Matching start time: " + event.start_time);
           //set place
           let place = {
             name: null,
@@ -873,35 +877,41 @@ export async function updateExistingEvent(eventList, existedEventIdList) {
 export async function findSiteEventTab(id, sitePath, pageNumber = 1) {
   let counter = 0;
   if (sitePath) {
-    const total = await Site.findOne({ sitePath }, "events");
+    const total = await Site.findOne({ sitePath }, "events").select(
+      "events limitEvent"
+    );
     await total.events.map(() => {
       counter++;
     });
+    const limitEvent = total.limitEvent;
     const events = await Site.findOne({ sitePath })
-      .select("events limitEvent")
+      .select("events")
       .populate("events", "", "", "", {
-        limit,
-        skip: (pageNumber - 1) * limit,
+        limit: limitEvent,
+        skip: (pageNumber - 1) * limitEvent,
       });
     return {
-      pageCount: Math.ceil(counter / limit),
+      pageCount: Math.ceil(counter / limitEvent),
       data: events,
     };
   } else {
-    const total = await Site.findOne({ id }, "events");
+    const total = await Site.findOne({ id }, "events").select(
+      "events limitEvent"
+    );
     if (total && total.events) {
       await total.events.map(() => {
         counter++;
       });
     }
+    const limitEvent = total.limitEvent;
     const events = await Site.findOne({ id })
-      .select("events limitEvent")
+      .select("events")
       .populate("events", "", "", "", {
-        limit,
-        skip: (pageNumber - 1) * limit,
+        limit: limitEvent,
+        skip: (pageNumber - 1) * limitEvent,
       });
     return {
-      pageCount: Math.ceil(counter / limit),
+      pageCount: Math.ceil(counter / limitEvent),
       data: events,
     };
   }
@@ -927,9 +937,14 @@ function findDataBySection(sitePath) {
               }
             }
           } else {
+            const total = await Site.find({ sitePath }).select("limitEvent");
+            const limitEvent = total.limitEvent;
             const events = await Site.find({ sitePath })
-              .select("events limitEvent")
-              .populate("events", "", "", "", { limit, sort: { _id: 1 } });
+              .select("events")
+              .populate("events", "", "", "", {
+                limit: limitEvent,
+                sort: { _id: 1 },
+              });
             section.filter.items = [];
             for (let index = 0; index < events[0].events.length; index++) {
               const element = events[0].events[index];
@@ -938,9 +953,7 @@ function findDataBySection(sitePath) {
           }
         } else if (section.original === "gallery") {
           if (section.filter.type === "manual") {
-            let gallery = await Site.findOne({ sitePath }).select(
-              "galleries limitGallery"
-            );
+            let gallery = await Site.findOne({ sitePath }).select("galleries");
             gallery.galleries.forEach((image) => {
               if (section.filter.items.includes(image._id)) {
                 const index = section.filter.items.findIndex((item) => {
@@ -950,6 +963,8 @@ function findDataBySection(sitePath) {
               }
             });
           } else {
+            const total = await Site.find({ sitePath }).select("limitGallery");
+            const limitGallery = total.limitGallery;
             const galleries = await Site.aggregate([
               { $match: { sitePath: sitePath } },
               { $unwind: "$galleries" },
@@ -959,7 +974,7 @@ function findDataBySection(sitePath) {
                 },
               },
               { $sort: { _id: -1 } },
-              { $limit: limit },
+              { $limit: limitGallery },
             ]);
             section.filter.items = [];
             for (let index = 0; index < galleries.length; index++) {
@@ -982,12 +997,14 @@ function findDataBySection(sitePath) {
               }
             }
           } else {
+            const total = await Site.find({ sitePath }).select("limitNews");
+            const limitNews = total.limitNews;
             const posts = await Site.find({ sitePath })
-              .select("posts limitNews")
+              .select("posts")
               .populate({
                 path: "posts",
                 match: { isActive: true },
-                options: { limit, sort: { _id: 1 } },
+                options: { limit: limitNews, sort: { _id: 1 } },
               });
             section.filter.items = [];
             for (let index = 0; index < posts[0].posts.length; index++) {
@@ -1008,10 +1025,13 @@ export async function findSiteHomeTab(id, sitePath) {
 export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
   let counter = 0;
   if (sitePath) {
-    const total = await Site.findOne({ sitePath }, "galleries");
+    const total = await Site.findOne({ sitePath }, "galleries").select(
+      "galleries limitGallery"
+    );
     await total.galleries.map(() => {
       counter++;
     });
+    const limitGallery = total.limitGallery;
     const galleries = await Site.aggregate([
       { $match: { sitePath: sitePath } },
       { $unwind: "$galleries" },
@@ -1021,15 +1041,17 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
         },
       },
       { $sort: { _id: -1 } },
-      { $skip: (pageNumber - 1) * limit },
-      { $limit: limit },
+      { $skip: (pageNumber - 1) * limitGallery },
+      { $limit: limitGallery },
     ]);
     return {
-      pageCount: Math.ceil(counter / limit),
+      pageCount: Math.ceil(counter / limitGallery),
       data: galleries,
     };
   } else {
-    const total = await Site.findOne({ id }, "galleries");
+    const total = await Site.findOne({ id }, "galleries").select(
+      "galleries limitGallery"
+    );
     if (total && total.galleries) {
       await total.galleries.map(() => {
         counter++;
@@ -1043,11 +1065,11 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
           _id: "$galleries",
         },
       },
-      { $skip: (pageNumber - 1) * limit },
-      { $limit: limit },
+      { $skip: (pageNumber - 1) * limitGallery },
+      { $limit: limitGallery },
     ]);
     return {
-      pageCount: Math.ceil(counter / limit),
+      pageCount: Math.ceil(counter / limitGallery),
       data: galleries,
     };
   }
@@ -1056,35 +1078,45 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
 export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
   let counter = 0;
   if (sitePath) {
-    const total = await Site.findOne({ sitePath }).populate({
-      path: "posts",
-      match: { isActive: true },
-    });
-    await total.posts.map(() => {
-      counter++;
-    });
-    const posts = await Site.findOne({ sitePath })
-      .select("posts limitNews")
+    const total = await Site.findOne({ sitePath })
       .populate({
         path: "posts",
         match: { isActive: true },
-        options: { limit, skip: (pageNumber - 1) * limit },
-      });
-    return {
-      pageCount: Math.ceil(counter / limit),
-      data: posts,
-    };
-  } else {
-    const total = await Site.findOne({ id }).populate({
-      path: "posts",
-      match: { isActive: true },
-    });
+      })
+      .select("posts limitNews");
     await total.posts.map(() => {
       counter++;
     });
+    const limitNews = total.limitNews;
+    console.log("limit:", limitNews);
+    const posts = await Site.findOne({ sitePath })
+      .select("posts")
+      .populate({
+        path: "posts",
+        match: { isActive: true },
+        options: { limit: limitNews, skip: (pageNumber - 1) * limitNews },
+      });
+    return {
+      pageCount: Math.ceil(counter / limitNews),
+      data: posts,
+    };
+  } else {
+    const total = await Site.findOne({ id })
+      .populate({
+        path: "posts",
+        match: { isActive: true },
+      })
+      .select("posts limitNews");
+    await total.posts.map(() => {
+      counter++;
+    });
+    const limitNews = total.limitNews;
     const posts = await Site.findOne({ id })
-      .select("posts limitNews")
-      .populate("posts", "", "", "", { limit, skip: (pageNumber - 1) * limit });
+      .select("posts")
+      .populate("posts", "", "", "", {
+        limit: limitNews,
+        skip: (pageNumber - 1) * limitNews,
+      });
     return {
       pageCount: Math.ceil(counter / limit),
       data: posts,
