@@ -11,7 +11,9 @@ import moment from "moment";
 import { CronJob } from "cron";
 
 const cronJobs = [];
-const limit = 3;
+const defaultLimitNews = 6;
+const defaultLimitEvent = 3;
+const defaultLimitGallery = 6;
 
 export async function insertSite(pageId, body) {
   const insert = await Site.create({
@@ -938,12 +940,10 @@ function findDataBySection(sitePath) {
               }
             }
           } else {
-            const total = await Site.find({ sitePath }).select("limitEvent");
-            const limitEvent = total.limitEvent;
             const events = await Site.find({ sitePath })
               .select("events")
               .populate("events", "", "", "", {
-                limit: limitEvent,
+                limit: defaultLimitEvent,
                 sort: { _id: 1 },
               });
             section.filter.items = [];
@@ -964,8 +964,6 @@ function findDataBySection(sitePath) {
               }
             });
           } else {
-            const total = await Site.find({ sitePath }).select("limitGallery");
-            const limitGallery = total.limitGallery;
             const galleries = await Site.aggregate([
               { $match: { sitePath: sitePath } },
               { $unwind: "$galleries" },
@@ -975,7 +973,7 @@ function findDataBySection(sitePath) {
                 },
               },
               { $sort: { _id: -1 } },
-              { $limit: limitGallery },
+              { $limit: defaultLimitGallery },
             ]);
             section.filter.items = [];
             for (let index = 0; index < galleries.length; index++) {
@@ -998,14 +996,12 @@ function findDataBySection(sitePath) {
               }
             }
           } else {
-            const total = await Site.find({ sitePath }).select("limitNews");
-            const limitNews = total.limitNews;
             const posts = await Site.find({ sitePath })
               .select("posts")
               .populate({
                 path: "posts",
                 match: { isActive: true },
-                options: { limit: limitNews, sort: { _id: 1 } },
+                options: { limit: defaultLimitNews, sort: { _id: 1 } },
               });
             section.filter.items = [];
             for (let index = 0; index < posts[0].posts.length; index++) {
@@ -1089,7 +1085,6 @@ export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
       counter++;
     });
     const limitNews = total.limitNews;
-    console.log("limit:", limitNews);
     const posts = await Site.findOne({ sitePath })
       .select("posts")
       .populate({
@@ -1119,7 +1114,7 @@ export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
         skip: (pageNumber - 1) * limitNews,
       });
     return {
-      pageCount: Math.ceil(counter / limit),
+      pageCount: Math.ceil(counter / limitNews),
       data: posts,
     };
   }
