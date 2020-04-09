@@ -172,18 +172,7 @@ const SiteSchema = new mongoose.Schema(
         type: Number,
       },
     },
-    showDesEvent: {
-      type: Boolean,
-      default: true,
-    },
-    showPlaceEvent: {
-      type: Boolean,
-      default: true,
-    },
-    showCoverEvent: {
-      type: Boolean,
-      default: true,
-    },
+
     story: {
       id: {
         type: String,
@@ -212,9 +201,23 @@ const SiteSchema = new mongoose.Schema(
       type: Number,
       default: 3,
     },
-    showStory: {
-      type: Boolean,
-      default: true,
+    showDetailSetting: {
+      showDesEvent: {
+        type: Boolean,
+        default: true,
+      },
+      showPlaceEvent: {
+        type: Boolean,
+        default: true,
+      },
+      showCoverEvent: {
+        type: Boolean,
+        default: true,
+      },
+      showStory: {
+        type: Boolean,
+        default: true,
+      },
     },
   },
   {

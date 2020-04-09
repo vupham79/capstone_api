@@ -121,8 +121,8 @@ export async function findSiteBySitepath(sitepath) {
         "logo fontTitle fontBody title address " +
         "navItems isPublish cover categories url " +
         "sitePath about whatsapp instagram email " +
-        "youtube theme homepage showDesEvent " +
-        "showCoverEvent showPlaceEvent story limitNews limitGallery limitEvent showStory"
+        "youtube theme homepage showDetailSetting" +
+        " story limitNews limitGallery limitEvent"
     )
     .populate("theme");
 }
@@ -159,14 +159,15 @@ export async function saveDesign(data) {
     site.youtube = data.youtube;
     site.phone = data.phone;
     site.address = data.address;
-    site.showDesEvent = data.showDesEvent;
-    site.showPlaceEvent = data.showPlaceEvent;
-    site.showCoverEvent = data.showCoverEvent;
     site.about = data.about;
     site.limitNews = data.limitNews;
     site.limitGallery = data.limitGallery;
     site.limitEvent = data.limitEvent;
-    site.showStory = data.showStory;
+    site.showDetailSetting.showDesEvent = data.showDesEvent;
+    site.showDetailSetting.showPlaceEvent = data.showPlaceEvent;
+    site.showDetailSetting.showCoverEvent = data.showCoverEvent;
+    site.showDetailSetting.showStory = data.showStory;
+    console.log(site.showDetailSetting);
     if (data.logoURL) {
       site.logo = data.logoURL;
     }
