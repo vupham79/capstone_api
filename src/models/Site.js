@@ -254,6 +254,10 @@ const SiteSchema = new mongoose.Schema(
         type: Boolean,
         default: true,
       },
+      showMessageUs: {
+        type: Boolean,
+        default: true,
+      },
     },
   },
   {

@@ -313,6 +313,7 @@ export async function saveDesign(req, res) {
     showGoogleMaps = true,
     showAboutDescription = true,
     showAboutLogo = true,
+    showMessageUs = true,
   } = req.body;
   try {
     if (
@@ -413,6 +414,7 @@ export async function saveDesign(req, res) {
         showGoogleMaps,
         showAboutDescription,
         showAboutLogo,
+        showMessageUs,
       });
       if (update.msg) {
         return res.status(400).send(update);

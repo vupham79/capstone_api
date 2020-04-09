@@ -176,6 +176,8 @@ export async function saveDesign(data) {
     site.showDetailSetting.showGoogleMaps = data.showGoogleMaps;
     site.showDetailSetting.showAboutDescription = data.showAboutDescription;
     site.showDetailSetting.showAboutLogo = data.showAboutLogo;
+    site.showDetailSetting.showMessageUs = data.showMessageUs;
+
     console.log(site.showDetailSetting);
     if (data.logoURL) {
       site.logo = data.logoURL;
