@@ -218,6 +218,46 @@ const SiteSchema = new mongoose.Schema(
         type: Boolean,
         default: true,
       },
+      showMessenger: {
+        type: Boolean,
+        default: true,
+      },
+      showMap: {
+        type: Boolean,
+        default: true,
+      },
+      showPostMessage: {
+        type: Boolean,
+        default: true,
+      },
+      showAlbumNumber: {
+        type: Boolean,
+        default: true,
+      },
+      showPostPreviewImage: {
+        type: Boolean,
+        default: true,
+      },
+      showPostCreatedTime: {
+        type: Boolean,
+        default: true,
+      },
+      showSuggestLatestNews: {
+        type: Boolean,
+        default: true,
+      },
+      showGoogleMaps: {
+        type: Boolean,
+        default: true,
+      },
+      showAboutDescription: {
+        type: Boolean,
+        default: true,
+      },
+      showAboutLogo: {
+        type: Boolean,
+        default: true,
+      },
     },
   },
   {

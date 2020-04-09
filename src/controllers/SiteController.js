@@ -304,6 +304,16 @@ export async function saveDesign(req, res) {
     limitGallery = 6,
     limitEvent = 6,
     showStory = true,
+    showMessenger = true,
+    showMap = true,
+    showPostMessage = true,
+    showAlbumNumber = true,
+    showPostPreviewImage = true,
+    showPostCreatedTime = true,
+    showSuggestLatestNews = true,
+    showGoogleMaps = true,
+    showAboutDescription = true,
+    showAboutLogo = true,
   } = req.body;
   try {
     if (
@@ -395,6 +405,16 @@ export async function saveDesign(req, res) {
         limitGallery,
         limitEvent,
         showStory,
+        showMessenger,
+        showMap,
+        showPostMessage,
+        showAlbumNumber,
+        showPostPreviewImage,
+        showPostCreatedTime,
+        showSuggestLatestNews,
+        showGoogleMaps,
+        showAboutDescription,
+        showAboutLogo,
       });
       if (update.msg) {
         return res.status(400).send(update);
