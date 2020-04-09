@@ -168,7 +168,6 @@ export async function saveDesign(data) {
     site.showDetailSetting.showCoverEvent = data.showCoverEvent;
     site.showDetailSetting.showStory = data.showStory;
     site.showDetailSetting.showMessenger = data.showMessenger;
-    site.showDetailSetting.showMap = data.showMap;
     site.showDetailSetting.showPostMessage = data.showPostMessage;
     site.showDetailSetting.showAlbumNumber = data.showAlbumNumber;
     site.showDetailSetting.showPostPreviewImage = data.showPostPreviewImage;

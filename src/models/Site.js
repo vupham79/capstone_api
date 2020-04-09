@@ -222,10 +222,6 @@ const SiteSchema = new mongoose.Schema(
         type: Boolean,
         default: true,
       },
-      showMap: {
-        type: Boolean,
-        default: true,
-      },
       showPostMessage: {
         type: Boolean,
         default: true,
