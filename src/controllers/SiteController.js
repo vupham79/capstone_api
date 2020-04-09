@@ -115,7 +115,6 @@ export async function findOneBySitepath(req, res) {
   try {
     const find = await SiteService.findSiteBySitepath(req.params.sitepath);
     if (find) {
-      console.log("Site show detail by Sitepath: ", find.showDetailSetting);
       return res.status(200).send(find);
     }
     return res.status(204).send();
@@ -129,7 +128,6 @@ export async function findOneById(req, res) {
   try {
     const find = await SiteService.findOneSite(req.query.id);
     if (find) {
-      console.log("Site show detail by Id: ", find.showDetailSetting);
       return res.status(200).send(find);
     }
     return res.status(204).send();
@@ -298,14 +296,14 @@ export async function saveDesign(req, res) {
     logoURL,
     coverURL,
     address,
-    showDesEvent,
-    showPlaceEvent,
-    showCoverEvent,
+    showDesEvent = true,
+    showPlaceEvent = true,
+    showCoverEvent = true,
     about,
-    limitNews,
-    limitGallery,
-    limitEvent,
-    showStory,
+    limitNews = 6,
+    limitGallery = 6,
+    limitEvent = 6,
+    showStory = true,
   } = req.body;
   try {
     if (
@@ -342,23 +340,6 @@ export async function saveDesign(req, res) {
             .send({ error: "Navigation item must not be empty!" });
         }
       });
-
-    let showStoryValue = showStory;
-    if (showStoryValue === undefined) {
-      showStoryValue = true;
-    }
-    let showDesEventValue = showDesEvent;
-    if (showDesEventValue === undefined) {
-      showDesEventValue = true;
-    }
-    let showPlaceEventValue = showPlaceEvent;
-    if (showPlaceEventValue === undefined) {
-      showPlaceEventValue = true;
-    }
-    let showCoverEventValue = showCoverEvent;
-    if (showCoverEventValue === undefined) {
-      showCoverEventValue = true;
-    }
 
     const findTheme = await findOneTheme(theme);
     if (findTheme) {
@@ -406,14 +387,14 @@ export async function saveDesign(req, res) {
         logoURL,
         coverURL,
         address,
-        showDesEvent: showDesEventValue,
-        showPlaceEvent: showPlaceEventValue,
-        showCoverEvent: showCoverEventValue,
+        showDesEvent,
+        showPlaceEvent,
+        showCoverEvent,
         about,
         limitNews,
         limitGallery,
         limitEvent,
-        showStory: showStoryValue,
+        showStory,
       });
       if (update.msg) {
         return res.status(400).send(update);
