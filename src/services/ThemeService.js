@@ -13,7 +13,7 @@ export async function insertTheme(body) {
       mainColor: body.mainColor ? body.mainColor : "#1474D4",
       previewImage: body.previewImage,
       category: category,
-      isOnePage: body.isOnePage,
+      isOnePage: body.isOnePage ? body.isOnePage : true,
     });
   }
   return insert;
@@ -30,7 +30,7 @@ export async function editTheme(id, body) {
       mainColor: body.color ? body.color : "#1474D4",
       previewImage: body.previewImage,
       category: category,
-      isOnePage: body.isOnePage,
+      isOnePage: body.isOnePage ? body.isOnePage : true,
     }
   );
   return edit;
