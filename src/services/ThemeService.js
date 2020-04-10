@@ -5,11 +5,12 @@ export async function insertTheme(body) {
   let insert = null;
   if (!themeResult) {
     let category = await Category.findOne({ _id: body.category });
+    console.log(body);
     insert = await Theme.create({
       name: body.name,
-      fontTitle: body.fontTitle,
-      fontBody: body.fontBody,
-      mainColor: body.color,
+      fontTitle: body.fontTitle ? body.fontTitle : "Arial",
+      fontBody: body.fontBody ? body.fontBody : "Arial",
+      mainColor: body.mainColor ? body.mainColor : "#1474D4",
       previewImage: body.previewImage,
       category: category,
       isOnePage: body.isOnePage,
@@ -24,9 +25,9 @@ export async function editTheme(id, body) {
     { _id: id },
     {
       name: body.name,
-      fontTitle: body.fontTitle,
-      fontBody: body.fontBody,
-      mainColor: body.color,
+      fontTitle: body.fontTitle ? body.fontTitle : "Arial",
+      fontBody: body.fontBody ? body.fontBody : "Arial",
+      mainColor: body.color ? body.color : "#1474D4",
       previewImage: body.previewImage,
       category: category,
       isOnePage: body.isOnePage,

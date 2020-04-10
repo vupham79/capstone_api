@@ -9,15 +9,15 @@ const ThemeSchema = new mongoose.Schema(
     },
     fontTitle: {
       type: String,
-      default: null,
+      default: "Arial",
     },
     fontBody: {
       type: String,
-      default: null,
+      default: "Arial",
     },
     mainColor: {
       type: String,
-      default: null,
+      default: "#1474D4",
     },
     previewImage: {
       type: String,
