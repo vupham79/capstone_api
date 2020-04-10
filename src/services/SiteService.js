@@ -147,6 +147,7 @@ export async function saveDesign(data) {
     id: data.pageId,
   });
   if (site) {
+    console.log(site.limitNews, data.limitNews);
     site.fontTitle = data.fontTitle;
     site.fontBody = data.fontBody;
     site.title = data.name;
@@ -241,22 +242,61 @@ export async function updateCovers(pageId, cover) {
 }
 
 export async function insertAndUpdatePosts(pageId, postsList) {
-  await Post.insertMany(postsList, async (error, docs) => {
-    if (error) {
-      return error;
-    } else {
-      const postIdList = [];
-      docs.forEach((doc) => {
-        postIdList.push(doc._id);
-      });
-      await Site.updateOne(
-        { id: pageId },
-        {
-          posts: postIdList.length > 0 ? postIdList : null,
-        }
-      );
-    }
+  const currentPostList = await Post.find();
+
+  let insertPostList = postsList ? postsList : [];
+  let updatePostList = postsList ? postsList : [];
+  let existedPostIdList = [];
+  let postObjIdList = [];
+  postsList &&
+    postsList.forEach((post) => {
+      existedPostIdList.push(post.id);
+    });
+
+  currentPostList &&
+    currentPostList.forEach((currentPost) => {
+      if (existedPostIdList.includes(currentPost.id)) {
+        insertPostList = insertPostList.filter(
+          (post) => post.id !== currentPost.id
+        );
+        postObjIdList.push(currentPost._id);
+      } else {
+        updatePostList = updatePostList.filter(
+          (post) => post.id !== currentPost.id
+        );
+      }
+    });
+
+  updatePostList.forEach(async (updatePost) => {
+    await Post.updateOne({ id: updatePost.id }, updatePost);
   });
+
+  await Site.updateOne(
+    { id: pageId },
+    {
+      posts: postObjIdList.length > 0 ? postObjIdList : null,
+    }
+  );
+
+  await Post.insertMany(
+    insertPostList,
+    { upsert: true },
+    async (error, docs) => {
+      if (error) {
+        return error;
+      } else {
+        docs.forEach((doc) => {
+          postObjIdList.push(doc._id);
+        });
+        await Site.updateOne(
+          { id: pageId },
+          {
+            posts: postObjIdList.length > 0 ? postObjIdList : null,
+          }
+        );
+      }
+    }
+  );
 }
 
 export async function updateGallery(pageId, galleryList) {
@@ -278,18 +318,53 @@ export async function updateGallery(pageId, galleryList) {
 }
 
 export async function insertAndUpdateEvents(pageId, eventList) {
-  await Event.insertMany(eventList, async (error, docs) => {
+  const currentEventList = await Event.find();
+
+  let insertEventList = eventList ? eventList : [];
+  let updateEventList = eventList ? eventList : [];
+  let existedEventIdList = [];
+  let eventObjIdList = [];
+  eventList &&
+    eventList.forEach((event) => {
+      existedEventIdList.push(event.id);
+    });
+
+  currentEventList &&
+    currentEventList.forEach((currentEvent) => {
+      if (existedEventIdList.includes(currentEvent.id)) {
+        insertEventList = insertEventList.filter(
+          (event) => event.id !== currentEvent.id
+        );
+        eventObjIdList.push(currentEvent._id);
+      } else {
+        updateEventList = updateEventList.filter(
+          (event) => event.id !== currentEvent.id
+        );
+      }
+    });
+
+  updateEventList.forEach(async (updateEvent) => {
+    await Event.updateOne({ id: updateEvent.id }, updateEvent);
+  });
+
+  await Site.updateOne(
+    { id: pageId },
+    {
+      events: eventObjIdList.length > 0 ? eventObjIdList : null,
+    }
+  );
+
+  await Event.insertMany(insertEventList, async (error, docs) => {
     if (error) {
       return error;
     } else {
-      const eventIdList = [];
       docs.forEach((doc) => {
-        eventIdList.push(doc._id);
+        eventObjIdList.push(doc._id);
       });
       await Site.updateOne(
         { id: pageId },
         {
-          events: eventIdList.length > 0 ? eventIdList : null,
+          events: eventObjIdList.length > 0 ? eventObjIdList : null,
         }
       );
     }
