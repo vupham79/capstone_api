@@ -12,6 +12,7 @@ export async function insertTheme(body) {
       mainColor: body.color,
       previewImage: body.previewImage,
       category: category,
+      isOnePage: body.isOnePage,
     });
   }
   return insert;
@@ -28,6 +29,7 @@ export async function editTheme(id, body) {
       mainColor: body.color,
       previewImage: body.previewImage,
       category: category,
+      isOnePage: body.isOnePage,
     }
   );
   return edit;
