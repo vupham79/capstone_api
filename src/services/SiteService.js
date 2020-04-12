@@ -1296,18 +1296,14 @@ export async function insertAndUpdateSyncDataPost(pageId, postsList) {
     postsList.forEach(async (post) => {
       if (!existedPostIdList.includes(post.id)) {
         const existedPost = await Post.findOne({ id: post.id });
-        //if (existedPost) {
-        // await Post.updateOne({ id: post.id }, post);
-        // const postResult = await Post.findOne({ id: post.id });
-        // existedPostObjIdList.push(
-        //   new mongoose.Types.ObjectId(postResult._id)
-        // );
-        // await Site.updateOne(
-        //   { id: pageId },
-        //   { posts: existedPostObjIdList }
-        // );
-        //}
-        if (!existedPost) {
+        if (existedPost) {
+          await Post.updateOne({ id: post.id }, post);
+          const postResult = await Post.findOne({ id: post.id });
+          existedPostObjIdList.push(
+            new mongoose.Types.ObjectId(postResult._id)
+          );
+          await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
+        } else {
           const postResult = await Post.create(post);
           existedPostObjIdList.push(
             new mongoose.Types.ObjectId(postResult._id)
@@ -1351,21 +1347,19 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
     eventList.forEach(async (event) => {
       if (!existedEventIdList.includes(event.id)) {
         const existedEvent = await Event.findOne({ id: event.id });
-        //if (existedEvent) {
-        // await Event.updateOne({ id: event.id }, event);
-        // const eventResult = await Event.findOne({ id: event.id });
-        // existedEventObjIdList.push(
-        //   new mongoose.Types.ObjectId(eventResult._id)
-        // );
-        // const result = await Site.updateOne(
-        //   { id: pageId },
-        //   {
-        //     events: existedEventObjIdList,
-        //   }
-        // );
-        // console.log("Existed Event true: ", result);
-        //}
-        if (!existedEvent) {
+        if (existedEvent) {
+          await Event.updateOne({ id: event.id }, event);
+          const eventResult = await Event.findOne({ id: event.id });
+          existedEventObjIdList.push(
+            new mongoose.Types.ObjectId(eventResult._id)
+          );
+          const result = await Site.updateOne(
+            { id: pageId },
+            {
+              events: existedEventObjIdList,
+            }
+          );
+        } else {
           const eventResult = await Event.create(event);
           existedEventObjIdList.push(
             new mongoose.Types.ObjectId(eventResult._id)
