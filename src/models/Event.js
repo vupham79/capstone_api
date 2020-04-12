@@ -4,41 +4,45 @@ const EventSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      unique: [true, "Id already existed!"]
+      unique: [true, "Id already existed!"],
     },
     name: {
       type: String,
-      default: null
+      default: null,
     },
     description: {
       type: String,
-      default: null
+      default: null,
     },
     cover: {
       type: String,
-      default: null
+      default: null,
     },
     startTime: {
       type: String,
-      default: null
+      default: null,
     },
     endTime: {
       type: String,
-      default: null
+      default: null,
     },
     place: {
       name: { type: String, default: null },
       street: { type: String, default: null },
       city: { type: String, default: null },
-      country: { type: String, default: null }
+      country: { type: String, default: null },
     },
     url: {
       type: String,
-      default: null
-    }
+      default: null,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

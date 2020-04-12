@@ -147,6 +147,7 @@ export async function saveDesign(data) {
     id: data.pageId,
   });
   if (site) {
+    console.log(site.limitNews, data.limitNews);
     site.fontTitle = data.fontTitle;
     site.fontBody = data.fontBody;
     site.title = data.name;
@@ -241,22 +242,61 @@ export async function updateCovers(pageId, cover) {
 }
 
 export async function insertAndUpdatePosts(pageId, postsList) {
-  await Post.insertMany(postsList, async (error, docs) => {
-    if (error) {
-      return error;
-    } else {
-      const postIdList = [];
-      docs.forEach((doc) => {
-        postIdList.push(doc._id);
-      });
-      await Site.updateOne(
-        { id: pageId },
-        {
-          posts: postIdList.length > 0 ? postIdList : null,
-        }
-      );
-    }
+  const currentPostList = await Post.find();
+
+  let insertPostList = postsList ? postsList : [];
+  let updatePostList = postsList ? postsList : [];
+  let existedPostIdList = [];
+  let postObjIdList = [];
+  postsList &&
+    postsList.forEach((post) => {
+      existedPostIdList.push(post.id);
+    });
+
+  currentPostList &&
+    currentPostList.forEach((currentPost) => {
+      if (existedPostIdList.includes(currentPost.id)) {
+        insertPostList = insertPostList.filter(
+          (post) => post.id !== currentPost.id
+        );
+        postObjIdList.push(currentPost._id);
+      } else {
+        updatePostList = updatePostList.filter(
+          (post) => post.id !== currentPost.id
+        );
+      }
+    });
+
+  updatePostList.forEach(async (updatePost) => {
+    await Post.updateOne({ id: updatePost.id }, updatePost);
   });
+
+  await Site.updateOne(
+    { id: pageId },
+    {
+      posts: postObjIdList.length > 0 ? postObjIdList : null,
+    }
+  );
+
+  await Post.insertMany(
+    insertPostList,
+    { upsert: true },
+    async (error, docs) => {
+      if (error) {
+        return error;
+      } else {
+        docs.forEach((doc) => {
+          postObjIdList.push(doc._id);
+        });
+        await Site.updateOne(
+          { id: pageId },
+          {
+            posts: postObjIdList.length > 0 ? postObjIdList : null,
+          }
+        );
+      }
+    }
+  );
 }
 
 export async function updateGallery(pageId, galleryList) {
@@ -278,18 +318,53 @@ export async function updateGallery(pageId, galleryList) {
 }
 
 export async function insertAndUpdateEvents(pageId, eventList) {
-  await Event.insertMany(eventList, async (error, docs) => {
+  const currentEventList = await Event.find();
+
+  let insertEventList = eventList ? eventList : [];
+  let updateEventList = eventList ? eventList : [];
+  let existedEventIdList = [];
+  let eventObjIdList = [];
+  eventList &&
+    eventList.forEach((event) => {
+      existedEventIdList.push(event.id);
+    });
+
+  currentEventList &&
+    currentEventList.forEach((currentEvent) => {
+      if (existedEventIdList.includes(currentEvent.id)) {
+        insertEventList = insertEventList.filter(
+          (event) => event.id !== currentEvent.id
+        );
+        eventObjIdList.push(currentEvent._id);
+      } else {
+        updateEventList = updateEventList.filter(
+          (event) => event.id !== currentEvent.id
+        );
+      }
+    });
+
+  updateEventList.forEach(async (updateEvent) => {
+    await Event.updateOne({ id: updateEvent.id }, updateEvent);
+  });
+
+  await Site.updateOne(
+    { id: pageId },
+    {
+      events: eventObjIdList.length > 0 ? eventObjIdList : null,
+    }
+  );
+
+  await Event.insertMany(insertEventList, async (error, docs) => {
     if (error) {
       return error;
     } else {
-      const eventIdList = [];
       docs.forEach((doc) => {
-        eventIdList.push(doc._id);
+        eventObjIdList.push(doc._id);
       });
       await Site.updateOne(
         { id: pageId },
         {
-          events: eventIdList.length > 0 ? eventIdList : null,
+          events: eventObjIdList.length > 0 ? eventObjIdList : null,
         }
       );
     }
@@ -685,6 +760,7 @@ export async function getFacebookEventData(data, dateFrom, dateTo) {
             place: place,
             isCanceled: event.is_canceled,
             url: "facebook.com/" + event.id,
+            isActive: true,
           });
         }
       });
@@ -729,6 +805,7 @@ export async function getFacebookEventData(data, dateFrom, dateTo) {
           place: place,
           isCanceled: event.is_canceled,
           url: "facebook.com/" + event.id,
+          isActive: true,
         });
       });
   }
@@ -781,6 +858,7 @@ export async function getFacebookEventSyncData(data) {
         place: place,
         isCanceled: event.is_canceled,
         url: "facebook.com/" + event.id,
+        isActive: true,
       });
     });
   return eventList;
@@ -1175,51 +1253,53 @@ export async function insertAndUpdateSyncDataPost(pageId, postsList) {
   let existedPostObjIdList = [];
   let existedPostIdList = [];
   let fbPostIdList = [];
+  console.log(postsList.length);
   postsList &&
     postsList.forEach((post) => {
       fbPostIdList.push(post.id);
     });
+  console.log("Fb Post Id List length: ", fbPostIdList.length);
+  console.log("Post List length: ", postsList.length);
   site.posts &&
-    site.posts.forEach((existedPost) => {
+    site.posts.forEach(async (existedPost) => {
       if (fbPostIdList.includes(existedPost.id)) {
+        console.log("Existed Post: ", existedPost.id);
         existedPostIdList.push(existedPost.id);
+      } else {
+        console.log("Deactive Post: ", existedPost.id);
+        await Post.updateOne({ id: existedPost.id }, { isActive: false });
       }
     });
-  if (postsList) {
-    postsList &&
-      postsList.forEach(async (post) => {
-        if (!existedPostIdList.includes(post.id)) {
-          const existedPost = await Post.findOne({ id: post.id });
-          if (existedPost) {
-            await Post.updateOne({ id: post.id }, post);
-            const postResult = await Post.findOne({ id: post.id });
-            existedPostObjIdList.push(
-              new mongoose.Types.ObjectId(postResult._id)
-            );
-            await Site.updateOne(
-              { id: pageId },
-              { posts: existedPostObjIdList }
-            );
-          } else {
-            const postResult = await Post.create(post);
-            existedPostObjIdList.push(
-              new mongoose.Types.ObjectId(postResult._id)
-            );
-            await Site.updateOne(
-              { id: pageId },
-              { posts: existedPostObjIdList }
-            );
-          }
-        } else {
-          await Post.updateOne({ id: post.id }, post);
-          const postResult = await Post.findOne({ id: post.id });
+
+  postsList &&
+    postsList.forEach(async (post) => {
+      if (!existedPostIdList.includes(post.id)) {
+        const existedPost = await Post.findOne({ id: post.id });
+        //if (existedPost) {
+        // await Post.updateOne({ id: post.id }, post);
+        // const postResult = await Post.findOne({ id: post.id });
+        // existedPostObjIdList.push(
+        //   new mongoose.Types.ObjectId(postResult._id)
+        // );
+        // await Site.updateOne(
+        //   { id: pageId },
+        //   { posts: existedPostObjIdList }
+        // );
+        //}
+        if (!existedPost) {
+          const postResult = await Post.create(post);
           existedPostObjIdList.push(
             new mongoose.Types.ObjectId(postResult._id)
           );
           await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
         }
-      });
-  }
+      } else {
+        await Post.updateOne({ id: post.id }, post);
+        const postResult = await Post.findOne({ id: post.id });
+        existedPostObjIdList.push(new mongoose.Types.ObjectId(postResult._id));
+        await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
+      }
+    });
 }
 
 export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
@@ -1235,33 +1315,41 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
       fbEventIdList.push(event.id);
     });
   site.events &&
-    site.events.forEach((existedEvent) => {
+    site.events.forEach(async (existedEvent) => {
       if (fbEventIdList.includes(existedEvent.id)) {
+        console.log("Existed Event: ", existedEvent.id);
         existedEventIdList.push(existedEvent.id);
+      } else {
+        console.log("Deactive Event: ", existedEvent.id);
+        await Event.updateOne({ id: existedEvent.id }, { isActive: false });
       }
     });
+  console.log("Fb Event Id List length: ", fbEventIdList.length);
+  console.log("Event List length: ", eventList.length);
   if (eventList) {
     eventList.forEach(async (event) => {
       if (!existedEventIdList.includes(event.id)) {
         const existedEvent = await Event.findOne({ id: event.id });
-        if (existedEvent) {
-          await Event.updateOne({ id: event.id }, event);
-          const eventResult = await Event.findOne({ id: event.id });
-          existedEventObjIdList.push(
-            new mongoose.Types.ObjectId(eventResult._id)
-          );
-          await Site.updateOne(
-            { id: pageId },
-            {
-              events: existedEventObjIdList,
-            }
-          );
-        } else {
+        //if (existedEvent) {
+          // await Event.updateOne({ id: event.id }, event);
+          // const eventResult = await Event.findOne({ id: event.id });
+          // existedEventObjIdList.push(
+          //   new mongoose.Types.ObjectId(eventResult._id)
+          // );
+          // const result = await Site.updateOne(
+          //   { id: pageId },
+          //   {
+          //     events: existedEventObjIdList,
+          //   }
+          // );
+          // console.log("Existed Event true: ", result);
+        //} 
+        if (!existedEvent) {
           const eventResult = await Event.create(event);
           existedEventObjIdList.push(
             new mongoose.Types.ObjectId(eventResult._id)
           );
-          await Site.updateOne(
+          const result = await Site.updateOne(
             { id: pageId },
             { events: existedEventObjIdList }
           );
@@ -1272,7 +1360,10 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
         existedEventObjIdList.push(
           new mongoose.Types.ObjectId(eventResult._id)
         );
-        await Site.updateOne({ id: pageId }, { events: existedEventObjIdList });
+        const result = await Site.updateOne(
+          { id: pageId },
+          { events: existedEventObjIdList }
+        );
       }
     });
   }
