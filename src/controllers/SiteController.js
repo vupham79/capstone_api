@@ -845,6 +845,7 @@ export async function syncEvent(req, res) {
       pageId: pageId,
       accessToken: req.user.accessToken,
     });
+    console.log("Get sync event data length: ", data.length);
     if (data) {
       //event list
       eventList = await SiteService.getFacebookEventData(
@@ -852,6 +853,7 @@ export async function syncEvent(req, res) {
         dateFrom,
         dateTo
       );
+      console.log("Event list length: ", eventList.length);
       if (!eventList) {
         return res
           .status(200)
