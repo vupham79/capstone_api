@@ -83,9 +83,24 @@ export async function findOneSiteByAccessToken(id, body) {
 }
 
 export async function findOneSite(id) {
-  return await Site.findOne({ id: id }).populate({
-    path: "theme posts events syncRecords",
-  });
+  const site = await Site.findOne({ id: id })
+    .populate({
+      path: "theme posts",
+    })
+    .populate({
+      path: "events",
+      // match: { isActive: true },
+      options: {
+        sort: { startTime: -1 },
+      },
+    })
+    .populate({
+      path: "syncRecords",
+      options: {
+        sort: { createdAt: -1 },
+      },
+    });
+  return site;
 }
 
 export function addSyncRecord(record, siteExist) {
