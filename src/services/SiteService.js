@@ -996,7 +996,7 @@ export async function findSiteEventTab(id, sitePath, pageNumber = 1) {
       .select("events")
       .populate({
         path: "events",
-        match: { isActive: true },
+        // match: { isActive: true },
         options: {
           limit: limitEvent,
           skip: (pageNumber - 1) * limitEvent,
@@ -1021,7 +1021,7 @@ export async function findSiteEventTab(id, sitePath, pageNumber = 1) {
       .select("events")
       .populate({
         path: "events",
-        match: { isActive: true },
+        // match: { isActive: true },
         options: {
           limit: limitEvent,
           skip: (pageNumber - 1) * limitEvent,
@@ -1059,8 +1059,11 @@ function findDataBySection(sitePath) {
               .select("events")
               .populate({
                 path: "events",
-                match: { isActive: true },
-                options: { limit: defaultLimitEvent, sort: { startTime: -1 } },
+                // match: { isActive: true },
+                options: {
+                  limit: defaultLimitEvent,
+                  sort: { startTime: -1 },
+                },
               });
             section.filter.items = [];
             for (let index = 0; index < events[0].events.length; index++) {
