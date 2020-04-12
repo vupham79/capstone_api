@@ -979,9 +979,14 @@ export async function findSiteEventTab(id, sitePath, pageNumber = 1) {
     const limitEvent = total.limitEvent;
     const events = await Site.findOne({ sitePath })
       .select("events")
-      .populate("events", "", "", "", {
-        limit: limitEvent,
-        skip: (pageNumber - 1) * limitEvent,
+      .populate({
+        path: "events",
+        match: { isActive: true },
+        options: {
+          limit: limitEvent,
+          skip: (pageNumber - 1) * limitEvent,
+          sort: { startTime: -1 },
+        },
       });
     return {
       pageCount: Math.ceil(counter / limitEvent),
@@ -999,9 +1004,14 @@ export async function findSiteEventTab(id, sitePath, pageNumber = 1) {
     const limitEvent = total.limitEvent;
     const events = await Site.findOne({ id })
       .select("events")
-      .populate("events", "", "", "", {
-        limit: limitEvent,
-        skip: (pageNumber - 1) * limitEvent,
+      .populate({
+        path: "events",
+        match: { isActive: true },
+        options: {
+          limit: limitEvent,
+          skip: (pageNumber - 1) * limitEvent,
+          sort: { startTime: -1 },
+        },
       });
     return {
       pageCount: Math.ceil(counter / limitEvent),
@@ -1032,9 +1042,10 @@ function findDataBySection(sitePath) {
           } else {
             const events = await Site.find({ sitePath })
               .select("events")
-              .populate("events", "", "", "", {
-                limit: defaultLimitEvent,
-                sort: { _id: 1 },
+              .populate({
+                path: "events",
+                match: { isActive: true },
+                options: { limit: defaultLimitEvent, sort: { startTime: -1 } },
               });
             section.filter.items = [];
             for (let index = 0; index < events[0].events.length; index++) {
@@ -1091,7 +1102,7 @@ function findDataBySection(sitePath) {
               .populate({
                 path: "posts",
                 match: { isActive: true },
-                options: { limit: defaultLimitNews, sort: { _id: 1 } },
+                options: { limit: defaultLimitNews, sort: { createdTime: -1 } },
               });
             section.filter.items = [];
             for (let index = 0; index < posts[0].posts.length; index++) {
@@ -1152,6 +1163,7 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
           _id: "$galleries",
         },
       },
+      { $sort: { _id: -1 } },
       { $skip: (pageNumber - 1) * limitGallery },
       { $limit: limitGallery },
     ]);
@@ -1180,7 +1192,11 @@ export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
       .populate({
         path: "posts",
         match: { isActive: true },
-        options: { limit: limitNews, skip: (pageNumber - 1) * limitNews },
+        options: {
+          limit: limitNews,
+          skip: (pageNumber - 1) * limitNews,
+          sort: { createdTime: -1 },
+        },
       });
     return {
       pageCount: Math.ceil(counter / limitNews),
@@ -1199,9 +1215,14 @@ export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
     const limitNews = total.limitNews;
     const posts = await Site.findOne({ id })
       .select("posts")
-      .populate("posts", "", "", "", {
-        limit: limitNews,
-        skip: (pageNumber - 1) * limitNews,
+      .populate({
+        path: "posts",
+        match: { isActive: true },
+        options: {
+          limit: limitNews,
+          skip: (pageNumber - 1) * limitNews,
+          sort: { createdTime: -1 },
+        },
       });
     return {
       pageCount: Math.ceil(counter / limitNews),
@@ -1331,19 +1352,19 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
       if (!existedEventIdList.includes(event.id)) {
         const existedEvent = await Event.findOne({ id: event.id });
         //if (existedEvent) {
-          // await Event.updateOne({ id: event.id }, event);
-          // const eventResult = await Event.findOne({ id: event.id });
-          // existedEventObjIdList.push(
-          //   new mongoose.Types.ObjectId(eventResult._id)
-          // );
-          // const result = await Site.updateOne(
-          //   { id: pageId },
-          //   {
-          //     events: existedEventObjIdList,
-          //   }
-          // );
-          // console.log("Existed Event true: ", result);
-        //} 
+        // await Event.updateOne({ id: event.id }, event);
+        // const eventResult = await Event.findOne({ id: event.id });
+        // existedEventObjIdList.push(
+        //   new mongoose.Types.ObjectId(eventResult._id)
+        // );
+        // const result = await Site.updateOne(
+        //   { id: pageId },
+        //   {
+        //     events: existedEventObjIdList,
+        //   }
+        // );
+        // console.log("Existed Event true: ", result);
+        //}
         if (!existedEvent) {
           const eventResult = await Event.create(event);
           existedEventObjIdList.push(
