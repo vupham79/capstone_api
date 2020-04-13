@@ -13,7 +13,7 @@ export async function insertTheme(body) {
       mainColor: body.mainColor ? body.mainColor : "#1474D4",
       previewImage: body.previewImage,
       category: category,
-      isOnePage: body.isOnePage ? body.isOnePage : true,
+      isOnePage: body.isOnePage,
     });
   }
   return insert;
@@ -30,16 +30,20 @@ export async function editTheme(id, body) {
       mainColor: body.color ? body.color : "#1474D4",
       previewImage: body.previewImage,
       category: category,
-      isOnePage: body.isOnePage ? body.isOnePage : true,
+      isOnePage: body.isOnePage,
     }
   );
   return edit;
 }
 
 export async function findAllTheme() {
-  return await Theme.find().populate("category");
+  return await Theme.find({ isDeleted: false }).populate("category");
 }
 
 export async function findOneTheme(id) {
   return await Theme.findOne({ _id: id });
+}
+
+export async function deleteTheme(id) {
+  return await Theme.updateOne({ _id: id }, { isDeleted: true });
 }

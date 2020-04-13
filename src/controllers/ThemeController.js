@@ -3,6 +3,7 @@ import {
   editTheme,
   findOneTheme,
   findAllTheme,
+  deleteTheme,
 } from "../services/ThemeService";
 
 export async function insert(req, res) {
@@ -47,6 +48,18 @@ export async function findAll(req, res) {
     const find = await findAllTheme();
     if (find) {
       return res.status(200).send(find);
+    }
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(400).send({ error });
+  }
+}
+
+export async function deleteOne(req, res) {
+  try {
+    const deleteOne = await deleteTheme(req.params.id);
+    if (deleteOne) {
+      return res.status(200).send(deleteOne);
     }
     return res.status(204).send();
   } catch (error) {

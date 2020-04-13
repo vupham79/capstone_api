@@ -11,6 +11,12 @@ router.patch(
   CategoryController.update
 );
 
+router.delete(
+  "/delete/:id",
+  AuthController.authAdmin,
+  CategoryController.deleteOne
+);
+
 router.get("/find/:id", CategoryController.findOne);
 
 router.get("/findAll", AuthController.authAdmin, CategoryController.findAll);

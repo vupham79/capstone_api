@@ -4,14 +4,18 @@ const CategorySchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      unique: [true, "Category already existed!"]
+      unique: [true, "Category already existed!"],
     },
     picture: {
-      type: String
-    }
+      type: String,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

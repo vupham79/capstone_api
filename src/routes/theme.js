@@ -11,4 +11,6 @@ router.get("/find/:id", authAll, ThemeController.findOne);
 
 router.get("/findAll", authAll, ThemeController.findAll);
 
+router.delete("/delete/:id", authAdmin, ThemeController.deleteOne);
+
 export default router;

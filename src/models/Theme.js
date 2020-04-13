@@ -32,7 +32,11 @@ const ThemeSchema = new mongoose.Schema(
     category: { type: Schema.Types.ObjectId, ref: "Category" },
     isOnePage: {
       type: Boolean,
-      default: true,
+      default: false,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {

@@ -51,3 +51,15 @@ export async function findAll(req, res) {
     return res.status(400).send({ error });
   }
 }
+
+export async function deleteOne(req, res) {
+  try {
+    const result = await CategoryService.deleteCategory(req.params.id);
+    if (result) {
+      return res.status(200).send(result);
+    }
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(400).send({ error });
+  }
+}
