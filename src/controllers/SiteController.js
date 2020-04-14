@@ -997,18 +997,10 @@ export async function syncData(req, res) {
                 dateFrom: dateFrom,
                 dateTo: dateTo,
               });
-              console.log("Show story: ", showStoryValue);
               let syncRecordList = SiteService.addSyncRecord(record, siteExist);
               const update = await SiteService.editSite(pageId, {
-                phone: data.phone,
-                longitude: data.location ? data.location.longitude : null,
-                latitude: data.location ? data.location.latitude : null,
-                address: data.single_line_address,
                 categories: data.category_list,
-                about: data.about,
-                genre: data.genre,
                 syncRecords: syncRecordList,
-                showStory: showStoryValue,
               });
               //post list
               postsList = await SiteService.getFacebookPostData(
@@ -1101,14 +1093,7 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
                 dataType: "All",
               });
               const update = await SiteService.editSite(pageId, {
-                phone: data.phone,
-                longitude: data.location ? data.location.longitude : null,
-                latitude: data.location ? data.location.latitude : null,
-                address: data.single_line_address,
-                cover: data.cover ? [data.cover.source] : null,
                 categories: data.category_list,
-                about: data.about,
-                genre: data.genre,
                 syncRecord: record,
               });
               //post list
