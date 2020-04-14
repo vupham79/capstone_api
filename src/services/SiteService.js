@@ -162,7 +162,6 @@ export async function saveDesign(data) {
     id: data.pageId,
   });
   if (site) {
-    console.log(site.limitNews, data.limitNews);
     site.fontTitle = data.fontTitle;
     site.fontBody = data.fontBody;
     site.title = data.name;
@@ -193,8 +192,8 @@ export async function saveDesign(data) {
     site.showDetailSetting.showAboutDescription = data.showAboutDescription;
     site.showDetailSetting.showAboutLogo = data.showAboutLogo;
     site.showDetailSetting.showMessageUs = data.showMessageUs;
-
-    console.log(site.showDetailSetting);
+    site.longitude = data.longitude;
+    site.latitude = data.latitude;
     if (data.logoURL) {
       site.logo = data.logoURL;
     }

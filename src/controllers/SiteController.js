@@ -314,6 +314,8 @@ export async function saveDesign(req, res) {
     showAboutDescription = true,
     showAboutLogo = true,
     showMessageUs = true,
+    longitude,
+    latitude,
   } = req.body;
   try {
     if (
@@ -415,6 +417,8 @@ export async function saveDesign(req, res) {
         showAboutDescription,
         showAboutLogo,
         showMessageUs,
+        longitude,
+        latitude,
       });
       if (update.msg) {
         return res.status(400).send(update);
