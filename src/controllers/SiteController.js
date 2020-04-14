@@ -316,6 +316,7 @@ export async function saveDesign(req, res) {
     showMessageUs = true,
     longitude,
     latitude,
+    showPostMode = 0,
   } = req.body;
   try {
     if (
@@ -419,6 +420,7 @@ export async function saveDesign(req, res) {
         showMessageUs,
         longitude,
         latitude,
+        showPostMode,
       });
       if (update.msg) {
         return res.status(400).send(update);

@@ -192,6 +192,7 @@ export async function saveDesign(data) {
     site.showDetailSetting.showAboutDescription = data.showAboutDescription;
     site.showDetailSetting.showAboutLogo = data.showAboutLogo;
     site.showDetailSetting.showMessageUs = data.showMessageUs;
+    site.showDetailSetting.showPostMode = data.showPostMode;
     site.longitude = data.longitude;
     site.latitude = data.latitude;
     if (data.logoURL) {

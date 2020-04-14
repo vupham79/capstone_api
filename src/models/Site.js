@@ -258,6 +258,10 @@ const SiteSchema = new mongoose.Schema(
         type: Boolean,
         default: true,
       },
+      showPostMode: {
+        type: Number,
+        default: 0,
+      },
     },
   },
   {
