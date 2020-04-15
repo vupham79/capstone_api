@@ -405,15 +405,19 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
       data.posts.data.forEach(async (post) => {
         if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
           if (!post.attachments || post.attachments === undefined) {
-            postsList.push({
-              id: post.id,
-              title: null,
-              message: post.message,
-              isActive: true,
-              createdTime: post.created_time,
-              attachments: null,
-              target: null,
-            });
+            console.log("No attachments: ", post.message);
+            if(!post.message || post.message === undefined || post.message.replace(/\s/g, "") === "") {
+            } else {
+              postsList.push({
+                id: post.id,
+                title: null,
+                message: post.message,
+                isActive: true,
+                createdTime: post.created_time,
+                attachments: null,
+                target: null,
+              });
+            }
           } else if (
             post.attachments &&
             post.attachments.data[0].media_type === "album"
@@ -482,15 +486,19 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
       data.posts.data &&
       data.posts.data.forEach(async (post) => {
         if (!post.attachments || post.attachments === undefined) {
-          postsList.push({
-            id: post.id,
-            title: null,
-            message: post.message,
-            isActive: true,
-            createdTime: post.created_time,
-            attachments: null,
-            target: null,
-          });
+          console.log("No attachments: ", post.message);
+          if(!post.message || post.message === undefined || post.message.replace(/\s/g, "") === "") {
+          } else {
+            postsList.push({
+              id: post.id,
+              title: null,
+              message: post.message,
+              isActive: true,
+              createdTime: post.created_time,
+              attachments: null,
+              target: null,
+            });
+          }
         } else if (
           post.attachments &&
           post.attachments.data[0].media_type === "album"
