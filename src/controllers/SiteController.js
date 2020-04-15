@@ -601,6 +601,7 @@ export async function syncPost(req, res) {
     if (data) {
       //post list
       postsList = await SiteService.getFacebookPostData(data, dateFrom, dateTo);
+      console.log("Posts List: ", postsList.length);
       const siteExist = await Site.findOne({ id: pageId });
       if (siteExist) {
         const record = await SyncRecord.create({
@@ -666,11 +667,11 @@ export async function autoSyncPost(userEmail, pageId, accessToken) {
           from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
           to: userEmail, // list of receivers
           subject: "Sync Success ✔", // Subject line
-          text: "Your site has synced data success", // plain text body
+          text: "Your site has synced post success", // plain text body
           html: `
           <h5><strong>FPWG System</strong></h5>
           <p>Hi,</p>
-          <p>Your site ${siteExist.title} just synced successfully!</p>
+          <p>Your site ${siteExist.title} just synced post successfully!</p>
           <br/>
           `, // html body
         });
@@ -680,7 +681,7 @@ export async function autoSyncPost(userEmail, pageId, accessToken) {
           from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
           to: userEmail, // list of receivers
           subject: "Sync Failed ✔", // Subject line
-          text: "Your site is not exist to sync", // plain text body
+          text: "Your site is not existed to sync post", // plain text body
           html: `
         <h5><strong>FPWG System</strong></h5>
         <p>Hi,</p>
@@ -695,11 +696,11 @@ export async function autoSyncPost(userEmail, pageId, accessToken) {
         from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
         to: userEmail, // list of receivers
         subject: "Sync Failed ✔", // Subject line
-        text: "Your Facebook Page is not exist to sync", // plain text body
+        text: "Your Facebook Page is not exist to sync post", // plain text body
         html: `
       <h5><strong>FPWG System</strong></h5>
       <p>Hi,</p>
-      <p>Your site is not existed to sync!</p>
+      <p>Your site is not existed to sync post!</p>
       <br/>
       `, // html body
       });
@@ -802,7 +803,7 @@ export async function autoSyncGallery(pageId, accessToken, userEmail) {
           from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
           to: userEmail, // list of receivers
           subject: "Sync Success ✔", // Subject line
-          text: "Your site has synced data success", // plain text body
+          text: "Your site has synced gallery success", // plain text body
           html: `
           <h5><strong>FPWG System</strong></h5>
           <p>Hi,</p>
@@ -815,7 +816,7 @@ export async function autoSyncGallery(pageId, accessToken, userEmail) {
           from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
           to: userEmail, // list of receivers
           subject: "Sync Failed ✔", // Subject line
-          text: "Your site has synced data failed", // plain text body
+          text: "Your site has synced gallery failed", // plain text body
           html: `
         <h5><strong>FPWG System</strong></h5>
         <p>Hi,</p>
@@ -829,11 +830,11 @@ export async function autoSyncGallery(pageId, accessToken, userEmail) {
         from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
         to: userEmail, // list of receivers
         subject: "Sync Failed ✔", // Subject line
-        text: "Your site has synced data failed", // plain text body
+        text: "Your site has synced gallery failed", // plain text body
         html: `
       <h5><strong>FPWG System</strong></h5>
       <p>Hi,</p>
-      <p>Your site is not existed to sync!</p>
+      <p>Your site is not existed to sync gallery!</p>
       <br/>
       `, // html body
       });
@@ -928,11 +929,11 @@ export async function autoSyncEvent(pageId, accessToken, userEmail) {
           from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
           to: userEmail, // list of receivers
           subject: "Sync Success ✔", // Subject line
-          text: "Your site has synced data success", // plain text body
+          text: "Your site has synced event success", // plain text body
           html: `
           <h5><strong>FPWG System</strong></h5>
           <p>Hi,</p>
-          <p>Your site ${siteExist.title} just synced successfully!</p>
+          <p>Your site ${siteExist.title} just synced event successfully!</p>
           <br/>
           `, // html body
         });
@@ -941,7 +942,7 @@ export async function autoSyncEvent(pageId, accessToken, userEmail) {
           from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
           to: userEmail, // list of receivers
           subject: "Sync Failed ✔", // Subject line
-          text: "Your site has synced data failed", // plain text body
+          text: "Your site has synced event failed", // plain text body
           html: `
           <h5><strong>FPWG System</strong></h5>
           <p>Hi,</p>
@@ -955,11 +956,11 @@ export async function autoSyncEvent(pageId, accessToken, userEmail) {
         from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
         to: userEmail, // list of receivers
         subject: "Sync Failed ✔", // Subject line
-        text: "Your site has synced data failed", // plain text body
+        text: "Your site has synced event failed", // plain text body
         html: `
       <h5><strong>FPWG System</strong></h5>
       <p>Hi,</p>
-      <p>Your site is not existed to sync!</p>
+      <p>Your site is not existed to sync event!</p>
       <br/>
       `, // html body
       });
@@ -1190,7 +1191,7 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
         html: `
       <h5><strong>FPWG System</strong></h5>
       <p>Hi,</p>
-      <p>Your site is not existed to sync!</p>
+      <p>Your site is not existed to sync data!</p>
       <br/>
       `, // html body
       });
