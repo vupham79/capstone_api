@@ -601,7 +601,6 @@ export async function syncPost(req, res) {
     if (data) {
       //post list
       postsList = await SiteService.getFacebookPostData(data, dateFrom, dateTo);
-      console.log("Posts List: ", postsList.length);
       const siteExist = await Site.findOne({ id: pageId });
       if (siteExist) {
         const record = await SyncRecord.create({
