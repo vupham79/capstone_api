@@ -21,9 +21,11 @@ app.use(
       "https://fpwg.now.sh",
       "https://fpwg.netlify.com",
       "https://fpwg1.netlify.com",
-      "http://localhost:3000"
+      "https://fpwg.netlify.app",
+      "https://fpwg1.netlify.app",
+      "http://localhost:3000",
     ],
-    credentials: true
+    credentials: true,
   })
 );
 
