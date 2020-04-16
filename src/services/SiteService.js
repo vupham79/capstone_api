@@ -1119,6 +1119,26 @@ function findDataBySection(sitePath) {
           }
         } else if (section.original === "news") {
           if (section.filter.type === "manual") {
+            const setting = await Site.findOne({ sitePath }).select(
+              "limitNews showDetailSetting.showPostMode"
+            );
+            const mode = setting.showDetailSetting.showPostMode;
+            const posts = await Site.find({ sitePath })
+              .select("posts")
+              .populate({
+                path: "posts",
+                match:
+                mode === 0
+                  ? { isActive: true }
+                  : mode === 1
+                  ? { isActive: true, "attachments.media_type": ["photo", "album"] }
+                  : mode === 2
+                  ? { isActive: true, "attachments.media_type": "video" }
+                  : mode === 3
+                  ? { isActive: true, "attachments.media_type": null }
+                  : { isActive: true },
+                options: { limit: defaultLimitNews, sort: { createdTime: -1 } },
+              });
             if (section.filter.items) {
               for (const _id of section.filter.items) {
                 let post = await Post.findOne({ _id });
@@ -1131,11 +1151,24 @@ function findDataBySection(sitePath) {
               }
             }
           } else {
+            const setting = await Site.findOne({ sitePath }).select(
+              "limitNews showDetailSetting.showPostMode"
+            );
+            const mode = setting.showDetailSetting.showPostMode;
             const posts = await Site.find({ sitePath })
               .select("posts")
               .populate({
                 path: "posts",
-                match: { isActive: true },
+                match:
+                mode === 0
+                  ? { isActive: true }
+                  : mode === 1
+                  ? { isActive: true, "attachments.media_type": ["photo", "album"] }
+                  : mode === 2
+                  ? { isActive: true, "attachments.media_type": "video" }
+                  : mode === 3
+                  ? { isActive: true, "attachments.media_type": null }
+                  : { isActive: true },
                 options: { limit: defaultLimitNews, sort: { createdTime: -1 } },
               });
             section.filter.items = [];
@@ -1227,7 +1260,7 @@ export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
             : mode === 2
             ? { isActive: true, "attachments.media_type": "video" }
             : mode === 3
-            ? { isActive: true, attachments: null }
+            ? { isActive: true, "attachments.media_type": null }
             : { isActive: true },
         options: {
           limit: limitNews,
