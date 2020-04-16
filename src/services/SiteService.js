@@ -506,6 +506,7 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
               attachments: null,
               target: null,
             });
+            console.log("postsList: ", postsList);
           }
         } else if (
           post.attachments &&
@@ -1135,7 +1136,7 @@ function findDataBySection(sitePath) {
                   : mode === 2
                   ? { isActive: true, "attachments.media_type": "video" }
                   : mode === 3
-                  ? { isActive: true, "attachments.media_type": null }
+                  ? { isActive: true, attachments : null }
                   : { isActive: true },
                 options: { limit: defaultLimitNews, sort: { createdTime: -1 } },
               });
@@ -1167,7 +1168,7 @@ function findDataBySection(sitePath) {
                   : mode === 2
                   ? { isActive: true, "attachments.media_type": "video" }
                   : mode === 3
-                  ? { isActive: true, "attachments.media_type": null }
+                  ? { isActive: true, attachments : null}
                   : { isActive: true },
                 options: { limit: defaultLimitNews, sort: { createdTime: -1 } },
               });
@@ -1260,7 +1261,7 @@ export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
             : mode === 2
             ? { isActive: true, "attachments.media_type": "video" }
             : mode === 3
-            ? { isActive: true, "attachments.media_type": null }
+            ? { isActive: true, attachments : null}
             : { isActive: true },
         options: {
           limit: limitNews,
