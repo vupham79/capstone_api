@@ -66,10 +66,24 @@ export async function getSyncData({ pageId, accessToken }) {
 }
 
 export async function getPageData({ pageId, accessToken }) {
+  let page_about_story = null;
+  try {
+    const data = await axios({
+      params: {
+        fields: "page_about_story",
+        locale: "en_US",
+        access_token: accessToken,
+      },
+      url: process.env.facebookAPI + pageId,
+    });
+    if (data.data) {
+      page_about_story = data.data.page_about_story;
+    }
+  } catch (error) {}
   const data = await axios({
     params: {
       fields:
-        "name,cover,phone,category_list,about,page_about_story," +
+        "name,cover,phone,category_list,about," +
         "location,single_line_address,albums{picture,link}," +
         "posts{message,created_time,attachments{title,media_type,subattachments,media,target}}," +
         "events{id,name,description,place,is_canceled,end_time,start_time,cover}",
@@ -95,7 +109,7 @@ export async function getPageData({ pageId, accessToken }) {
     });
   }
   return {
-    data: data.data,
+    data: { ...data.data, page_about_story },
     logo: logo.data.data.url,
     cover: cover ? cover.data.images[0].source : null,
   };
