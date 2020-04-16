@@ -406,7 +406,11 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
         if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
           if (!post.attachments || post.attachments === undefined) {
             console.log("No attachments: ", post.message);
-            if(!post.message || post.message === undefined || post.message.replace(/\s/g, "") === "") {
+            if (
+              !post.message ||
+              post.message === undefined ||
+              post.message.replace(/\s/g, "") === ""
+            ) {
             } else {
               postsList.push({
                 id: post.id,
@@ -487,7 +491,11 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
       data.posts.data.forEach(async (post) => {
         if (!post.attachments || post.attachments === undefined) {
           console.log("No attachments: ", post.message);
-          if(!post.message || post.message === undefined || post.message.replace(/\s/g, "") === "") {
+          if (
+            !post.message ||
+            post.message === undefined ||
+            post.message.replace(/\s/g, "") === ""
+          ) {
           } else {
             postsList.push({
               id: post.id,
@@ -1203,56 +1211,74 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
 export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
   let counter = 0;
   if (sitePath) {
+    const setting = await Site.findOne({ sitePath }).select(
+      "limitNews showDetailSetting.showPostMode"
+    );
+    const limitNews = setting.limitNews;
+    const mode = setting.showDetailSetting.showPostMode;
     const total = await Site.findOne({ sitePath })
       .populate({
         path: "posts",
-        match: { isActive: true },
-      })
-      .select("posts limitNews");
-    await total.posts.map(() => {
-      counter++;
-    });
-    const limitNews = total.limitNews;
-    const posts = await Site.findOne({ sitePath })
-      .select("posts")
-      .populate({
-        path: "posts",
-        match: { isActive: true },
+        match:
+          mode === 0
+            ? { isActive: true }
+            : mode === 1
+            ? { isActive: true, "attachments.media_type": ["photo", "album"] }
+            : mode === 2
+            ? { isActive: true, "attachments.media_type": "video" }
+            : mode === 3
+            ? { isActive: true, attachments: null }
+            : { isActive: true },
         options: {
           limit: limitNews,
           skip: (pageNumber - 1) * limitNews,
           sort: { createdTime: -1 },
         },
-      });
+      })
+      .select("posts");
+    await total.posts.map(() => {
+      counter++;
+    });
     return {
       pageCount: Math.ceil(counter / limitNews),
-      data: posts,
+      data: {
+        posts: !!total.posts && total.posts.length > 0 ? total.posts : null,
+      },
     };
   } else {
+    const setting = await Site.findOne({ id }).select(
+      "limitNews showDetailSetting.showPostMode"
+    );
+    const limitNews = setting.limitNews;
+    const mode = setting.showDetailSetting.showPostMode;
     const total = await Site.findOne({ id })
       .populate({
         path: "posts",
-        match: { isActive: true },
-      })
-      .select("posts limitNews");
-    await total.posts.map(() => {
-      counter++;
-    });
-    const limitNews = total.limitNews;
-    const posts = await Site.findOne({ id })
-      .select("posts")
-      .populate({
-        path: "posts",
-        match: { isActive: true },
+        match:
+          mode === 0
+            ? { isActive: true }
+            : mode === 1
+            ? { isActive: true, "attachments.media_type": ["photo", "album"] }
+            : mode === 2
+            ? { isActive: true, "attachments.media_type": "video" }
+            : mode === 3
+            ? { isActive: true, attachments: null }
+            : { isActive: true },
         options: {
           limit: limitNews,
           skip: (pageNumber - 1) * limitNews,
           sort: { createdTime: -1 },
         },
-      });
+      })
+      .select("posts");
+    await total.posts.map(() => {
+      counter++;
+    });
     return {
       pageCount: Math.ceil(counter / limitNews),
-      data: posts,
+      data: {
+        posts: !!total.posts && total.posts.length > 0 ? total.posts : null,
+      },
     };
   }
 }
