@@ -193,7 +193,7 @@ export async function saveDesign(data) {
     site.showDetailSetting.showAboutDescription = data.showAboutDescription;
     site.showDetailSetting.showAboutLogo = data.showAboutLogo;
     site.showDetailSetting.showMessageUs = data.showMessageUs;
-
+    site.showDetailSetting.showPostMode = data.showPostMode;
     console.log(site.showDetailSetting);
     if (data.logoURL) {
       site.logo = data.logoURL;
@@ -1110,6 +1110,7 @@ function findDataBySection(sitePath) {
             section.filter.items = galleries;
           }
         } else if (section.original === "news") {
+          console.log(section.original);
           if (section.filter.type === "manual") {
             if (section.filter.items) {
               for (const _id of section.filter.items) {
@@ -1214,7 +1215,7 @@ export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
     });
     const limitNews = total.limitNews;
     const posts = await Site.findOne({ sitePath })
-      .select("posts")
+      .select("posts showDetailSetting")
       .populate({
         path: "posts",
         match: { isActive: true },
@@ -1224,9 +1225,42 @@ export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
           sort: { createdTime: -1 },
         },
       });
+      let filteredPostList = [];
+      posts && posts.posts.forEach(post => {
+        if(posts.showDetailSetting.showPostMode === 0) {
+            filteredPostList.push(post);
+        } else if(posts.showDetailSetting.showPostMode === 1) {
+          if(post.attachments.media_type === "photo" || post.attachments.media_type === "album") {
+            console.log(post.attachments.media_type);
+            filteredPostList.push(post);
+          }
+        } else if(posts.showDetailSetting.showPostMode === 2) {
+          if(post.attachments.media_type === "video") {
+            filteredPostList.push(post);
+          }
+        }
+        else if(posts.showDetailSetting.showPostMode === 3) {
+          console.log("Post message: ", post.message);
+          if (!post.attachments) {
+            if(!post.message || post.message === undefined || post.message.replace(/\s/g, "") === "") {
+            } else {
+              filteredPostList.push(post);
+            }
+          } else if(!post.attachments.media_type || post.attachments.media_type === undefined) {
+            if(!post.message || post.message === undefined || post.message.replace(/\s/g, "") === "") {
+            } else {
+              filteredPostList.push(post);
+            }
+          }
+        }
+      });
+      console.log("Filtered Post List: ", filteredPostList);
     return {
       pageCount: Math.ceil(counter / limitNews),
-      data: posts,
+      data: {
+        _id: new mongoose.Types.ObjectId(posts._id),
+        posts: filteredPostList
+      },
     };
   } else {
     const total = await Site.findOne({ id })

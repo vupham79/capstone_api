@@ -258,6 +258,11 @@ const SiteSchema = new mongoose.Schema(
         type: Boolean,
         default: true,
       },
+      showPostMode: {
+        type: Number,
+        default: true,
+        enum: [0, 1, 2, 3],
+      }
     },
   },
   {
