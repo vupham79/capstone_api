@@ -314,10 +314,9 @@ export async function saveDesign(req, res) {
     showAboutDescription = true,
     showAboutLogo = true,
     showMessageUs = true,
-    showPostMode
+    showPostMode = 0,
   } = req.body;
   try {
-    console.log("showPostMode: ", showPostMode);
     if (
       !sitePath ||
       sitePath === undefined ||
@@ -417,7 +416,7 @@ export async function saveDesign(req, res) {
         showAboutDescription,
         showAboutLogo,
         showMessageUs,
-        showPostMode
+        showPostMode,
       });
       if (update.msg) {
         return res.status(400).send(update);

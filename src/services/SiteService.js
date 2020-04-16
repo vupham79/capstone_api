@@ -162,7 +162,6 @@ export async function saveDesign(data) {
     id: data.pageId,
   });
   if (site) {
-    console.log(site.limitNews, data.limitNews);
     site.fontTitle = data.fontTitle;
     site.fontBody = data.fontBody;
     site.title = data.name;
@@ -194,7 +193,6 @@ export async function saveDesign(data) {
     site.showDetailSetting.showAboutLogo = data.showAboutLogo;
     site.showDetailSetting.showMessageUs = data.showMessageUs;
     site.showDetailSetting.showPostMode = data.showPostMode;
-    console.log(site.showDetailSetting);
     if (data.logoURL) {
       site.logo = data.logoURL;
     }
@@ -406,7 +404,11 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
         if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
           if (!post.attachments || post.attachments === undefined) {
             console.log("No attachments: ", post.message);
-            if(!post.message || post.message === undefined || post.message.replace(/\s/g, "") === "") {
+            if (
+              !post.message ||
+              post.message === undefined ||
+              post.message.replace(/\s/g, "") === ""
+            ) {
             } else {
               postsList.push({
                 id: post.id,
@@ -487,7 +489,11 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
       data.posts.data.forEach(async (post) => {
         if (!post.attachments || post.attachments === undefined) {
           console.log("No attachments: ", post.message);
-          if(!post.message || post.message === undefined || post.message.replace(/\s/g, "") === "") {
+          if (
+            !post.message ||
+            post.message === undefined ||
+            post.message.replace(/\s/g, "") === ""
+          ) {
           } else {
             postsList.push({
               id: post.id,
@@ -1110,7 +1116,6 @@ function findDataBySection(sitePath) {
             section.filter.items = galleries;
           }
         } else if (section.original === "news") {
-          console.log(section.original);
           if (section.filter.type === "manual") {
             if (section.filter.items) {
               for (const _id of section.filter.items) {
@@ -1204,89 +1209,74 @@ export async function findSiteGalleryTab(id, sitePath, pageNumber = 1) {
 export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
   let counter = 0;
   if (sitePath) {
+    const setting = await Site.findOne({ sitePath }).select(
+      "limitNews showDetailSetting.showPostMode"
+    );
+    const limitNews = setting.limitNews;
+    const mode = setting.showDetailSetting.showPostMode;
     const total = await Site.findOne({ sitePath })
       .populate({
         path: "posts",
-        match: { isActive: true },
-      })
-      .select("posts limitNews");
-    await total.posts.map(() => {
-      counter++;
-    });
-    const limitNews = total.limitNews;
-    const posts = await Site.findOne({ sitePath })
-      .select("posts showDetailSetting")
-      .populate({
-        path: "posts",
-        match: { isActive: true },
+        match:
+          mode === 0
+            ? { isActive: true }
+            : mode === 1
+            ? { isActive: true, "attachments.media_type": ["photo", "album"] }
+            : mode === 2
+            ? { isActive: true, "attachments.media_type": "video" }
+            : mode === 3
+            ? { isActive: true, attachments: null }
+            : { isActive: true },
         options: {
           limit: limitNews,
           skip: (pageNumber - 1) * limitNews,
           sort: { createdTime: -1 },
         },
-      });
-      let filteredPostList = [];
-      posts && posts.posts.forEach(post => {
-        if(posts.showDetailSetting.showPostMode === 0) {
-            filteredPostList.push(post);
-        } else if(posts.showDetailSetting.showPostMode === 1) {
-          if(post.attachments.media_type === "photo" || post.attachments.media_type === "album") {
-            console.log(post.attachments.media_type);
-            filteredPostList.push(post);
-          }
-        } else if(posts.showDetailSetting.showPostMode === 2) {
-          if(post.attachments.media_type === "video") {
-            filteredPostList.push(post);
-          }
-        }
-        else if(posts.showDetailSetting.showPostMode === 3) {
-          console.log("Post message: ", post.message);
-          if (!post.attachments) {
-            if(!post.message || post.message === undefined || post.message.replace(/\s/g, "") === "") {
-            } else {
-              filteredPostList.push(post);
-            }
-          } else if(!post.attachments.media_type || post.attachments.media_type === undefined) {
-            if(!post.message || post.message === undefined || post.message.replace(/\s/g, "") === "") {
-            } else {
-              filteredPostList.push(post);
-            }
-          }
-        }
-      });
-      console.log("Filtered Post List: ", filteredPostList);
+      })
+      .select("posts");
+    await total.posts.map(() => {
+      counter++;
+    });
     return {
       pageCount: Math.ceil(counter / limitNews),
       data: {
-        _id: new mongoose.Types.ObjectId(posts._id),
-        posts: filteredPostList
+        posts: !!total.posts && total.posts.length > 0 ? total.posts : null,
       },
     };
   } else {
+    const setting = await Site.findOne({ id }).select(
+      "limitNews showDetailSetting.showPostMode"
+    );
+    const limitNews = setting.limitNews;
+    const mode = setting.showDetailSetting.showPostMode;
     const total = await Site.findOne({ id })
       .populate({
         path: "posts",
-        match: { isActive: true },
-      })
-      .select("posts limitNews");
-    await total.posts.map(() => {
-      counter++;
-    });
-    const limitNews = total.limitNews;
-    const posts = await Site.findOne({ id })
-      .select("posts")
-      .populate({
-        path: "posts",
-        match: { isActive: true },
+        match:
+          mode === 0
+            ? { isActive: true }
+            : mode === 1
+            ? { isActive: true, "attachments.media_type": ["photo", "album"] }
+            : mode === 2
+            ? { isActive: true, "attachments.media_type": "video" }
+            : mode === 3
+            ? { isActive: true, attachments: null }
+            : { isActive: true },
         options: {
           limit: limitNews,
           skip: (pageNumber - 1) * limitNews,
           sort: { createdTime: -1 },
         },
-      });
+      })
+      .select("posts");
+    await total.posts.map(() => {
+      counter++;
+    });
     return {
       pageCount: Math.ceil(counter / limitNews),
-      data: posts,
+      data: {
+        posts: !!total.posts && total.posts.length > 0 ? total.posts : null,
+      },
     };
   }
 }
