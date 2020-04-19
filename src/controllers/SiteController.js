@@ -623,6 +623,7 @@ export async function syncPost(req, res) {
           status: true,
         });
         const update = await SiteService.findOneSite(pageId);
+        console.log(update);
         return res.status(200).send(update);
       }
       return res.status(400).send({ error: "Site not existed!" });
@@ -1003,6 +1004,7 @@ export async function syncData(req, res) {
               const update = await SiteService.editSite(pageId, {
                 categories: data.category_list,
                 syncRecords: syncRecordList,
+                data: data
               });
               //post list
               postsList = await SiteService.getFacebookPostData(
@@ -1097,6 +1099,7 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
               const update = await SiteService.editSite(pageId, {
                 categories: data.category_list,
                 syncRecord: record,
+                data: data
               });
               //post list
               postsList = await SiteService.getFacebookPostSyncData(data);

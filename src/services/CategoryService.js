@@ -2,17 +2,18 @@ import { Category } from "../models";
 
 export async function insertCategory(body) {
   const result = await Category.findOne({name: body.name});
-  console.log(result);
   if(result){
     await Category.updateOne({name:body.name}, {
       picture: body.picture, 
       isDeleted: false
     });
+    console.log(await Category.findOne({name:body.name}));
     return await Category.findOne({name:body.name});
   }
   return await Category.collection.insertOne({
     name: body.name,
     picture: body.picture,
+    isDeleted: false
   });
 }
 
