@@ -14,22 +14,24 @@ export async function insertTheme(body) {
       previewImage: body.previewImage,
       category: category,
       isOnePage: body.isOnePage,
-      isDeleted: false
+      isDeleted: false,
     });
   } else {
     let category = await Category.findOne({ _id: body.category });
-    console.log(body);
-    insert = await Theme.updateOne({
-      name: body.name,
-    }, {
-      fontTitle: body.fontTitle ? body.fontTitle : "Arial",
-      fontBody: body.fontBody ? body.fontBody : "Arial",
-      mainColor: body.mainColor ? body.mainColor : "#1474D4",
-      previewImage: body.previewImage,
-      category: category,
-      isOnePage: body.isOnePage,
-      isDeleted: false
-    });
+    insert = await Theme.updateOne(
+      {
+        name: body.name,
+      },
+      {
+        fontTitle: body.fontTitle ? body.fontTitle : "Arial",
+        fontBody: body.fontBody ? body.fontBody : "Arial",
+        mainColor: body.mainColor ? body.mainColor : "#1474D4",
+        previewImage: body.previewImage,
+        category: category,
+        isOnePage: body.isOnePage,
+        isDeleted: false,
+      }
+    );
   }
   return insert;
 }
