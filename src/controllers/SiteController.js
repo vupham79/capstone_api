@@ -312,6 +312,7 @@ export async function saveDesign(req, res) {
     longitude,
     latitude,
     showPostMode = 0,
+    story,
   } = req.body;
   try {
     if (
@@ -416,6 +417,7 @@ export async function saveDesign(req, res) {
         longitude,
         latitude,
         showPostMode,
+        story,
       });
       if (update.msg) {
         return res.status(400).send(update);
@@ -999,7 +1001,7 @@ export async function syncData(req, res) {
               const update = await SiteService.editSite(pageId, {
                 categories: data.category_list,
                 syncRecords: syncRecordList,
-                data: data
+                data: data,
               });
               //post list
               postsList = await SiteService.getFacebookPostData(
@@ -1094,7 +1096,7 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
               const update = await SiteService.editSite(pageId, {
                 categories: data.category_list,
                 syncRecord: record,
-                data: data
+                data: data,
               });
               //post list
               postsList = await SiteService.getFacebookPostSyncData(data);

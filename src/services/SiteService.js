@@ -195,6 +195,7 @@ export async function saveDesign(data) {
     site.showDetailSetting.showPostMode = data.showPostMode;
     site.longitude = data.longitude;
     site.latitude = data.latitude;
+    site.story = data.story;
     if (data.logoURL) {
       site.logo = data.logoURL;
     }
