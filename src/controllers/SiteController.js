@@ -225,7 +225,6 @@ export async function applyAutoSync(req, res) {
     switch (autoSync.dataType) {
       // sync all data
       case "all":
-        console.log("all");
         SiteService.addCronJob({
           id,
           autoSync,
@@ -234,7 +233,6 @@ export async function applyAutoSync(req, res) {
         break;
       // sync event
       case "event":
-        console.log("event");
         SiteService.addCronJob({
           id,
           autoSync,
@@ -243,7 +241,6 @@ export async function applyAutoSync(req, res) {
         break;
       // sync post
       case "post":
-        console.log("post");
         SiteService.addCronJob({
           id,
           autoSync,
@@ -252,7 +249,6 @@ export async function applyAutoSync(req, res) {
         break;
       // sync gallery
       case "gallery":
-        console.log("gallery");
         SiteService.addCronJob({
           id,
           autoSync,
@@ -260,7 +256,6 @@ export async function applyAutoSync(req, res) {
         });
         break;
       case "none":
-        console.log("none");
         SiteService.addCronJob({
           id,
           autoSync,
