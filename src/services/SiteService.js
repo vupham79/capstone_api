@@ -1256,7 +1256,7 @@ export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
     );
     const limitNews = setting.limitNews;
     const mode = setting.showDetailSetting.showPostMode;
-    const total = await Site.findOne({ sitePath })
+    const filter = await Site.findOne({ sitePath })
       .populate({
         path: "posts",
         match:
@@ -1276,13 +1276,28 @@ export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
         },
       })
       .select("posts");
-    await total.posts.map(() => {
+    const noFilter = await Site.findOne({ sitePath })
+      .populate({
+        path: "posts",
+        match:
+          mode === 0
+            ? { isActive: true }
+            : mode === 1
+            ? { isActive: true, "attachments.media_type": ["photo", "album"] }
+            : mode === 2
+            ? { isActive: true, "attachments.media_type": "video" }
+            : mode === 3
+            ? { isActive: true, attachments: null }
+            : { isActive: true },
+      })
+      .select("posts");
+    await noFilter.posts.map(() => {
       counter++;
     });
     return {
       pageCount: Math.ceil(counter / limitNews),
       data: {
-        posts: !!total.posts && total.posts.length > 0 ? total.posts : null,
+        posts: !!filter.posts && filter.posts.length > 0 ? filter.posts : null,
       },
     };
   } else {
@@ -1291,7 +1306,7 @@ export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
     );
     const limitNews = setting.limitNews;
     const mode = setting.showDetailSetting.showPostMode;
-    const total = await Site.findOne({ id })
+    const filter = await Site.findOne({ id })
       .populate({
         path: "posts",
         match:
@@ -1311,13 +1326,28 @@ export async function findSiteNewsTab(id, sitePath, pageNumber = 1) {
         },
       })
       .select("posts");
-    await total.posts.map(() => {
+    const noFilter = await Site.findOne({ sitePath })
+      .populate({
+        path: "posts",
+        match:
+          mode === 0
+            ? { isActive: true }
+            : mode === 1
+            ? { isActive: true, "attachments.media_type": ["photo", "album"] }
+            : mode === 2
+            ? { isActive: true, "attachments.media_type": "video" }
+            : mode === 3
+            ? { isActive: true, attachments: null }
+            : { isActive: true },
+      })
+      .select("posts");
+    await noFilter.posts.map(() => {
       counter++;
     });
     return {
       pageCount: Math.ceil(counter / limitNews),
       data: {
-        posts: !!total.posts && total.posts.length > 0 ? total.posts : null,
+        posts: !!filter.posts && filter.posts.length > 0 ? filter.posts : null,
       },
     };
   }
