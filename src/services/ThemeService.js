@@ -14,6 +14,7 @@ export async function insertTheme(body) {
       previewImage: body.previewImage,
       category: category,
       isOnePage: body.isOnePage,
+      isDeleted: false
     });
   } else {
     let category = await Category.findOne({ _id: body.category });
