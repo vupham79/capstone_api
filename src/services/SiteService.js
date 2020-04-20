@@ -45,14 +45,14 @@ export async function insertSite(pageId, body) {
 
 export async function editSite(id, body) {
   const site = await Site.findOne({ id: id });
-  site.phone = body.data.phone;
-  site.longitude = body.longitude;
-  site.latitude = body.latitude;
-  site.address = body.data.single_line_address;
+  // site.phone = body.data.phone;
+  // site.longitude = body.longitude;
+  // site.latitude = body.latitude;
+  // site.address = body.data.single_line_address;
   site.categories = body.categories;
-  site.about = body.about;
+  // site.about = body.about;
   site.syncRecords = body.syncRecords;
-  site.showStory = body.showStory;
+  // site.showStory = body.showStory;
   // site.syncRecords = [...site.syncRecords, body.syncRecord];
   return await site.save();
 }
