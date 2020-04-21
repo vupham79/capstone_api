@@ -172,7 +172,6 @@ const SiteSchema = new mongoose.Schema(
         type: Number,
       },
     },
-
     story: {
       id: {
         type: String,
@@ -262,6 +261,24 @@ const SiteSchema = new mongoose.Schema(
         type: Number,
         default: 0,
         enum: [0, 1, 2, 3],
+      },
+    },
+    isEdited: {
+      about: {
+        type: Boolean,
+        default: false,
+      },
+      story: {
+        type: Boolean,
+        default: false,
+      },
+      address: {
+        type: Boolean,
+        default: false,
+      },
+      phone: {
+        type: Boolean,
+        default: false,
       },
     },
   },
