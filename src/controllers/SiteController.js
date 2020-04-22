@@ -972,8 +972,7 @@ export async function syncData(req, res) {
     let galleryList = [];
     let postsList = [];
     let eventList = [];
-    let postIdList = [];
-    const { pageId, dateFrom, dateTo, showStory } = req.body;
+    const { pageId, dateFrom, dateTo, showStory, filterPostMessage, filterPostType, filterEventTitle } = req.body;
     let showStoryValue = showStory;
     if (showStory === undefined) {
       showStoryValue = false;
@@ -1007,7 +1006,10 @@ export async function syncData(req, res) {
               postsList = await SiteService.getFacebookPostData(
                 data,
                 dateFrom,
-                dateTo
+                dateTo,
+                filterPostMessage,
+                filterPostType, 
+                filterEventTitle 
               );
               //gallery list
               galleryList = await SiteService.getFacebookGalleryData(
@@ -1015,6 +1017,13 @@ export async function syncData(req, res) {
                 dateFrom,
                 dateTo
               );
+              //event list
+              eventList = await SiteService.getFacebookEventData(
+                data,
+                dateFrom,
+                dateTo
+              );
+              
               galleryList &&
                 galleryList.forEach((item) => {
                   siteExist.galleries.forEach((siteItem) => {
@@ -1025,26 +1034,63 @@ export async function syncData(req, res) {
                 });
               //update galleries
               await SiteService.updateGallery(pageId, galleryList);
+
+              
+              const existedSite = await Site.findOne({ id: pageId }).select("posts events").populate("posts events");
+                
               //post Id list
               if (postsList) {
-                postsList &&
-                  postsList.forEach((post) => {
-                    postIdList.push(post.id);
-                  });
+                let filteredPostResult = SiteService.filterPost(postsList, filterPostMessage, filterPostType);
+              
+                //get filtered Post Id List
+                let filteredPostResultIdList = [];
+                filteredPostResult.forEach(post => {
+                  filteredPostResultIdList.push(post.id);
+                });
+
+                //get updated Post list
+                let updatedPostList = [];
+                existedSite.posts && existedSite.posts.forEach(post => {
+                  if(filteredPostResultIdList.includes(post.id)) {
+                    const postResult = filteredPostResult.find(checkPost => checkPost.id === post.id);
+                    console.log("Post Result: " + post.id + " : ", postResult);
+                    updatedPostList.push(postResult);
+                  } else {
+                    updatedPostList.push(post);
+                  }
+                });
+                postsList = updatedPostList;
+
                 //insert and update post
                 await SiteService.insertAndUpdateSyncDataPost(
                   pageId,
                   postsList
                 );
               }
-              //event list
-              eventList = await SiteService.getFacebookEventData(
-                data,
-                dateFrom,
-                dateTo
-              );
               //event Id list
               if (eventList) {
+                //filer post and event list
+                let filteredEventResult = SiteService.filterEvent(eventList, filterEventTitle);
+
+                //get filtered Event Id List
+                let filteredEventResultIdList = [];
+                filteredEventResult.forEach(event => {
+                  filteredEventResultIdList.push(event.id);
+                });
+
+                //get updated Event list
+                let updatedEventList = [];
+                existedSite.events && existedSite.events.forEach(event => {
+                  if(filteredEventResultIdList.includes(event.id)) {
+                    const eventResult = filteredEventResult.find(checkEvent => checkEvent.id === event.id);    
+                    console.log("eventResult " + event.id + " : ", eventResult);
+                    updatedEventList.push(eventResult);
+                  } else {
+                    updatedEventList.push(event);
+                  }
+                });
+                eventList = updatedEventList;
+
                 //insert and update event
                 await SiteService.insertAndUpdateSyncDataEvents(
                   pageId,
@@ -1056,6 +1102,7 @@ export async function syncData(req, res) {
                   status: true,
                 });
                 const siteResult = await SiteService.findOneSite(pageId);
+                console.log("Site result length: ", siteResult.posts.length);
                 return res.status(200).send(siteResult);
               } else {
                 return res.status(400).send({ error: "Edit failed!" });
