@@ -53,7 +53,7 @@ export async function getSyncData({ pageId, accessToken }) {
   const data = await axios({
     params: {
       fields:
-        "category_list,phone,single_line_address," +
+        "category_list,location,single_line_address,phone,about,page_about_story," +
         "albums{picture,link}," +
         "posts{message,created_time,attachments{title,media_type,subattachments,media,target}}," +
         "events{id,name,description,place,is_canceled,end_time,start_time,cover}",
