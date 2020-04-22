@@ -9,7 +9,7 @@ export async function deactivateUser(id) {
     }
     await user.updateOne({
       isActivated: false,
-      token: null
+      token: null,
     });
     await Site.updateMany(
       { _id: { $in: user.sites } },
@@ -24,7 +24,7 @@ export async function activateUser(id) {
   const user = User.find({ id: id });
   if (user) {
     await user.updateOne({
-      isActivated: true
+      isActivated: true,
     });
     return user;
   }
@@ -39,21 +39,21 @@ export async function findAllUser() {
       select: "id title categories theme sitePath isPublish phone",
       populate: {
         path: "theme",
-        select: "name"
-      }
+        select: "name",
+      },
     });
 }
 
 export async function login({ id, name, email, picture, token }) {
   const user = await User.findOne({
-    email
+    email,
   });
   if (user) {
     if (!user.isActivated) {
       return false;
     }
     await user.updateOne({
-      token: token
+      token: token,
     });
     return true;
   } else {
@@ -62,7 +62,7 @@ export async function login({ id, name, email, picture, token }) {
       displayName: name,
       email: email,
       token: token,
-      picture: picture
+      picture: picture,
     });
     if (create) {
       return true;

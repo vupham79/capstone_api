@@ -1,13 +1,18 @@
 import { client as redis } from "../utils/redis_";
 import * as UserService from "../services/UserService";
-import { getUserPages } from "../services/FacebookAPI";
+import { getUserPages, getLongLivedToken } from "../services/FacebookAPI";
 import jwt from "jsonwebtoken";
 
 export async function login(req, res) {
   try {
     const { accessToken, id, name, email, picture } = req.body;
+    const longLivedToken = await getLongLivedToken(token);
     jwt.sign(
-      { accessToken: accessToken, email: email, id: id },
+      {
+        accessToken: longLivedToken ? longLivedToken.access_token : accessToken,
+        email: email,
+        id: id,
+      },
       process.env.secret,
       async (err, token) => {
         const data = await UserService.login({
