@@ -390,11 +390,7 @@ export async function insertAndUpdateEvents(pageId, eventList) {
 
 export async function getFacebookPostData(
     data, dateFrom, dateTo, 
-    filterPostMessage = "k",
-    filterPostType = 0, 
-    filterEventTitle = "wea"
   ) {
-    console.log("Filter Post Message: ", filterPostMessage);
   let postsList = [];
   if (data.posts === undefined) {
     return null;
@@ -498,7 +494,6 @@ export async function getFacebookPostData(
       data.posts.data &&
       data.posts.data.forEach(async (post) => {
         if (!post.attachments || post.attachments === undefined) {
-          // console.log("No attachments: ", post.message);
           if (
             !post.message ||
             post.message === undefined ||
@@ -514,16 +509,11 @@ export async function getFacebookPostData(
               attachments: null,
               target: null,
             });
-            // console.log("postsList: ", postsList);
           }
         } else if (
           post.attachments &&
           post.attachments.data[0].media_type === "album"
         ) {
-          // console.log("Post album message ", post.message);
-          // if(post.message.includes(filterPostMessage)) {
-          //   console.log("Post album message match ", post.message);
-          // }
           const subAttachmentList = [];
           post.attachments.data[0].subattachments.data.forEach(
             (subAttachment) => {
@@ -548,10 +538,6 @@ export async function getFacebookPostData(
           post.attachments &&
           post.attachments.data[0].media_type === "photo"
         ) {
-          // console.log("Post photo message ", post.message);
-          // if(post.message.includes(filterPostMessage)) {
-          //   console.log("Post photo message match ", post.message);
-          // }
           postsList.push({
             id: post.id,
             message: post.message,
@@ -570,10 +556,6 @@ export async function getFacebookPostData(
           post.attachments &&
           post.attachments.data[0].media_type === "video"
         ) {
-          // console.log("Post video message ", post.message);
-          // if(post.message.includes(filterPostMessage)) {
-          //   console.log("Post video message match ", post.message);
-          // }
           postsList.push({
             id: post.id,
             message: post.message,

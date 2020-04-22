@@ -1006,10 +1006,7 @@ export async function syncData(req, res) {
               postsList = await SiteService.getFacebookPostData(
                 data,
                 dateFrom,
-                dateTo,
-                filterPostMessage,
-                filterPostType, 
-                filterEventTitle 
+                dateTo
               );
               //gallery list
               galleryList = await SiteService.getFacebookGalleryData(
@@ -1035,7 +1032,7 @@ export async function syncData(req, res) {
               //update galleries
               await SiteService.updateGallery(pageId, galleryList);
 
-              
+
               const existedSite = await Site.findOne({ id: pageId }).select("posts events").populate("posts events");
                 
               //post Id list
@@ -1243,7 +1240,18 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
       });
     }
   } catch (error) {
-    console.log(error);
+    await transporter.sendMail({
+        from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+        to: userEmail, // list of receivers
+        subject: "Sync Failed ✔", // Subject line
+        text: "Cannot sync your Facebook data", // plain text body
+        html: `
+      <h5><strong>FPWG System</strong></h5>
+      <p>Hi,</p>
+      <p>Your site is not existed to sync data!</p>
+      <br/>
+      `, // html body
+      });
   }
 }
 
