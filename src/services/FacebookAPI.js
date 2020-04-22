@@ -5,7 +5,7 @@ export async function getLongLivedToken(accessToken) {
     params: { locale: "en_US ", access_token: accessToken },
     url:
       process.env.facebookAPI +
-      `oauth/access_token?grant_type=fb_exchange_token&client_id=${process.env.clientId}&client_secret=${process.env.clientSecret}&fb_exchange_token=${accessToken}`,
+      `oauth/access_token?grant_type=fb_exchange_token&client_id=${process.env.clientID}&client_secret=${process.env.clientSecret}&fb_exchange_token=${accessToken}`,
   });
   return data.data;
 }

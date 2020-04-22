@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 export async function login(req, res) {
   try {
     const { accessToken, id, name, email, picture } = req.body;
-    const longLivedToken = await getLongLivedToken(token);
+    const longLivedToken = await getLongLivedToken(accessToken);
     jwt.sign(
       {
         accessToken: longLivedToken ? longLivedToken.access_token : accessToken,
@@ -38,6 +38,7 @@ export async function login(req, res) {
       }
     );
   } catch (error) {
+    console.log(error);
     return res.status(400).send({ error });
   }
 }
