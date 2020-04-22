@@ -387,7 +387,14 @@ export async function insertAndUpdateEvents(pageId, eventList) {
   });
 }
 
-export async function getFacebookPostData(data, dateFrom, dateTo) {
+
+export async function getFacebookPostData(
+    data, dateFrom, dateTo, 
+    filterPostMessage = "k",
+    filterPostType = 0, 
+    filterEventTitle = "wea"
+  ) {
+    console.log("Filter Post Message: ", filterPostMessage);
   let postsList = [];
   if (data.posts === undefined) {
     return null;
@@ -406,7 +413,7 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
       data.posts.data.forEach(async (post) => {
         if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
           if (!post.attachments || post.attachments === undefined) {
-            console.log("No attachments: ", post.message);
+            // console.log("No attachments: ", post.message);
             if (
               !post.message ||
               post.message === undefined ||
@@ -491,7 +498,7 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
       data.posts.data &&
       data.posts.data.forEach(async (post) => {
         if (!post.attachments || post.attachments === undefined) {
-          console.log("No attachments: ", post.message);
+          // console.log("No attachments: ", post.message);
           if (
             !post.message ||
             post.message === undefined ||
@@ -507,12 +514,16 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
               attachments: null,
               target: null,
             });
-            console.log("postsList: ", postsList);
+            // console.log("postsList: ", postsList);
           }
         } else if (
           post.attachments &&
           post.attachments.data[0].media_type === "album"
         ) {
+          // console.log("Post album message ", post.message);
+          // if(post.message.includes(filterPostMessage)) {
+          //   console.log("Post album message match ", post.message);
+          // }
           const subAttachmentList = [];
           post.attachments.data[0].subattachments.data.forEach(
             (subAttachment) => {
@@ -537,6 +548,10 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
           post.attachments &&
           post.attachments.data[0].media_type === "photo"
         ) {
+          // console.log("Post photo message ", post.message);
+          // if(post.message.includes(filterPostMessage)) {
+          //   console.log("Post photo message match ", post.message);
+          // }
           postsList.push({
             id: post.id,
             message: post.message,
@@ -555,6 +570,10 @@ export async function getFacebookPostData(data, dateFrom, dateTo) {
           post.attachments &&
           post.attachments.data[0].media_type === "video"
         ) {
+          // console.log("Post video message ", post.message);
+          // if(post.message.includes(filterPostMessage)) {
+          //   console.log("Post video message match ", post.message);
+          // }
           postsList.push({
             id: post.id,
             message: post.message,
@@ -1407,10 +1426,10 @@ export async function insertAndUpdateSyncDataPost(pageId, postsList) {
   site.posts &&
     site.posts.forEach(async (existedPost) => {
       if (fbPostIdList.includes(existedPost.id)) {
-        console.log("Existed Post: ", existedPost.id);
+        // console.log("Existed Post: ", existedPost.id);
         existedPostIdList.push(existedPost.id);
       } else {
-        console.log("Deactive Post: ", existedPost.id);
+        // console.log("Deactive Post: ", existedPost.id);
         await Post.updateOne({ id: existedPost.id }, { isActive: false });
       }
     });
@@ -1457,7 +1476,7 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList) {
   site.events &&
     site.events.forEach(async (existedEvent) => {
       if (fbEventIdList.includes(existedEvent.id)) {
-        console.log("Existed Event: ", existedEvent.id);
+        // console.log("Existed Event: ", existedEvent.id);
         existedEventIdList.push(existedEvent.id);
       } else {
         console.log("Deactive Event: ", existedEvent.id);
@@ -1572,4 +1591,100 @@ export async function updateAutoSync(id, autoSync) {
       autoSync,
     }
   );
+}
+
+export function filterPost(postsList, filterPostMessage = "d", filterPostType = 1) {
+  console.log(postsList.length, filterPostMessage, filterPostType);
+  let filteredPostList = [];
+  if(filterPostMessage === null || filterPostMessage === undefined || 
+    filterPostMessage.replace(/\s/g, "") === "") {
+      switch(filterPostType) {
+        case 0: 
+          postsList.forEach(post => {
+              filteredPostList.push(post);
+          });
+          break;
+        case 1:
+          postsList.forEach(post => {
+            if(post.attachments && post.attachments.media_type === "photo") {
+              filteredPostList.push(post);
+            }
+            if(post.attachments && post.attachments.media_type === "album" ) {
+              filteredPostList.push(post);
+            }
+          });
+          break;
+        case 2:
+          postsList.forEach(post => {
+            if(post.attachments && post.attachments.media_type === "video") {
+              filteredPostList.push(post);
+            }
+          }); 
+          break;
+        case 3: 
+        postsList.forEach(post => {
+          if(!post.attachments) {
+            filteredPostList.push(post);
+          }
+        });
+          break;
+        default: 
+          break;
+      }
+  } else {
+    switch(filterPostType) {
+      case 0: 
+      postsList.forEach(post => {
+        if(post.message.includes(filterPostMessage.replace(/\s/g, ""))) {
+          filteredPostList.push(post);
+        }
+      });
+        break;
+      case 1:
+        postsList.forEach(post => {
+          if(post.attachments && post.attachments.media_type === "photo" && post.message.includes(filterPostMessage.replace(/\s/g, ""))) {
+            filteredPostList.push(post);
+          }
+          if(post.attachments && post.attachments.media_type === "album" && post.message.includes(filterPostMessage.replace(/\s/g, ""))) {
+            filteredPostList.push(post);
+          }
+        });
+        break;
+      case 2:
+        postsList.forEach(post => {
+          if(post.attachments && post.attachments.media_type === "video" && post.message.includes(filterPostMessage.replace(/\s/g, ""))) {
+            filteredPostList.push(post);
+          }
+        }); 
+        break;
+      case 3: 
+      postsList.forEach(post => {
+        if(!post.attachments && post.message.includes(filterPostMessage.replace(/\s/g, ""))) {
+          filteredPostList.push(post);
+        }
+      });
+        break;
+      default: 
+        break;
+    }
+    console.log("filteredPostList: ", filteredPostList);
+  }
+  return filteredPostList;
+}
+
+export function filterEvent(eventList, filterEventTitle = "c") {
+ console.log(eventList.length, filterEventTitle);
+ let filteredEventList = [];
+ if(filterEventTitle === null || filterEventTitle === undefined || 
+   filterEventTitle.replace(/\s/g, "") === "") {
+     filteredEventList = eventList;
+ } else {
+   eventList.forEach(event => {
+     if(event.name.includes(filterEventTitle.replace(/\s/g, ""))) {
+       filteredEventList.push(event);
+     }
+   }); 
+ }
+ console.log("filteredEventList: ", filteredEventList);
+ return filteredEventList;
 }

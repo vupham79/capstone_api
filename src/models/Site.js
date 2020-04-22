@@ -281,6 +281,18 @@ const SiteSchema = new mongoose.Schema(
         default: false,
       },
     },
+    filterPostMessage: {
+      type: String,
+      default: "",
+    }, 
+    filterPostType: {
+      type: Number,
+      default: 0,
+    }, 
+    filterEventTitle: {
+      type: String,
+      default: "",
+    }
   },
   {
     timestamps: true,
