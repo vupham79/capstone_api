@@ -972,7 +972,15 @@ export async function syncData(req, res) {
     let galleryList = [];
     let postsList = [];
     let eventList = [];
-    const { pageId, dateFrom, dateTo, showStory, filterPostMessage, filterPostType, filterEventTitle } = req.body;
+    const {
+      pageId,
+      dateFrom,
+      dateTo,
+      showStory,
+      filterPostMessage,
+      filterPostType,
+      filterEventTitle,
+    } = req.body;
     let showStoryValue = showStory;
     if (showStory === undefined) {
       showStoryValue = false;
@@ -981,8 +989,8 @@ export async function syncData(req, res) {
       pageId: pageId,
       accessToken: req.user.accessToken,
     });
-    const siteExist = await Site.findOne({ id: pageId });
     if (data) {
+      const siteExist = await Site.findOne({ id: pageId });
       if (siteExist) {
         let session;
         return Site.createCollection()
@@ -997,7 +1005,8 @@ export async function syncData(req, res) {
                 dateTo: dateTo,
               });
               let syncRecordList = SiteService.addSyncRecord(record, siteExist);
-              const update = await SiteService.editSite(pageId, {
+              // const update =
+              await SiteService.editSite(pageId, {
                 categories: data.category_list,
                 syncRecords: syncRecordList,
                 data: data,
@@ -1020,7 +1029,6 @@ export async function syncData(req, res) {
                 dateFrom,
                 dateTo
               );
-              
               galleryList &&
                 galleryList.forEach((item) => {
                   siteExist.galleries.forEach((siteItem) => {
@@ -1032,30 +1040,41 @@ export async function syncData(req, res) {
               //update galleries
               await SiteService.updateGallery(pageId, galleryList);
 
+              const existedSite = await Site.findOne({ id: pageId })
+                .select("posts events")
+                .populate("posts events");
 
-              const existedSite = await Site.findOne({ id: pageId }).select("posts events").populate("posts events");
-                
               //post Id list
               if (postsList) {
-                let filteredPostResult = SiteService.filterPost(postsList, filterPostMessage, filterPostType);
-              
+                let filteredPostResult = SiteService.filterPost(
+                  postsList,
+                  filterPostMessage,
+                  filterPostType
+                );
+
                 //get filtered Post Id List
                 let filteredPostResultIdList = [];
-                filteredPostResult.forEach(post => {
+                filteredPostResult.forEach((post) => {
                   filteredPostResultIdList.push(post.id);
                 });
 
                 //get updated Post list
                 let updatedPostList = [];
-                existedSite.posts && existedSite.posts.forEach(post => {
-                  if(filteredPostResultIdList.includes(post.id)) {
-                    const postResult = filteredPostResult.find(checkPost => checkPost.id === post.id);
-                    console.log("Post Result: " + post.id + " : ", postResult);
-                    updatedPostList.push(postResult);
-                  } else {
-                    updatedPostList.push(post);
-                  }
-                });
+                existedSite.posts &&
+                  existedSite.posts.forEach((post) => {
+                    if (filteredPostResultIdList.includes(post.id)) {
+                      const postResult = filteredPostResult.find(
+                        (checkPost) => checkPost.id === post.id
+                      );
+                      console.log(
+                        "Post Result: " + post.id + " : ",
+                        postResult
+                      );
+                      updatedPostList.push(postResult);
+                    } else {
+                      updatedPostList.push(post);
+                    }
+                  });
                 postsList = updatedPostList;
 
                 //insert and update post
@@ -1067,25 +1086,34 @@ export async function syncData(req, res) {
               //event Id list
               if (eventList) {
                 //filer post and event list
-                let filteredEventResult = SiteService.filterEvent(eventList, filterEventTitle);
+                let filteredEventResult = SiteService.filterEvent(
+                  eventList,
+                  filterEventTitle
+                );
 
                 //get filtered Event Id List
                 let filteredEventResultIdList = [];
-                filteredEventResult.forEach(event => {
+                filteredEventResult.forEach((event) => {
                   filteredEventResultIdList.push(event.id);
                 });
 
                 //get updated Event list
                 let updatedEventList = [];
-                existedSite.events && existedSite.events.forEach(event => {
-                  if(filteredEventResultIdList.includes(event.id)) {
-                    const eventResult = filteredEventResult.find(checkEvent => checkEvent.id === event.id);    
-                    console.log("eventResult " + event.id + " : ", eventResult);
-                    updatedEventList.push(eventResult);
-                  } else {
-                    updatedEventList.push(event);
-                  }
-                });
+                existedSite.events &&
+                  existedSite.events.forEach((event) => {
+                    if (filteredEventResultIdList.includes(event.id)) {
+                      const eventResult = filteredEventResult.find(
+                        (checkEvent) => checkEvent.id === event.id
+                      );
+                      console.log(
+                        "eventResult " + event.id + " : ",
+                        eventResult
+                      );
+                      updatedEventList.push(eventResult);
+                    } else {
+                      updatedEventList.push(event);
+                    }
+                  });
                 eventList = updatedEventList;
 
                 //insert and update event
@@ -1094,16 +1122,16 @@ export async function syncData(req, res) {
                   eventList
                 );
               }
-              if (update) {
-                await record.update({
-                  status: true,
-                });
-                const siteResult = await SiteService.findOneSite(pageId);
-                console.log("Site result length: ", siteResult.posts.length);
-                return res.status(200).send(siteResult);
-              } else {
-                return res.status(400).send({ error: "Edit failed!" });
-              }
+              // if (update) {
+              await record.update({
+                status: true,
+              });
+              const siteResult = await SiteService.findOneSite(pageId);
+              console.log("Site result length: ", siteResult.posts.length);
+              return res.status(200).send(siteResult);
+              // } else {
+              // return res.status(400).send({ error: "Edit failed!" });
+              // }
             });
           });
       }
@@ -1241,17 +1269,17 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
     }
   } catch (error) {
     await transporter.sendMail({
-        from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
-        to: userEmail, // list of receivers
-        subject: "Sync Failed ✔", // Subject line
-        text: "Cannot sync your Facebook data", // plain text body
-        html: `
+      from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+      to: userEmail, // list of receivers
+      subject: "Sync Failed ✔", // Subject line
+      text: "Cannot sync your Facebook data", // plain text body
+      html: `
       <h5><strong>FPWG System</strong></h5>
       <p>Hi,</p>
       <p>Your site is not existed to sync data!</p>
       <br/>
       `, // html body
-      });
+    });
   }
 }
 
