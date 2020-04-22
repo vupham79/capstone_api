@@ -263,36 +263,18 @@ const SiteSchema = new mongoose.Schema(
         enum: [0, 1, 2, 3],
       },
     },
-    isEdited: {
-      about: {
-        type: Boolean,
-        default: false,
-      },
-      story: {
-        type: Boolean,
-        default: false,
-      },
-      address: {
-        type: Boolean,
-        default: false,
-      },
-      phone: {
-        type: Boolean,
-        default: false,
-      },
-    },
     filterPostMessage: {
       type: String,
       default: "",
-    }, 
+    },
     filterPostType: {
       type: Number,
       default: 0,
-    }, 
+    },
     filterEventTitle: {
       type: String,
       default: "",
-    }
+    },
   },
   {
     timestamps: true,
