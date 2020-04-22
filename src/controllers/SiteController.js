@@ -1268,18 +1268,7 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
       });
     }
   } catch (error) {
-    await transporter.sendMail({
-      from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
-      to: userEmail, // list of receivers
-      subject: "Sync Failed ✔", // Subject line
-      text: "Cannot sync your Facebook data", // plain text body
-      html: `
-      <h5><strong>FPWG System</strong></h5>
-      <p>Hi,</p>
-      <p>Your site is not existed to sync data!</p>
-      <br/>
-      `, // html body
-    });
+    console.log(error);
   }
 }
 
