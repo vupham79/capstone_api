@@ -45,15 +45,30 @@ export async function insertSite(pageId, body) {
 
 export async function editSite(id, body) {
   const site = await Site.findOne({ id: id });
-  // site.phone = body.data.phone;
-  // site.longitude = body.longitude;
-  // site.latitude = body.latitude;
-  // site.address = body.data.single_line_address;
+  if (body.phone) {
+    site.phone = body.data.phone;
+  }
+  if (body.address) {
+    site.address = body.data.single_line_address;
+    site.longitude = body.data.location ? page.data.location.longitude : null;
+    site.latitude = body.data.location ? page.data.location.latitude : null;
+  }
   site.categories = body.categories;
-  // site.about = body.about;
+  if (body.about) {
+    site.about = body.data.about;
+  }
+  if (body.story) {
+    site.story = body.data.page_about_story
+      ? {
+          id: page.data.page_about_story.id,
+          title: page.data.page_about_story.title,
+          composedText: page.data.page_about_story.composed_text
+            ? page.data.page_about_story.composed_text.map((val) => val.text)
+            : null,
+        }
+      : null;
+  }
   site.syncRecords = body.syncRecords;
-  // site.showStory = body.showStory;
-  // site.syncRecords = [...site.syncRecords, body.syncRecord];
   return await site.save();
 }
 
@@ -387,10 +402,7 @@ export async function insertAndUpdateEvents(pageId, eventList) {
   });
 }
 
-
-export async function getFacebookPostData(
-    data, dateFrom, dateTo, 
-  ) {
+export async function getFacebookPostData(data, dateFrom, dateTo) {
   let postsList = [];
   if (data.posts === undefined) {
     return null;
@@ -1575,98 +1587,124 @@ export async function updateAutoSync(id, autoSync) {
   );
 }
 
-export function filterPost(postsList, filterPostMessage = "d", filterPostType = 1) {
-  console.log(postsList.length, filterPostMessage, filterPostType);
+export function filterPost(
+  postsList,
+  filterPostMessage = "d",
+  filterPostType = 1
+) {
+  // console.log(postsList.length, filterPostMessage, filterPostType);
   let filteredPostList = [];
-  if(filterPostMessage === null || filterPostMessage === undefined || 
-    filterPostMessage.replace(/\s/g, "") === "") {
-      switch(filterPostType) {
-        case 0: 
-          postsList.forEach(post => {
-              filteredPostList.push(post);
-          });
-          break;
-        case 1:
-          postsList.forEach(post => {
-            if(post.attachments && post.attachments.media_type === "photo") {
-              filteredPostList.push(post);
-            }
-            if(post.attachments && post.attachments.media_type === "album" ) {
-              filteredPostList.push(post);
-            }
-          });
-          break;
-        case 2:
-          postsList.forEach(post => {
-            if(post.attachments && post.attachments.media_type === "video") {
-              filteredPostList.push(post);
-            }
-          }); 
-          break;
-        case 3: 
-        postsList.forEach(post => {
-          if(!post.attachments) {
-            filteredPostList.push(post);
-          }
-        });
-          break;
-        default: 
-          break;
-      }
-  } else {
-    switch(filterPostType) {
-      case 0: 
-      postsList.forEach(post => {
-        if(post.message.includes(filterPostMessage.replace(/\s/g, ""))) {
+  if (
+    filterPostMessage === null ||
+    filterPostMessage === undefined ||
+    filterPostMessage.replace(/\s/g, "") === ""
+  ) {
+    switch (filterPostType) {
+      case 0:
+        postsList.forEach((post) => {
           filteredPostList.push(post);
-        }
-      });
+        });
         break;
       case 1:
-        postsList.forEach(post => {
-          if(post.attachments && post.attachments.media_type === "photo" && post.message.includes(filterPostMessage.replace(/\s/g, ""))) {
+        postsList.forEach((post) => {
+          if (post.attachments && post.attachments.media_type === "photo") {
             filteredPostList.push(post);
           }
-          if(post.attachments && post.attachments.media_type === "album" && post.message.includes(filterPostMessage.replace(/\s/g, ""))) {
+          if (post.attachments && post.attachments.media_type === "album") {
             filteredPostList.push(post);
           }
         });
         break;
       case 2:
-        postsList.forEach(post => {
-          if(post.attachments && post.attachments.media_type === "video" && post.message.includes(filterPostMessage.replace(/\s/g, ""))) {
+        postsList.forEach((post) => {
+          if (post.attachments && post.attachments.media_type === "video") {
             filteredPostList.push(post);
           }
-        }); 
+        });
         break;
-      case 3: 
-      postsList.forEach(post => {
-        if(!post.attachments && post.message.includes(filterPostMessage.replace(/\s/g, ""))) {
-          filteredPostList.push(post);
-        }
-      });
+      case 3:
+        postsList.forEach((post) => {
+          if (!post.attachments) {
+            filteredPostList.push(post);
+          }
+        });
         break;
-      default: 
+      default:
         break;
     }
-    console.log("filteredPostList: ", filteredPostList);
+  } else {
+    switch (filterPostType) {
+      case 0:
+        postsList.forEach((post) => {
+          if (post.message.includes(filterPostMessage.replace(/\s/g, ""))) {
+            filteredPostList.push(post);
+          }
+        });
+        break;
+      case 1:
+        postsList.forEach((post) => {
+          if (
+            post.attachments &&
+            post.attachments.media_type === "photo" &&
+            post.message &&
+            post.message.includes(filterPostMessage.replace(/\s/g, ""))
+          ) {
+            filteredPostList.push(post);
+          }
+          if (
+            post.attachments &&
+            post.attachments.media_type === "album" &&
+            post.message.includes(filterPostMessage.replace(/\s/g, ""))
+          ) {
+            filteredPostList.push(post);
+          }
+        });
+        break;
+      case 2:
+        postsList.forEach((post) => {
+          if (
+            post.attachments &&
+            post.attachments.media_type === "video" &&
+            post.message.includes(filterPostMessage.replace(/\s/g, ""))
+          ) {
+            filteredPostList.push(post);
+          }
+        });
+        break;
+      case 3:
+        postsList.forEach((post) => {
+          if (
+            !post.attachments &&
+            post.message.includes(filterPostMessage.replace(/\s/g, ""))
+          ) {
+            filteredPostList.push(post);
+          }
+        });
+        break;
+      default:
+        break;
+    }
+    // console.log("filteredPostList: ", filteredPostList);
   }
   return filteredPostList;
 }
 
 export function filterEvent(eventList, filterEventTitle = "c") {
- console.log(eventList.length, filterEventTitle);
- let filteredEventList = [];
- if(filterEventTitle === null || filterEventTitle === undefined || 
-   filterEventTitle.replace(/\s/g, "") === "") {
-     filteredEventList = eventList;
- } else {
-   eventList.forEach(event => {
-     if(event.name.includes(filterEventTitle.replace(/\s/g, ""))) {
-       filteredEventList.push(event);
-     }
-   }); 
- }
- console.log("filteredEventList: ", filteredEventList);
- return filteredEventList;
+  // console.log(eventList.length, filterEventTitle);
+  let filteredEventList = [];
+  if (
+    filterEventTitle === null ||
+    filterEventTitle === undefined ||
+    filterEventTitle.replace(/\s/g, "") === ""
+  ) {
+    filteredEventList = eventList;
+  } else {
+    eventList.forEach((event) => {
+      if (event.name.includes(filterEventTitle.replace(/\s/g, ""))) {
+        filteredEventList.push(event);
+      }
+    });
+  }
+  // console.log("filteredEventList: ", filteredEventList);
+  return filteredEventList;
 }

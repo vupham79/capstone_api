@@ -213,7 +213,8 @@ export async function publish(req, res) {
 }
 
 export async function applyAutoSync(req, res) {
-  const { id, autoSync } = req.body;
+  const { id, autoSync, about, address, story, email, phone } = req.body;
+  console.log(req.body);
   try {
     const autoSyncFormatted = {
       dataType: autoSync.dataType,
@@ -228,7 +229,17 @@ export async function applyAutoSync(req, res) {
         SiteService.addCronJob({
           id,
           autoSync,
-          job: () => autoSyncData(id, req.user.accessToken, req.user.email),
+          job: () =>
+            autoSyncData(
+              id,
+              req.user.accessToken,
+              req.user.email,
+              about,
+              address,
+              story,
+              email,
+              phone
+            ),
         });
         break;
       // sync event
@@ -980,6 +991,11 @@ export async function syncData(req, res) {
       filterPostMessage,
       filterPostType,
       filterEventTitle,
+      about = false,
+      address = false,
+      story = false,
+      email = false,
+      phone = false,
     } = req.body;
     let showStoryValue = showStory;
     if (showStory === undefined) {
@@ -1010,6 +1026,11 @@ export async function syncData(req, res) {
                 categories: data.category_list,
                 syncRecords: syncRecordList,
                 data: data,
+                about,
+                address,
+                story,
+                email,
+                phone,
               });
               //post list
               postsList = await SiteService.getFacebookPostData(
@@ -1066,10 +1087,10 @@ export async function syncData(req, res) {
                       const postResult = filteredPostResult.find(
                         (checkPost) => checkPost.id === post.id
                       );
-                      console.log(
-                        "Post Result: " + post.id + " : ",
-                        postResult
-                      );
+                      // console.log(
+                      //   "Post Result: " + post.id + " : ",
+                      //   postResult
+                      // );
                       updatedPostList.push(postResult);
                     } else {
                       updatedPostList.push(post);
@@ -1105,10 +1126,10 @@ export async function syncData(req, res) {
                       const eventResult = filteredEventResult.find(
                         (checkEvent) => checkEvent.id === event.id
                       );
-                      console.log(
-                        "eventResult " + event.id + " : ",
-                        eventResult
-                      );
+                      // console.log(
+                      //   "eventResult " + event.id + " : ",
+                      //   eventResult
+                      // );
                       updatedEventList.push(eventResult);
                     } else {
                       updatedEventList.push(event);
@@ -1127,7 +1148,7 @@ export async function syncData(req, res) {
                 status: true,
               });
               const siteResult = await SiteService.findOneSite(pageId);
-              console.log("Site result length: ", siteResult.posts.length);
+              // console.log("Site result length: ", siteResult.posts.length);
               return res.status(200).send(siteResult);
               // } else {
               // return res.status(400).send({ error: "Edit failed!" });
@@ -1143,7 +1164,17 @@ export async function syncData(req, res) {
   }
 }
 
-export async function autoSyncData(pageId, accessToken, userEmail) {
+export async function autoSyncData(
+  pageId,
+  accessToken,
+  userEmail,
+  about = false,
+  address = false,
+  story = false,
+  email = false,
+  phone = false
+) {
+  console.log(about, address, story, email, phone);
   try {
     let galleryList = [];
     let postsList = [];
@@ -1169,6 +1200,11 @@ export async function autoSyncData(pageId, accessToken, userEmail) {
                 categories: data.category_list,
                 syncRecord: record,
                 data: data,
+                about,
+                address,
+                story,
+                email,
+                phone,
               });
               //post list
               postsList = await SiteService.getFacebookPostSyncData(data);
