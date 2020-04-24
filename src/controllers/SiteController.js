@@ -213,8 +213,18 @@ export async function publish(req, res) {
 }
 
 export async function applyAutoSync(req, res) {
-  const { id, autoSync, about, address, story, email, phone } = req.body;
-  console.log(req.body);
+  const {
+    id,
+    autoSync,
+    about,
+    address,
+    story,
+    email,
+    phone,
+    postWith, //(int) 1: message, 2: video, 3: photo
+    containMsg,
+    eventContainTitle,
+  } = req.body;
   try {
     const autoSyncFormatted = {
       dataType: autoSync.dataType,
@@ -247,7 +257,13 @@ export async function applyAutoSync(req, res) {
         SiteService.addCronJob({
           id,
           autoSync,
-          job: () => autoSyncEvent(id, req.user.accessToken, req.user.email),
+          job: () =>
+            autoSyncEvent(
+              id,
+              req.user.accessToken,
+              req.user.email,
+              eventContainTitle
+            ),
         });
         break;
       // sync post
@@ -255,7 +271,14 @@ export async function applyAutoSync(req, res) {
         SiteService.addCronJob({
           id,
           autoSync,
-          job: () => autoSyncPost(req.user.email, id, req.user.accessToken),
+          job: () =>
+            autoSyncPost(
+              req.user.email,
+              id,
+              req.user.accessToken,
+              postWith,
+              containMsg
+            ),
         });
         break;
       // sync gallery
@@ -601,41 +624,47 @@ export async function syncPost(req, res) {
   try {
     let postsList = [];
     let postIdList = [];
-    const { pageId, dateFrom, dateTo } = req.body;
+    const {
+      pageId,
+      dateFrom,
+      dateTo,
+      postWith, //(int) 1: message, 2: video, 3: photo
+      containMsg,
+    } = req.body;
     const data = await getSyncPost({
       pageId: pageId,
       accessToken: req.user.accessToken,
     });
-    if (data) {
-      //post list
-      postsList = await SiteService.getFacebookPostData(data, dateFrom, dateTo);
-      const siteExist = await Site.findOne({ id: pageId });
-      if (siteExist) {
-        const record = await SyncRecord.create({
-          dataType: "News",
-          dateFrom: dateFrom,
-          dateTo: dateTo,
-        });
-        let syncRecordList = SiteService.addSyncRecord(record, siteExist);
-        await siteExist.updateOne({
-          id: pageId,
-          syncRecords: syncRecordList,
-        });
-        postsList &&
-          postsList.forEach((post) => {
-            postIdList.push(post.id);
-          });
-        //insert and update post
-        await SiteService.insertAndUpdateSyncDataPost(pageId, postsList);
-        await record.update({
-          status: true,
-        });
-        const update = await SiteService.findOneSite(pageId);
-        console.log(update);
-        return res.status(200).send(update);
-      }
-      return res.status(400).send({ error: "Site not existed!" });
-    }
+    // if (data) {
+    //   //post list
+    //   postsList = await SiteService.getFacebookPostData(data, dateFrom, dateTo);
+    //   const siteExist = await Site.findOne({ id: pageId });
+    //   if (siteExist) {
+    //     const record = await SyncRecord.create({
+    //       dataType: "News",
+    //       dateFrom: dateFrom,
+    //       dateTo: dateTo,
+    //     });
+    //     let syncRecordList = SiteService.addSyncRecord(record, siteExist);
+    //     await siteExist.updateOne({
+    //       id: pageId,
+    //       syncRecords: syncRecordList,
+    //     });
+    //     postsList &&
+    //       postsList.forEach((post) => {
+    //         postIdList.push(post.id);
+    //       });
+    //     //insert and update post
+    //     await SiteService.insertAndUpdateSyncDataPost(pageId, postsList);
+    //     await record.update({
+    //       status: true,
+    //     });
+    //     const update = await SiteService.findOneSite(pageId);
+    //     console.log(update);
+    //     return res.status(200).send(update);
+    //   }
+    //   return res.status(400).send({ error: "Site not existed!" });
+    // }
     return res.status(400).send({ error: "Facebook page event not existed!" });
   } catch (error) {
     console.log(error);
@@ -643,76 +672,82 @@ export async function syncPost(req, res) {
   }
 }
 
-export async function autoSyncPost(userEmail, pageId, accessToken) {
+export async function autoSyncPost(
+  userEmail,
+  pageId,
+  accessToken,
+  postWith, //(int) 1: message, 2: video, 3: photo
+  containMsg
+) {
   try {
-    let postsList = [];
-    const data = await getSyncPost({
-      pageId: pageId,
-      accessToken: accessToken,
-    });
-    const siteExist = await SiteService.findOneSite(pageId);
-    if (siteExist) {
-      if (data) {
-        const record = await SyncRecord.create({
-          dataType: "News",
-        });
-        //post list
-        postsList = await SiteService.getFacebookPostData(data);
-        //post Id list
-        let postIdList = [];
-        postsList &&
-          postsList.forEach((post) => {
-            postIdList.push(post.id);
-          });
-        //insert and update post
-        await SiteService.insertAndUpdateSyncDataPost(pageId, postsList);
-        // success
-        await record.update({
-          status: true,
-        });
-        // send mail with defined transport object
-        await transporter.sendMail({
-          from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
-          to: userEmail, // list of receivers
-          subject: "Sync Success ✔", // Subject line
-          text: "Your site has synced post success", // plain text body
-          html: `
-          <h5><strong>FPWG System</strong></h5>
-          <p>Hi,</p>
-          <p>Your site ${siteExist.title} just synced post successfully!</p>
-          <br/>
-          `, // html body
-        });
-      } else {
-        // site not exist
-        await transporter.sendMail({
-          from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
-          to: userEmail, // list of receivers
-          subject: "Sync Failed ✔", // Subject line
-          text: "Your site is not existed to sync post", // plain text body
-          html: `
-        <h5><strong>FPWG System</strong></h5>
-        <p>Hi,</p>
-        <p>Cannot find your Facebook Page ${siteExist.title}'s post to sync!</p>
-        <br/>
-        `, // html body
-        });
-      }
-    } else {
-      // page not exist
-      await transporter.sendMail({
-        from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
-        to: userEmail, // list of receivers
-        subject: "Sync Failed ✔", // Subject line
-        text: "Your Facebook Page is not exist to sync post", // plain text body
-        html: `
-      <h5><strong>FPWG System</strong></h5>
-      <p>Hi,</p>
-      <p>Your site is not existed to sync post!</p>
-      <br/>
-      `, // html body
-      });
-    }
+    // let postsList = [];
+    // const data = await getSyncPost({
+    //   pageId: pageId,
+    //   accessToken: accessToken,
+    // });
+    // const siteExist = await SiteService.findOneSite(pageId);
+    // if (siteExist) {
+    //   if (data) {
+    //     const record = await SyncRecord.create({
+    //       dataType: "News",
+    //     });
+    //     //post list
+    //     postsList = await SiteService.getFacebookPostData(data);
+    //     //post Id list
+    //     let postIdList = [];
+    //     postsList &&
+    //       postsList.forEach((post) => {
+    //         postIdList.push(post.id);
+    //       });
+    //     //insert and update post
+    //     await SiteService.insertAndUpdateSyncDataPost(pageId, postsList);
+    //     // success
+    //     await record.update({
+    //       status: true,
+    //     });
+    //     // send mail with defined transport object
+    //     await transporter.sendMail({
+    //       from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+    //       to: userEmail, // list of receivers
+    //       subject: "Sync Success ✔", // Subject line
+    //       text: "Your site has synced post success", // plain text body
+    //       html: `
+    //       <h5><strong>FPWG System</strong></h5>
+    //       <p>Hi,</p>
+    //       <p>Your site ${siteExist.title} just synced post successfully!</p>
+    //       <br/>
+    //       `, // html body
+    //     });
+    //   } else {
+    //     // site not exist
+    //     await transporter.sendMail({
+    //       from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+    //       to: userEmail, // list of receivers
+    //       subject: "Sync Failed ✔", // Subject line
+    //       text: "Your site is not existed to sync post", // plain text body
+    //       html: `
+    //     <h5><strong>FPWG System</strong></h5>
+    //     <p>Hi,</p>
+    //     <p>Cannot find your Facebook Page ${siteExist.title}'s post to sync!</p>
+    //     <br/>
+    //     `, // html body
+    //     });
+    //   }
+    // } else {
+    //   // page not exist
+    //   await transporter.sendMail({
+    //     from: '"FPWG 👻" <fpwg.fptu@gmail.com>', // sender address
+    //     to: userEmail, // list of receivers
+    //     subject: "Sync Failed ✔", // Subject line
+    //     text: "Your Facebook Page is not exist to sync post", // plain text body
+    //     html: `
+    //   <h5><strong>FPWG System</strong></h5>
+    //   <p>Hi,</p>
+    //   <p>Your site is not existed to sync post!</p>
+    //   <br/>
+    //   `, // html body
+    //   });
+    // }
   } catch (error) {
     console.log(error);
   }
@@ -855,51 +890,51 @@ export async function autoSyncGallery(pageId, accessToken, userEmail) {
 export async function syncEvent(req, res) {
   try {
     let eventList = [];
-    const { pageId, dateFrom, dateTo } = req.body;
+    const { pageId, dateFrom, dateTo, eventContainTitle } = req.body;
     const data = await getSyncEvent({
       pageId: pageId,
       accessToken: req.user.accessToken,
     });
-    console.log("Get sync event data length: ", data.length);
-    if (data) {
-      //event list
-      eventList = await SiteService.getFacebookEventData(
-        data,
-        dateFrom,
-        dateTo
-      );
-      console.log("Event list length: ", eventList.length);
-      if (!eventList) {
-        return res
-          .status(200)
-          .send({ msg: "Facebook page has no event existed!" });
-      }
-      const siteExist = await Site.findOne({ id: pageId });
-      if (siteExist) {
-        const record = await SyncRecord.create({
-          dataType: "Event",
-          dateFrom: dateFrom,
-          dateTo: dateTo,
-        });
-        let syncRecordList = SiteService.addSyncRecord(record, siteExist);
-        await siteExist.updateOne({ id: pageId, syncRecords: syncRecordList });
-        //event Id list
-        let eventIdList = [];
-        eventList &&
-          eventList.forEach((event) => {
-            eventIdList.push(event.id);
-          });
-        //insert and update event
-        await SiteService.insertAndUpdateSyncDataEvents(pageId, eventList);
-        await record.updateOne({
-          status: true,
-        });
-        const update = await SiteService.findOneSite(pageId);
-        return res.status(200).send(update);
-      } else {
-        return res.status(400).send({ error: "Site not existed!" });
-      }
-    }
+    // console.log("Get sync event data length: ", data.length);
+    // if (data) {
+    //   //event list
+    //   eventList = await SiteService.getFacebookEventData(
+    //     data,
+    //     dateFrom,
+    //     dateTo
+    //   );
+    //   console.log("Event list length: ", eventList.length);
+    //   if (!eventList) {
+    //     return res
+    //       .status(200)
+    //       .send({ msg: "Facebook page has no event existed!" });
+    //   }
+    //   const siteExist = await Site.findOne({ id: pageId });
+    //   if (siteExist) {
+    //     const record = await SyncRecord.create({
+    //       dataType: "Event",
+    //       dateFrom: dateFrom,
+    //       dateTo: dateTo,
+    //     });
+    //     let syncRecordList = SiteService.addSyncRecord(record, siteExist);
+    //     await siteExist.updateOne({ id: pageId, syncRecords: syncRecordList });
+    //     //event Id list
+    //     let eventIdList = [];
+    //     eventList &&
+    //       eventList.forEach((event) => {
+    //         eventIdList.push(event.id);
+    //       });
+    //     //insert and update event
+    //     await SiteService.insertAndUpdateSyncDataEvents(pageId, eventList);
+    //     await record.updateOne({
+    //       status: true,
+    //     });
+    //     const update = await SiteService.findOneSite(pageId);
+    //     return res.status(200).send(update);
+    //   } else {
+    //     return res.status(400).send({ error: "Site not existed!" });
+    //   }
+    // }
     return res.status(400).send({ error: "Facebook page event not existed!" });
   } catch (error) {
     console.log(error);
@@ -907,7 +942,12 @@ export async function syncEvent(req, res) {
   }
 }
 
-export async function autoSyncEvent(pageId, accessToken, userEmail) {
+export async function autoSyncEvent(
+  pageId,
+  accessToken,
+  userEmail,
+  containTitle
+) {
   try {
     let eventList = [];
     const data = await getSyncEvent({
