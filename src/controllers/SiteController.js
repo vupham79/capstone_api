@@ -154,22 +154,23 @@ export async function findAll(req, res) {
     if (find) {
       let siteList = [];
       find.forEach((user) => {
-        user.sites && user.sites.forEach((site) => {
-          siteList.push({
-            title: site.title,
-            isPublish: site.isPublish,
-            _id: site._id,
-            theme: site.theme,
-            categories: site.categories,
-            sitePath: site.sitePath,
-            phone: site.phone,
-            id: site.id,
-            displayName: user.displayName,
-            picture: user.picture,
-            email: user.email,
-            isActivated: user.isActivated,
+        user.sites &&
+          user.sites.forEach((site) => {
+            siteList.push({
+              title: site.title,
+              isPublish: site.isPublish,
+              _id: site._id,
+              theme: site.theme,
+              categories: site.categories,
+              sitePath: site.sitePath,
+              phone: site.phone,
+              id: site.id,
+              displayName: user.displayName,
+              picture: user.picture,
+              email: user.email,
+              isActivated: user.isActivated,
+            });
           });
-        });
       });
       return res.status(200).send(siteList);
     }
@@ -523,13 +524,14 @@ export async function createNewSite(req, res) {
               if (!theme) {
                 return res.status(500).send({ error: "No theme existed!" });
               }
-               theme.sections && await theme.sections.forEach((section) => {
-                defaultHomepageSetting.forEach((homepageSection) => {
-                  if (section === homepageSection.original) {
-                    homepageSection.isActive = true;
-                  }
-                });
-              });
+              theme.sections &&
+                (await theme.sections.forEach((section) => {
+                  defaultHomepageSetting.forEach((homepageSection) => {
+                    if (section === homepageSection.original) {
+                      homepageSection.isActive = true;
+                    }
+                  });
+                }));
               // insert site
               const insert = await SiteService.insertSite(pageId, {
                 phone: page.data.phone,
@@ -625,26 +627,26 @@ export async function syncPost(req, res) {
     let postsList = [];
     const {
       pageId,
-      dateFrom=null,
-      dateTo=null,
-      postWith=0, //(int) 1: message, 2: video, 3: photo
-      containMsg="",
+      dateFrom = null,
+      dateTo = null,
+      postWith = 0, //(int) 1: message, 2: video, 3: photo
+      containMsg = "",
     } = req.body;
     const data = await getSyncPost({
       pageId: pageId,
       accessToken: req.user.accessToken,
     });
-    console.log("total: ", data.posts.data.length)
+    console.log("total: ", data.posts.data.length);
     if (data) {
       //post list
       postsList = await SiteService.getFacebookPostData(data, dateFrom, dateTo); //filter by date range
       console.log("Get posts list length: ", postsList.length);
-      
+
       const siteExist = await Site.findOne({ id: pageId });
       if (siteExist) {
         const existedSite = await Site.findOne({ id: pageId })
-                .select("posts events")
-                .populate("posts events");
+          .select("posts events")
+          .populate("posts events");
         console.log("Existed Site Posts: ", existedSite.posts.length);
 
         //filter Post by type, message
@@ -666,7 +668,14 @@ export async function syncPost(req, res) {
           syncRecords: syncRecordList,
         });
         //insert and update post
-        await SiteService.insertAndUpdateSyncDataPost(pageId, filteredPostResult, dateFrom, dateTo, !!containMsg, !!postWith);
+        await SiteService.insertAndUpdateSyncDataPost(
+          pageId,
+          filteredPostResult,
+          dateFrom,
+          dateTo,
+          !!containMsg,
+          !!postWith
+        );
         await record.updateOne({
           status: true,
         });
@@ -693,7 +702,8 @@ export async function autoSyncPost(
     console.log(
       pageId,
       postWith, //(int) 1: message, 2: video, 3: photo
-      containMsg);
+      containMsg
+    );
     let postsList = [];
     const data = await getSyncPost({
       pageId: pageId,
@@ -709,8 +719,8 @@ export async function autoSyncPost(
         postsList = await SiteService.getFacebookPostData(data);
 
         const existedSite = await Site.findOne({ id: pageId })
-                .select("posts events")
-                .populate("posts events");
+          .select("posts events")
+          .populate("posts events");
 
         //filter Post
         let filteredPostResult = SiteService.filterPost(
@@ -726,7 +736,10 @@ export async function autoSyncPost(
             postIdList.push(post.id);
           });
         //insert and update post
-        await SiteService.insertAndUpdateSyncDataPost(pageId, filteredPostResult);
+        await SiteService.insertAndUpdateSyncDataPost(
+          pageId,
+          filteredPostResult
+        );
         // success
         await record.update({
           status: true,
@@ -797,13 +810,14 @@ export async function syncGallery(req, res) {
       const siteExist = await Site.findOne({ id: pageId });
       if (siteExist) {
         galleryList &&
-        galleryList.forEach((item) => {
-          siteExist.galleries && siteExist.galleries.forEach((siteItem) => {
-            if (item.target === siteItem.target) {
-              item._id = new mongoose.Types.ObjectId(siteItem._id);
-            }
+          galleryList.forEach((item) => {
+            siteExist.galleries &&
+              siteExist.galleries.forEach((siteItem) => {
+                if (item.target === siteItem.target) {
+                  item._id = new mongoose.Types.ObjectId(siteItem._id);
+                }
+              });
           });
-        });
         const record = await SyncRecord.create({
           dataType: "Gallery",
           dateFrom: dateFrom,
@@ -852,11 +866,12 @@ export async function autoSyncGallery(pageId, accessToken, userEmail) {
         galleryList = await SiteService.getFacebookGalleryData(data);
         galleryList &&
           galleryList.forEach((item) => {
-            siteExist.galleries && siteExist.galleries.forEach((siteItem) => {
-              if (item.target === siteItem.target) {
-                item._id = new mongoose.Types.ObjectId(siteItem._id);
-              }
-            });
+            siteExist.galleries &&
+              siteExist.galleries.forEach((siteItem) => {
+                if (item.target === siteItem.target) {
+                  item._id = new mongoose.Types.ObjectId(siteItem._id);
+                }
+              });
           });
         //update galleries
         await Site.updateOne(
@@ -940,8 +955,8 @@ export async function syncEvent(req, res) {
       const siteExist = await Site.findOne({ id: pageId });
       if (siteExist) {
         const existedSite = await Site.findOne({ id: pageId })
-        .select("posts events")
-        .populate("posts events");
+          .select("posts events")
+          .populate("posts events");
         console.log("Existed Site Posts: ", existedSite.events.length);
 
         //filer post and event list
@@ -958,7 +973,13 @@ export async function syncEvent(req, res) {
         let syncRecordList = SiteService.addSyncRecord(record, siteExist);
         await siteExist.updateOne({ id: pageId, syncRecords: syncRecordList });
         //insert and update event
-        await SiteService.insertAndUpdateSyncDataEvents(pageId, filteredEventResult, dateFrom, dateTo, !!eventContainTitle);
+        await SiteService.insertAndUpdateSyncDataEvents(
+          pageId,
+          filteredEventResult,
+          dateFrom,
+          dateTo,
+          !!eventContainTitle
+        );
         await record.updateOne({
           status: true,
         });
@@ -997,8 +1018,8 @@ export async function autoSyncEvent(
         eventList = await SiteService.getFacebookEventData(data);
 
         const existedSite = await Site.findOne({ id: pageId })
-        .select("posts events")
-        .populate("posts events");
+          .select("posts events")
+          .populate("posts events");
 
         //filer post and event list
         let filteredEventResult = SiteService.filterEvent(
@@ -1161,11 +1182,12 @@ export async function syncData(req, res) {
               );
               galleryList &&
                 galleryList.forEach((item) => {
-                  siteExist.galleries && siteExist.galleries.forEach((siteItem) => {
-                    if (item.target === siteItem.target) {
-                      item._id = new mongoose.Types.ObjectId(siteItem._id);
-                    }
-                  });
+                  siteExist.galleries &&
+                    siteExist.galleries.forEach((siteItem) => {
+                      if (item.target === siteItem.target) {
+                        item._id = new mongoose.Types.ObjectId(siteItem._id);
+                      }
+                    });
                 });
               //update galleries
               await SiteService.updateGallery(pageId, galleryList);
@@ -1283,7 +1305,6 @@ export async function autoSyncData(
   email = false,
   phone = false
 ) {
-  console.log(about, address, story, email, phone);
   try {
     let galleryList = [];
     let postsList = [];
@@ -1315,32 +1336,35 @@ export async function autoSyncData(
                 email,
                 phone,
               });
-              //post list
-              postsList = await SiteService.getFacebookPostSyncData(data);
-              //gallery list
-              galleryList = await SiteService.getFacebookGalleryData(data);
-              galleryList &&
-                galleryList.forEach((item) => {
-                  siteExist.galleries && siteExist.galleries.forEach((siteItem) => {
-                    if (item.target === siteItem.target) {
-                      item._id = new mongoose.Types.ObjectId(siteItem._id);
-                    }
+              if (data.post) {
+                //gallery list
+                galleryList = await SiteService.getFacebookGalleryData(data);
+                galleryList &&
+                  galleryList.forEach((item) => {
+                    siteExist.galleries &&
+                      siteExist.galleries.forEach((siteItem) => {
+                        if (item.target === siteItem.target) {
+                          item._id = new mongoose.Types.ObjectId(siteItem._id);
+                        }
+                      });
                   });
-                });
-              //update galleries
-              await SiteService.updateGallery(pageId, galleryList);
-              //post Id list
-              let postIdList = [];
-              if (postsList) {
-                postsList &&
-                  postsList.forEach((post) => {
-                    postIdList.push(post.id);
-                  });
-                //insert and update post
-                await SiteService.insertAndUpdateSyncDataPost(
-                  pageId,
-                  postsList
-                );
+                //update galleries
+                await SiteService.updateGallery(pageId, galleryList);
+                //post list
+                postsList = await SiteService.getFacebookPostSyncData(data);
+                //post Id list
+                let postIdList = [];
+                if (postsList) {
+                  postsList &&
+                    postsList.forEach((post) => {
+                      postIdList.push(post.id);
+                    });
+                  //insert and update post
+                  await SiteService.insertAndUpdateSyncDataPost(
+                    pageId,
+                    postsList
+                  );
+                }
               }
               //event list
               eventList = await SiteService.getFacebookEventSyncData(data);
