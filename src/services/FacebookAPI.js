@@ -24,7 +24,7 @@ export async function getSyncEvent({ pageId, accessToken }) {
   const data = await axios({
     params: {
       fields:
-        "events{id,name,description,place,is_canceled,end_time,start_time,cover}",
+        "events.limit(1000){id,name,description,place,is_canceled,end_time,start_time,cover}",
       locale: "en_US",
       access_token: accessToken,
     },
@@ -37,7 +37,7 @@ export async function getSyncPost({ pageId, accessToken }) {
   const data = await axios({
     params: {
       fields:
-        "posts{message,created_time,attachments{title,media_type,subattachments,media,target}}",
+        "posts.limit(1000){message,created_time,attachments{title,media_type,subattachments,media,target}}",
       locale: "en_US",
       access_token: accessToken,
     },
@@ -50,7 +50,7 @@ export async function getSyncGallery({ pageId, accessToken }) {
   const data = await axios({
     params: {
       fields:
-        "posts{message,created_time,attachments{title,media_type,subattachments,media,target}}",
+        "posts.limit(1000){message,created_time,attachments{title,media_type,subattachments,media,target}}",
       locale: "en_US",
       access_token: accessToken,
     },
@@ -72,15 +72,14 @@ export async function getSyncData({ pageId, accessToken }) {
     if (data.data) {
       page_about_story = data.data.page_about_story;
     }
-  } catch (error) {
-  }
+  } catch (error) {}
   const data = await axios({
     params: {
       fields:
         "category_list,location,single_line_address,phone,about," +
         "albums{picture,link}," +
-        "posts{message,created_time,attachments{title,media_type,subattachments,media,target}}," +
-        "events{id,name,description,place,is_canceled,end_time,start_time,cover}",
+        "posts.limit(1000){message,created_time,attachments{title,media_type,subattachments,media,target}}," +
+        "events.limit(1000){id,name,description,place,is_canceled,end_time,start_time,cover}",
       locale: "en_US",
       access_token: accessToken,
     },
@@ -102,15 +101,14 @@ export async function getPageData({ pageId, accessToken }) {
     if (data.data) {
       page_about_story = data.data.page_about_story;
     }
-  } catch (error) {
-  }
+  } catch (error) {}
   const data = await axios({
     params: {
       fields:
         "name,cover,phone,category_list,about," +
         "location,single_line_address,albums{picture,link}," +
-        "posts{message,created_time,attachments{title,media_type,subattachments,media,target}}," +
-        "events{id,name,description,place,is_canceled,end_time,start_time,cover}",
+        "posts.limit(1000){message,created_time,attachments{title,media_type,subattachments,media,target}}," +
+        "events.limit(1000){id,name,description,place,is_canceled,end_time,start_time,cover}",
       locale: "en_US",
       access_token: accessToken,
     },

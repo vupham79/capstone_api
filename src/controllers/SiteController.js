@@ -645,8 +645,8 @@ export async function syncPost(req, res) {
       const siteExist = await Site.findOne({ id: pageId });
       if (siteExist) {
         const existedSite = await Site.findOne({ id: pageId })
-          .select("posts events")
-          .populate("posts events");
+          .select("posts")
+          .populate("posts");
         console.log("Existed Site Posts: ", existedSite.posts.length);
 
         //filter Post by type, message

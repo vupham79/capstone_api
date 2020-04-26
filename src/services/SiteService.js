@@ -38,14 +38,25 @@ export async function insertSite(pageId, body) {
 export async function editSite(id, body) {
   const site = await Site.findOne({ id: id });
   if (body.phone) {
-    console.log("phone: ", body.data.phone ? body.data.phone: null);
+    console.log("phone: ", body.data.phone ? body.data.phone : null);
     site.phone = body.data.phone;
   }
   if (body.address) {
-    console.log("single line address: ", body.data.single_line_address ? body.data.single_line_address: null);
-    console.log("location longitude: ", body.data.location ? body.data.location.longitude: null);
-    console.log("location latitude: ", body.data.location ? body.data.location.latitude: null);
-    site.address = body.data.single_line_address ? body.data.single_line_address : null;
+    console.log(
+      "single line address: ",
+      body.data.single_line_address ? body.data.single_line_address : null
+    );
+    console.log(
+      "location longitude: ",
+      body.data.location ? body.data.location.longitude : null
+    );
+    console.log(
+      "location latitude: ",
+      body.data.location ? body.data.location.latitude : null
+    );
+    site.address = body.data.single_line_address
+      ? body.data.single_line_address
+      : null;
     site.longitude = body.data.location ? body.data.location.longitude : null;
     site.latitude = body.data.location ? body.data.location.latitude : null;
   }
@@ -55,9 +66,14 @@ export async function editSite(id, body) {
     site.about = body.data.about ? body.data.about : null;
   }
   if (body.story) {
-    console.log("page about story: ", body.data.page_about_story ? body.data.page_about_story : null);
-    console.log("page about story title: ", body.data.page_about_story?
-    body.data.page_about_story.title : null);
+    console.log(
+      "page about story: ",
+      body.data.page_about_story ? body.data.page_about_story : null
+    );
+    console.log(
+      "page about story title: ",
+      body.data.page_about_story ? body.data.page_about_story.title : null
+    );
     site.story = body.data.page_about_story
       ? {
           id: body.data.page_about_story.id,
@@ -402,7 +418,11 @@ export async function insertAndUpdateEvents(pageId, eventList) {
   });
 }
 
-export async function getFacebookPostData(data, dateFrom=null, dateTo=null) {
+export async function getFacebookPostData(
+  data,
+  dateFrom = null,
+  dateTo = null
+) {
   let postsList = [];
   if (!data.posts) {
     return null;
@@ -412,6 +432,11 @@ export async function getFacebookPostData(data, dateFrom=null, dateTo=null) {
       data.posts.data &&
       data.posts.data.forEach(async (post) => {
         if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
+          console.log(
+            post.created_time,
+            moment(post.created_time).isBetween(dateFrom, dateTo),
+            dateFrom
+          );
           if (!post.attachments || post.attachments === undefined) {
             if (
               !post.message ||
@@ -489,25 +514,25 @@ export async function getFacebookPostData(data, dateFrom=null, dateTo=null) {
               },
               target: post.attachments.data[0].target.url,
             });
-          }
-        } else if (
-          post.attachments &&
-          post.attachments.data[0].media_type === "link"
-        ) {
-          postsList.push({
-            id: post.id,
-            message: post.message,
-            title: post.attachments.data[0].title,
-            isActive: true,
-            createdTime: post.created_time,
-            attachments: {
+          } else if (
+            post.attachments &&
+            post.attachments.data[0].media_type === "link"
+          ) {
+            postsList.push({
               id: post.id,
-              media_type: "link",
-              images: post.attachments.data[0].media.image.src,
-              video: null,
-            },
-            target: post.attachments.data[0].target.url,
-          });
+              message: post.message,
+              title: post.attachments.data[0].title,
+              isActive: true,
+              createdTime: post.created_time,
+              attachments: {
+                id: post.id,
+                media_type: "link",
+                images: post.attachments.data[0].media.image.src,
+                video: null,
+              },
+              target: post.attachments.data[0].target.url,
+            });
+          }
         }
       });
   } else {
@@ -604,21 +629,24 @@ export async function getFacebookPostData(data, dateFrom=null, dateTo=null) {
             attachments: {
               id: post.id,
               media_type: "link",
-              images: post.attachments.data[0].media.image.src,
+              images:
+                post.attachments.data[0].media &&
+                post.attachments.data[0].media.image.src,
               video: null,
             },
             target: post.attachments.data[0].target.url,
           });
-          console.log(post);
-          console.log(post.attachments.data);
-          console.log(post.attachments.data[0].media.image);
         }
       });
   }
   return postsList;
 }
 
-export async function getFacebookGalleryData(data, dateFrom=null, dateTo=null) {
+export async function getFacebookGalleryData(
+  data,
+  dateFrom = null,
+  dateTo = null
+) {
   let galleryList = [];
   if (!data.posts) {
     return null;
@@ -797,7 +825,11 @@ export async function getFacebookPostSyncData(data) {
   return postsList;
 }
 
-export async function getFacebookEventData(data, dateFrom=null, dateTo=null) {
+export async function getFacebookEventData(
+  data,
+  dateFrom = null,
+  dateTo = null
+) {
   let eventList = [];
   if (!data.events) {
     return null;
@@ -1449,7 +1481,14 @@ export async function findExistedPostObjId(pageId) {
   return site;
 }
 
-export async function insertAndUpdateSyncDataPost(pageId, postsList, dateFrom=null, dateTo=null, filterMessage=false, filterType=false) {
+export async function insertAndUpdateSyncDataPost(
+  pageId,
+  postsList,
+  dateFrom = null,
+  dateTo = null,
+  filterMessage = false,
+  filterType = false
+) {
   //find existed post id
   const site = await Site.findOne({ id: pageId })
     .select("posts")
@@ -1463,33 +1502,40 @@ export async function insertAndUpdateSyncDataPost(pageId, postsList, dateFrom=nu
     postsList.forEach((post) => {
       fbPostIdList.push(post.id);
     });
-    console.log("Fb Post Id List length: ", fbPostIdList.length);
-    //existedPostIdList
+  console.log("Fb Post Id List length: ", fbPostIdList.length);
+  //existedPostIdList
   site.posts &&
-  site.posts.forEach((post) => {
+    site.posts.forEach((post) => {
       existedPostIdList.push(post.id);
     });
-    console.log("existedPostIdList: ", existedPostIdList.length);
+  console.log("existedPostIdList: ", existedPostIdList.length);
 
   //delete and update post
   site.posts &&
     site.posts.forEach(async (existedPost) => {
-      console.log("Included: ", fbPostIdList.includes(existedPost.id));
       // tao 1 list id chua id cua post co trong database
       if (fbPostIdList.includes(existedPost.id)) {
         // post co o Database va co o Facebook data -> update
-        const postResult = postsList.find(fbPost => fbPost.id === existedPost.id);
+        const postResult = postsList.find(
+          (fbPost) => fbPost.id === existedPost.id
+        );
         await Post.updateOne({ id: existedPost.id }, postResult);
       } else {
         // kiem tra co date range khong?
         // Co -> kiem tra created time cua existed post co trong khoang date range ko?
         // Khong -> deactivate post
         if (!filterMessage && !filterType) {
-          if(!dateFrom && !dateTo) {
+          if (!dateFrom && !dateTo) {
             await Post.updateOne({ id: existedPost.id }, { isActive: false });
           }
-          if(dateFrom && dateTo && 
-            moment(existedPost.createdTime).isBetween(formatDate(dateFrom), formatDate(dateTo))) {
+          if (
+            dateFrom &&
+            dateTo &&
+            moment(existedPost.createdTime).isBetween(
+              formatDate(dateFrom),
+              formatDate(dateTo)
+            )
+          ) {
             await Post.updateOne({ id: existedPost.id }, { isActive: false });
           }
         }
@@ -1502,26 +1548,30 @@ export async function insertAndUpdateSyncDataPost(pageId, postsList, dateFrom=nu
       if (!existedPostIdList.includes(post.id)) {
         const postResult = await Post.create(post);
         existedPostObjIdList.push(new mongoose.Types.ObjectId(postResult._id));
-        await Site.updateOne({id: pageId}, {posts: existedPostObjIdList});
+        await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
       }
     });
 }
 
 function formatDate(date) {
   var d = new Date(date),
-      month = '' + (d.getMonth() + 1),
-      day = '' + d.getDate(),
-      year = d.getFullYear();
+    month = "" + (d.getMonth() + 1),
+    day = "" + d.getDate(),
+    year = d.getFullYear();
 
-  if (month.length < 2) 
-      month = '0' + month;
-  if (day.length < 2) 
-      day = '0' + day;
+  if (month.length < 2) month = "0" + month;
+  if (day.length < 2) day = "0" + day;
 
-  return [year, month, day].join('-');
+  return [year, month, day].join("-");
 }
 
-export async function insertAndUpdateSyncDataEvents(pageId, eventList, dateFrom=null, dateTo=null, filterEventTitle=null) {
+export async function insertAndUpdateSyncDataEvents(
+  pageId,
+  eventList,
+  dateFrom = null,
+  dateTo = null,
+  filterEventTitle = null
+) {
   //find existed event id
   const site = await Site.findOne({ id: pageId })
     .select("events")
@@ -1535,35 +1585,46 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList, dateFrom=
     eventList.forEach((event) => {
       fbEventIdList.push(event.id);
     });
-    console.log("Fb Event Id List length: ", fbEventIdList.length);
-    //existedEventIdList
+  console.log("Fb Event Id List length: ", fbEventIdList.length);
+  //existedEventIdList
   site.events &&
-  site.events.forEach((event) => {
-    existedEventIdList.push(event.id);
+    site.events.forEach((event) => {
+      existedEventIdList.push(event.id);
     });
-    console.log("existedEventIdList: ", existedEventIdList.length);
+  console.log("existedEventIdList: ", existedEventIdList.length);
 
   //delete and update post
   site.events &&
     site.events.forEach(async (existedEvent) => {
-      console.log("Included: ", fbEventIdList.includes(existedEvent.id));
       // tao 1 list id chua id cua post co trong database
       if (fbEventIdList.includes(existedEvent.id)) {
         // post co o Database va co o Facebook data -> update
-        const eventResult = eventList.find(fbEvent => fbEvent.id === existedEvent.id);
+        const eventResult = eventList.find(
+          (fbEvent) => fbEvent.id === existedEvent.id
+        );
         await Event.updateOne({ id: existedEvent.id }, eventResult);
       } else {
         // kiem tra co date range khong?
         // Co -> kiem tra created time cua existed post co trong khoang date range ko?
         // Khong -> deactivate post
         if (!filterEventTitle) {
-          if(!dateFrom && !dateTo) {
+          if (!dateFrom && !dateTo) {
             await Event.updateOne({ id: existedEvent.id }, { isActive: false });
           }
-          if(dateFrom && dateTo && 
-            moment(existedEvent.createdTime).isBetween(formatDate(dateFrom), formatDate(dateTo))) {
+          if (
+            dateFrom &&
+            dateTo &&
+            (moment(existedEvent.startTime).isBetween(
+              formatDate(dateFrom),
+              formatDate(dateTo)
+            ) ||
+              moment(existedEvent.endTime).isBetween(
+                formatDate(dateFrom),
+                formatDate(dateTo)
+              ))
+          ) {
             await Event.updateOne({ id: existedEvent.id }, { isActive: false });
-          }  
+          }
         }
       }
     });
@@ -1573,8 +1634,10 @@ export async function insertAndUpdateSyncDataEvents(pageId, eventList, dateFrom=
     eventList.forEach(async (event) => {
       if (!existedEventIdList.includes(event.id)) {
         const eventResult = await Event.create(event);
-        existedEventObjIdList.push(new mongoose.Types.ObjectId(eventResult._id));
-        await Site.updateOne({id: pageId}, {events: existedEventObjIdList});
+        existedEventObjIdList.push(
+          new mongoose.Types.ObjectId(eventResult._id)
+        );
+        await Site.updateOne({ id: pageId }, { events: existedEventObjIdList });
       }
     });
 }
@@ -1652,7 +1715,7 @@ export function filterPost(
   filterPostType = 0
 ) {
   if (!filterPostType) {
-    filterPostType = 0
+    filterPostType = 0;
   }
   let filteredPostList = [];
   if (
@@ -1679,7 +1742,10 @@ export function filterPost(
       case 2:
         postsList.forEach((post) => {
           if (post.attachments && post.attachments.media_type === "video") {
-            console.log("attachments media type: ", post.attachments.media_type);
+            console.log(
+              "attachments media type: ",
+              post.attachments.media_type
+            );
             filteredPostList.push(post);
           }
         });
@@ -1698,7 +1764,10 @@ export function filterPost(
     switch (filterPostType) {
       case 0:
         postsList.forEach((post) => {
-          if (post.message && post.message.toLowerCase().includes(filterPostMessage.toLowerCase())) {
+          if (
+            post.message &&
+            post.message.toLowerCase().includes(filterPostMessage.toLowerCase())
+          ) {
             filteredPostList.push(post);
           }
         });
@@ -1715,7 +1784,8 @@ export function filterPost(
           }
           if (
             post.attachments &&
-            post.attachments.media_type === "album" && post.message &&
+            post.attachments.media_type === "album" &&
+            post.message &&
             post.message.toLowerCase().includes(filterPostMessage.toLowerCase())
           ) {
             filteredPostList.push(post);
@@ -1726,7 +1796,8 @@ export function filterPost(
         postsList.forEach((post) => {
           if (
             post.attachments &&
-            post.attachments.media_type === "video" && post.message &&
+            post.attachments.media_type === "video" &&
+            post.message &&
             post.message.toLowerCase().includes(filterPostMessage.toLowerCase())
           ) {
             filteredPostList.push(post);
@@ -1736,7 +1807,8 @@ export function filterPost(
       case 3:
         postsList.forEach((post) => {
           if (
-            !post.attachments && post.message &&
+            !post.attachments &&
+            post.message &&
             post.message.toLowerCase().includes(filterPostMessage.toLowerCase())
           ) {
             filteredPostList.push(post);
@@ -1761,7 +1833,10 @@ export function filterEvent(eventList, filterEventTitle = "") {
     filteredEventList = eventList;
   } else {
     eventList.forEach((event) => {
-      if (event.name && event.name.toLowerCase().includes(filterEventTitle.toLowerCase())) {
+      if (
+        event.name &&
+        event.name.toLowerCase().includes(filterEventTitle.toLowerCase())
+      ) {
         filteredEventList.push(event);
       }
     });
