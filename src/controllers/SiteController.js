@@ -154,7 +154,7 @@ export async function findAll(req, res) {
     if (find) {
       let siteList = [];
       find.forEach((user) => {
-        user.sites.forEach((site) => {
+        user.sites && user.sites.forEach((site) => {
           siteList.push({
             title: site.title,
             isPublish: site.isPublish,
@@ -523,7 +523,7 @@ export async function createNewSite(req, res) {
               if (!theme) {
                 return res.status(500).send({ error: "No theme existed!" });
               }
-              await theme.sections.forEach((section) => {
+               theme.sections && await theme.sections.forEach((section) => {
                 defaultHomepageSetting.forEach((homepageSection) => {
                   if (section === homepageSection.original) {
                     homepageSection.isActive = true;
@@ -666,7 +666,7 @@ export async function syncPost(req, res) {
           syncRecords: syncRecordList,
         });
         //insert and update post
-        await SiteService.insertAndUpdateSyncDataPost(pageId, filteredPostResult, dateFrom, dateTo);
+        await SiteService.insertAndUpdateSyncDataPost(pageId, filteredPostResult, dateFrom, dateTo, !!containMsg, !!postWith);
         await record.updateOne({
           status: true,
         });
@@ -719,34 +719,6 @@ export async function autoSyncPost(
           postWith
         );
 
-        console.log("Filtered Post List Result: ", filteredPostResult);
-
-        //get filtered Post Id List
-        let filteredPostResultIdList = [];
-        filteredPostResult.forEach((post) => {
-          filteredPostResultIdList.push(post.id);
-        });
-
-        //get updated Post list
-        let updatedPostList = [];
-        existedSite.posts &&
-          existedSite.posts.forEach((post) => {
-            if (filteredPostResultIdList.includes(post.id)) {
-              const postResult = filteredPostResult.find(
-                (checkPost) => checkPost.id === post.id
-              );
-              console.log(
-                "Post Result: " + post.id + " : ",
-                postResult
-              );
-              updatedPostList.push(postResult);
-            } else {
-              updatedPostList.push(post);
-            }
-          });
-          console.log("Updated Post List length: ", updatedPostList.length);
-        postsList = updatedPostList;
-
         //post Id list
         let postIdList = [];
         postsList &&
@@ -754,7 +726,7 @@ export async function autoSyncPost(
             postIdList.push(post.id);
           });
         //insert and update post
-        await SiteService.insertAndUpdateSyncDataPost(pageId, postsList);
+        await SiteService.insertAndUpdateSyncDataPost(pageId, filteredPostResult);
         // success
         await record.update({
           status: true,
@@ -823,15 +795,15 @@ export async function syncGallery(req, res) {
         dateTo
       );
       const siteExist = await Site.findOne({ id: pageId });
-      galleryList &&
+      if (siteExist) {
+        galleryList &&
         galleryList.forEach((item) => {
-          siteExist.galleries.forEach((siteItem) => {
+          siteExist.galleries && siteExist.galleries.forEach((siteItem) => {
             if (item.target === siteItem.target) {
               item._id = new mongoose.Types.ObjectId(siteItem._id);
             }
           });
         });
-      if (siteExist) {
         const record = await SyncRecord.create({
           dataType: "Gallery",
           dateFrom: dateFrom,
@@ -880,7 +852,7 @@ export async function autoSyncGallery(pageId, accessToken, userEmail) {
         galleryList = await SiteService.getFacebookGalleryData(data);
         galleryList &&
           galleryList.forEach((item) => {
-            siteExist.galleries.forEach((siteItem) => {
+            siteExist.galleries && siteExist.galleries.forEach((siteItem) => {
               if (item.target === siteItem.target) {
                 item._id = new mongoose.Types.ObjectId(siteItem._id);
               }
@@ -970,42 +942,13 @@ export async function syncEvent(req, res) {
         const existedSite = await Site.findOne({ id: pageId })
         .select("posts events")
         .populate("posts events");
+        console.log("Existed Site Posts: ", existedSite.events.length);
 
         //filer post and event list
         let filteredEventResult = SiteService.filterEvent(
           eventList,
           eventContainTitle
         );
-
-        //get filtered Event Id List
-        let filteredEventResultIdList = [];
-        filteredEventResult.forEach((event) => {
-          filteredEventResultIdList.push(event.id);
-        });
-
-        //get updated Event list
-        let updatedEventList = [];
-        existedSite.events &&
-          existedSite.events.forEach((event) => {
-            if (filteredEventResultIdList.includes(event.id)) {
-              const eventResult = filteredEventResult.find(
-                (checkEvent) => checkEvent.id === event.id
-              );
-              console.log(
-                "eventResult : ",
-                eventResult.name
-              );
-              updatedEventList.push(eventResult);
-            } else {
-              updatedEventList.push(event);
-              console.log(
-                "non existed eventResult : ",
-                event.name
-              );
-            }
-          });
-        eventList = updatedEventList;
-        console.log("Updated Event List lenghth: ", updatedEventList.length);
 
         const record = await SyncRecord.create({
           dataType: "Event",
@@ -1014,14 +957,8 @@ export async function syncEvent(req, res) {
         });
         let syncRecordList = SiteService.addSyncRecord(record, siteExist);
         await siteExist.updateOne({ id: pageId, syncRecords: syncRecordList });
-        //event Id list
-        let eventIdList = [];
-        eventList &&
-          eventList.forEach((event) => {
-            eventIdList.push(event.id);
-          });
         //insert and update event
-        await SiteService.insertAndUpdateSyncDataEvents(pageId, eventList);
+        await SiteService.insertAndUpdateSyncDataEvents(pageId, filteredEventResult, dateFrom, dateTo, !!eventContainTitle);
         await record.updateOne({
           status: true,
         });
@@ -1224,7 +1161,7 @@ export async function syncData(req, res) {
               );
               galleryList &&
                 galleryList.forEach((item) => {
-                  siteExist.galleries.forEach((siteItem) => {
+                  siteExist.galleries && siteExist.galleries.forEach((siteItem) => {
                     if (item.target === siteItem.target) {
                       item._id = new mongoose.Types.ObjectId(siteItem._id);
                     }
@@ -1384,7 +1321,7 @@ export async function autoSyncData(
               galleryList = await SiteService.getFacebookGalleryData(data);
               galleryList &&
                 galleryList.forEach((item) => {
-                  siteExist.galleries.forEach((siteItem) => {
+                  siteExist.galleries && siteExist.galleries.forEach((siteItem) => {
                     if (item.target === siteItem.target) {
                       item._id = new mongoose.Types.ObjectId(siteItem._id);
                     }
