@@ -15,7 +15,7 @@ var transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: "fpwg.fptu@gmail.com",
-    pass: "fptu123456",
+    pass: "123456Aa@",
   },
 });
 
@@ -717,7 +717,7 @@ export async function autoSyncPost(
         });
         //post list
         postsList = await SiteService.getFacebookPostData(data);
-          console.log("Posts List length: ", postsList.length);
+        console.log("Posts List length: ", postsList.length);
 
         //filter Post
         let filteredPostResult = SiteService.filterPost(
