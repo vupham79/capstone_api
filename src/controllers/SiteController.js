@@ -717,10 +717,7 @@ export async function autoSyncPost(
         });
         //post list
         postsList = await SiteService.getFacebookPostData(data);
-
-        const existedSite = await Site.findOne({ id: pageId })
-          .select("posts events")
-          .populate("posts events");
+          console.log("Posts List length: ", postsList.length);
 
         //filter Post
         let filteredPostResult = SiteService.filterPost(
@@ -728,6 +725,7 @@ export async function autoSyncPost(
           containMsg,
           postWith
         );
+        console.log("Filtered Post Result length: ", filteredPostResult.length);
 
         //post Id list
         let postIdList = [];
