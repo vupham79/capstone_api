@@ -53,6 +53,7 @@ export async function login({ id, name, email, picture, token }) {
       return false;
     }
     await user.updateOne({
+      picture: picture,
       token: token,
     });
     return true;
