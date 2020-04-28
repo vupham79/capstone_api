@@ -526,8 +526,8 @@ export async function getFacebookPostData(
               createdTime: post.created_time,
               attachments: {
                 id: post.id,
-                media_type: "link",
-                images: post.attachments.data[0].media.image.src,
+                media_type: "photo",
+                images: post.attachments.data[0].media && [post.attachments.data[0].media.image.src],
                 video: null,
               },
               target: post.attachments.data[0].target.url,
@@ -628,10 +628,10 @@ export async function getFacebookPostData(
             createdTime: post.created_time,
             attachments: {
               id: post.id,
-              media_type: "link",
+              media_type: "photo",
               images:
                 post.attachments.data[0].media &&
-                post.attachments.data[0].media.image.src,
+                [post.attachments.data[0].media.image.src],
               video: null,
             },
             target: post.attachments.data[0].target.url,
@@ -811,8 +811,8 @@ export async function getFacebookPostSyncData(data) {
           createdTime: post.created_time,
           attachments: {
             id: post.id,
-            media_type: "link",
-            images: post.attachments.data[0].media.image.src,
+            media_type: "photo",
+            images: post.attachments.data[0].media && [post.attachments.data[0].media.image.src],
             video: null,
           },
           target: post.attachments.data[0].target.url,
@@ -1745,7 +1745,13 @@ export function filterPost(
         break;
       case 1:
         postsList.forEach((post) => {
+          if (post.attachments && post.attachments.media_type === "link") {
+            console.log("Link image Post: ", post.message);
+            post.attachments.media_type = "photo";
+            filteredPostList.push(post);
+          }
           if (post.attachments && post.attachments.media_type === "photo") {
+            console.log("Photo Post: ", post.message);
             filteredPostList.push(post);
           }
           if (post.attachments && post.attachments.media_type === "album") {
@@ -1756,10 +1762,7 @@ export function filterPost(
       case 2:
         postsList.forEach((post) => {
           if (post.attachments && post.attachments.media_type === "video") {
-            console.log(
-              "attachments media type: ",
-              post.attachments.media_type
-            );
+            // console.log("Link video Post: ", post.message);
             filteredPostList.push(post);
           }
         });
@@ -1767,6 +1770,7 @@ export function filterPost(
       case 3:
         postsList.forEach((post) => {
           if (!post.attachments) {
+            console.log("No attachments: ", post.message);
             filteredPostList.push(post);
           }
         });
@@ -1788,6 +1792,15 @@ export function filterPost(
         break;
       case 1:
         postsList.forEach((post) => {
+          if (
+            post.attachments &&
+            post.attachments.media_type === "link" &&
+            post.message &&
+            post.message.toLowerCase().includes(filterPostMessage.toLowerCase())
+          ) {
+            post.attachments.media_type = "photo";
+            filteredPostList.push(post);
+          }
           if (
             post.attachments &&
             post.attachments.media_type === "photo" &&
