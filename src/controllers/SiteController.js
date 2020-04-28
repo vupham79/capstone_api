@@ -585,6 +585,7 @@ export async function createNewSite(req, res) {
                         : null,
                     }
                   : null,
+                email: req.body.profile.email,
               });
               //find user
               await SiteService.updateSiteList(req.user.id, insert);
@@ -667,7 +668,12 @@ export async function syncPost(req, res) {
           id: pageId,
           syncRecords: syncRecordList,
         });
+        await record.updateOne({
+          status: true,
+        });
+        console.log("Before update");
         //insert and update post
+        // const update = 
         await SiteService.insertAndUpdateSyncDataPost(
           pageId,
           filteredPostResult,
@@ -676,9 +682,7 @@ export async function syncPost(req, res) {
           !!containMsg,
           !!postWith
         );
-        await record.updateOne({
-          status: true,
-        });
+        // console.log(update);
         const update = await SiteService.findOneSite(pageId);
         return res.status(200).send(update);
       }
@@ -1019,11 +1023,13 @@ export async function autoSyncEvent(
           .select("posts events")
           .populate("posts events");
 
+          console.log(containTitle);
         //filer post and event list
         let filteredEventResult = SiteService.filterEvent(
           eventList,
           containTitle
         );
+        console.log("filteredEventResult: ", filteredEventResult.length);
 
         //get filtered Event Id List
         let filteredEventResultIdList = [];
@@ -1039,10 +1045,6 @@ export async function autoSyncEvent(
               const eventResult = filteredEventResult.find(
                 (checkEvent) => checkEvent.id === event.id
               );
-              // console.log(
-              //   "eventResult " + event.id + " : ",
-              //   eventResult
-              // );
               updatedEventList.push(eventResult);
             } else {
               updatedEventList.push(event);
@@ -1149,6 +1151,11 @@ export async function syncData(req, res) {
                 dateTo: dateTo,
               });
               let syncRecordList = SiteService.addSyncRecord(record, siteExist);
+              console.log(about,
+                address,
+                story,
+                email,
+                phone);
               // const update =
               await SiteService.editSite(pageId, {
                 categories: data.category_list,

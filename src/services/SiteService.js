@@ -31,6 +31,7 @@ export async function insertSite(pageId, body) {
     events: body.events,
     homepage: body.homepage,
     story: body.story,
+    email: body.email,
   });
   return insert;
 }
@@ -1558,6 +1559,9 @@ export async function insertAndUpdateSyncDataPost(
         }
       }
     });
+
+  // const result = await findOneSite(pageId);
+  // return result;
 }
 
 function formatDate(date) {
