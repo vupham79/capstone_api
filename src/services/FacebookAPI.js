@@ -50,7 +50,7 @@ export async function getSyncGallery({ pageId, accessToken }) {
   const data = await axios({
     params: {
       fields:
-        "posts.limit(1000){message,created_time,,updated_time,attachments{title,media_type,subattachments,media,target}}",
+        "posts.limit(1000){message,created_time,updated_time,attachments{title,media_type,subattachments,media,target}}",
       locale: "en_US",
       access_token: accessToken,
     },
