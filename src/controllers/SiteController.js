@@ -671,9 +671,8 @@ export async function syncPost(req, res) {
         await record.updateOne({
           status: true,
         });
-        console.log("Before update");
         //insert and update post
-        // const update = 
+        const update = 
         await SiteService.insertAndUpdateSyncDataPost(
           pageId,
           filteredPostResult,
@@ -682,8 +681,7 @@ export async function syncPost(req, res) {
           !!containMsg,
           !!postWith
         );
-        // console.log(update);
-        const update = await SiteService.findOneSite(pageId);
+        // const update = await SiteService.findOneSite(pageId);
         return res.status(200).send(update);
       }
       return res.status(400).send({ error: "Site not existed!" });
@@ -719,6 +717,13 @@ export async function autoSyncPost(
         const record = await SyncRecord.create({
           dataType: "News",
         });
+        let syncRecordList = SiteService.addSyncRecord(record, siteExist);
+        await Site.updateOne(
+          { id: pageId },
+          {
+            syncRecords: syncRecordList,
+          }
+        );
         //post list
         postsList = await SiteService.getFacebookPostData(data);
         console.log("Posts List length: ", postsList.length);
@@ -864,6 +869,7 @@ export async function autoSyncGallery(pageId, accessToken, userEmail) {
         const record = await SyncRecord.create({
           dataType: "Gallery",
         });
+        let syncRecordList = SiteService.addSyncRecord(record, siteExist);
         //gallery list
         galleryList = await SiteService.getFacebookGalleryData(data);
         galleryList &&
@@ -880,6 +886,7 @@ export async function autoSyncGallery(pageId, accessToken, userEmail) {
           { id: pageId },
           {
             galleries: galleryList.length > 0 ? galleryList : null,
+            syncRecords: syncRecordList,
           }
         );
         await record.updateOne({
@@ -1016,6 +1023,13 @@ export async function autoSyncEvent(
         const record = await SyncRecord.create({
           dataType: "Event",
         });
+        let syncRecordList = SiteService.addSyncRecord(record, siteExist);
+        await Site.updateOne(
+          { id: pageId },
+          {
+            syncRecords: syncRecordList,
+          }
+        );
         //event list
         eventList = await SiteService.getFacebookEventData(data);
 
@@ -1331,9 +1345,11 @@ export async function autoSyncData(
               const record = await SyncRecord.create({
                 dataType: "All",
               });
+              let syncRecordList = SiteService.addSyncRecord(record, siteExist);
+              console.log("syncRecordList: ", syncRecordList.length);
               const update = await SiteService.editSite(pageId, {
                 categories: data.category_list,
-                syncRecord: record,
+                syncRecords: syncRecordList,
                 data: data,
                 about,
                 address,

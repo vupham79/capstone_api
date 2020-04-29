@@ -139,8 +139,8 @@ export function addSyncRecord(record, siteExist) {
   let syncRecordList = [];
   siteExist &&
     siteExist.syncRecords &&
-    siteExist.syncRecords.forEach((record) => {
-      syncRecordList.push(new mongoose.Types.ObjectId(record));
+    siteExist.syncRecords.forEach((existedRecord) => {
+      syncRecordList.push(new mongoose.Types.ObjectId(existedRecord._id));
     });
   syncRecordList.push(new mongoose.Types.ObjectId(record._id));
   return syncRecordList;
@@ -1560,8 +1560,8 @@ export async function insertAndUpdateSyncDataPost(
       }
     });
 
-  // const result = await findOneSite(pageId);
-  // return result;
+  const result = await findOneSite(pageId);
+  return result;
 }
 
 function formatDate(date) {
