@@ -1668,19 +1668,15 @@ export async function insertAndUpdateSyncDataEvents(
   //create event
   eventList &&
     eventList.forEach(async (event) => {
-      if (!existedEventIdList.includes(event.id)) {
-        const existedEvent = await Event.findOne({ id: event.id });
-        if (!existedEvent) {
-          const eventResult = await Event.create(event);
-          existedEventObjIdList.push(
-            new mongoose.Types.ObjectId(eventResult._id)
-          );
-          await Site.updateOne(
-            { id: pageId },
-            { events: existedEventObjIdList }
-          );
-        } else {
-          await Event.updateOne({ id: event.id }, event);
+      const existedEvent = await Event.findOne({ id: event.id });
+      if (!existedEvent) {
+        const eventResult = await Event.create(event);
+        existedEventObjIdList.push(
+          new mongoose.Types.ObjectId(eventResult._id)
+        );
+        await Site.updateOne({ id: pageId }, { events: existedEventObjIdList });
+      } else {
+        if (!existedEventIdList.includes(event.id)) {
           existedEventIdList.push(new mongoose.Types.ObjectId(eventResult._id));
           await Site.updateOne(
             { id: pageId },
