@@ -10,9 +10,9 @@ passport.use(
   new JWTStrategy(
     {
       jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-      secretOrKey: process.env.secret
+      secretOrKey: process.env.secret,
     },
-    function(jwtPayload, cb) {
+    function (jwtPayload, cb) {
       //find the user in db if needed. This functionality may be omitted if you store everything you'll need in JWT payload.
       if (jwtPayload.email && jwtPayload.accessToken) {
         return cb(null, jwtPayload);
@@ -23,7 +23,7 @@ passport.use(
 );
 
 passport.use(
-  new LocalStrategy(async function(username, password, done) {
+  new LocalStrategy(async function (username, password, done) {
     try {
       const admin = await Admin.findOne({ username: username });
       if (!admin) {
@@ -39,11 +39,11 @@ passport.use(
   })
 );
 
-passport.serializeUser(function(user, done) {
+passport.serializeUser(function (user, done) {
   done(null, user);
 });
 
-passport.deserializeUser(function(user, done) {
+passport.deserializeUser(function (user, done) {
   done(null, user);
 });
 

@@ -7,7 +7,7 @@ export default ({
   url,
   data,
   params,
-  baseURL = process.env.facebookAPI
+  baseURL = process.env.facebookAPI,
 }) => {
   return axios({
     headers,
@@ -15,6 +15,6 @@ export default ({
     url,
     data,
     params,
-    baseURL
+    baseURL,
   });
 };

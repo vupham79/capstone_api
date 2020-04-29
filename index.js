@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import canvas from "canvas";
 import routes from "./src/routes";
 import { connectDb } from "./src/models";
 import bodyParser from "body-parser";
@@ -34,6 +35,9 @@ routes(app);
 // mongodb local
 connectDb();
 
+app.get("/", (req, res) =>
+  res.send({ version: canvas.version, cairoVersion: canvas.cairoVersion })
+);
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
