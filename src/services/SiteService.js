@@ -122,15 +122,15 @@ export async function findOneSite(id) {
     .populate({
       path: "events",
       match: { isActive: true },
-      options: {
-        sort: { startTime: -1 },
-      },
+      // options: {
+      //   sort: { startTime: -1 },
+      // },
     })
     .populate({
       path: "syncRecords",
-      options: {
-        sort: { createdAt: -1 },
-      },
+      // options: {
+      //   sort: { createdAt: -1 },
+      // },
     });
   return site;
 }
@@ -1586,7 +1586,26 @@ export async function insertAndUpdateSyncDataPost(
     });
 
   const result = await findOneSite(pageId);
-  return result;
+  console.log("result: ", result.posts.length);
+  const result2 = await Site.findOne({ id: pageId })
+    .populate({
+      path: "theme posts",
+    })
+    .populate({
+      path: "events",
+      match: { isActive: true },
+      // options: {
+      //   sort: { startTime: -1 },
+      // },
+    })
+    .populate({
+      path: "syncRecords",
+      // options: {
+      //   sort: { createdAt: -1 },
+      // },
+    });
+  console.log("result 2: ", result2.posts.length);
+  return result2;
 }
 
 function formatDate(date) {
@@ -1685,6 +1704,28 @@ export async function insertAndUpdateSyncDataEvents(
         }
       }
     });
+   
+  const result = await findOneSite(pageId);
+  console.log("result: ", result.posts.length);
+  const result2 = await Site.findOne({ id: pageId })
+    .populate({
+      path: "theme events",
+    })
+    .populate({
+      path: "posts",
+      match: { isActive: true },
+      // options: {
+      //   sort: { startTime: -1 },
+      // },
+    })
+    .populate({
+      path: "syncRecords",
+      // options: {
+      //   sort: { createdAt: -1 },
+      // },
+    });
+  console.log("result 2: ", result2.events.length);
+  return result2;
 }
 
 export async function findExistedSitePath(sitepath) {

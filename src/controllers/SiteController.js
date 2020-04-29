@@ -980,18 +980,18 @@ export async function syncEvent(req, res) {
         });
         let syncRecordList = SiteService.addSyncRecord(record, siteExist);
         await siteExist.updateOne({ id: pageId, syncRecords: syncRecordList });
+        await record.updateOne({
+          status: true,
+        });
         //insert and update event
-        await SiteService.insertAndUpdateSyncDataEvents(
+        const update = await SiteService.insertAndUpdateSyncDataEvents(
           pageId,
           filteredEventResult,
           dateFrom,
           dateTo,
           !!eventContainTitle
         );
-        await record.updateOne({
-          status: true,
-        });
-        const update = await SiteService.findOneSite(pageId);
+        // const update = await SiteService.findOneSite(pageId);
         return res.status(200).send(update);
       } else {
         return res.status(400).send({ error: "Site not existed!" });
@@ -1122,6 +1122,7 @@ export async function autoSyncEvent(
 
 export async function syncData(req, res) {
   try {
+    let syncDataResult = null;
     let galleryList = [];
     let postsList = [];
     let eventList = [];
@@ -1244,7 +1245,7 @@ export async function syncData(req, res) {
                 postsList = updatedPostList;
 
                 //insert and update post
-                await SiteService.insertAndUpdateSyncDataPost(
+                syncDataResult = await SiteService.insertAndUpdateSyncDataPost(
                   pageId,
                   postsList
                 );
@@ -1283,7 +1284,7 @@ export async function syncData(req, res) {
                 eventList = updatedEventList;
 
                 //insert and update event
-                await SiteService.insertAndUpdateSyncDataEvents(
+                syncDataResult = await SiteService.insertAndUpdateSyncDataEvents(
                   pageId,
                   eventList
                 );
@@ -1292,9 +1293,12 @@ export async function syncData(req, res) {
               await record.update({
                 status: true,
               });
-              const siteResult = await SiteService.findOneSite(pageId);
+              if(!syncDataResult) {
+                syncDataResult = await SiteService.findOneSite(pageId);
+              }
+              // const siteResult = await SiteService.findOneSite(pageId);
               // console.log("Site result length: ", siteResult.posts.length);
-              return res.status(200).send(siteResult);
+              return res.status(200).send(syncDataResult);
               // } else {
               // return res.status(400).send({ error: "Edit failed!" });
               // }
