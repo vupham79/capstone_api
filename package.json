@@ -2,6 +2,9 @@
   "name": "capstone",
   "version": "1.0.0",
   "description": "FPT University FPWG Capstone Project ",
+  "engines": {
+    "node": "10.14.x"
+  },
   "scripts": {
     "start": "nodemon --exec babel-node -- index.js"
   },
