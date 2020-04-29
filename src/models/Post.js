@@ -4,36 +4,40 @@ const PostSchema = new mongoose.Schema(
   {
     id: {
       type: String,
-      unique: [true, "Id already existed!"]
+      unique: [true, "Id already existed!"],
     },
     title: {
       type: String,
-      default: null
+      default: null,
     },
     message: {
       type: String,
-      default: null
+      default: null,
     },
     attachments: {
       media_type: String,
       images: [String],
-      video: String
+      video: String,
     },
     isActive: {
       type: Boolean,
-      default: true
+      default: true,
     },
     createdTime: {
       type: String,
-      default: null
+      default: null,
+    },
+    updatedTime: {
+      type: String,
+      default: null,
     },
     target: {
       type: String,
-      default: null
-    }
+      default: null,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

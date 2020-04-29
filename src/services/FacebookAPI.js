@@ -37,7 +37,7 @@ export async function getSyncPost({ pageId, accessToken }) {
   const data = await axios({
     params: {
       fields:
-        "posts.limit(1000){message,created_time,attachments{title,media_type,subattachments,media,target}}",
+        "posts.limit(1000){message,created_time,updated_time,attachments{title,media_type,subattachments,media,target}}",
       locale: "en_US",
       access_token: accessToken,
     },
@@ -50,7 +50,7 @@ export async function getSyncGallery({ pageId, accessToken }) {
   const data = await axios({
     params: {
       fields:
-        "posts.limit(1000){message,created_time,attachments{title,media_type,subattachments,media,target}}",
+        "posts.limit(1000){message,created_time,,updated_time,attachments{title,media_type,subattachments,media,target}}",
       locale: "en_US",
       access_token: accessToken,
     },
@@ -78,7 +78,7 @@ export async function getSyncData({ pageId, accessToken }) {
       fields:
         "category_list,location,single_line_address,phone,about," +
         "albums{picture,link}," +
-        "posts.limit(1000){message,created_time,attachments{title,media_type,subattachments,media,target}}," +
+        "posts.limit(1000){message,created_time,updated_time,attachments{title,media_type,subattachments,media,target}}," +
         "events.limit(1000){id,name,description,place,is_canceled,end_time,start_time,cover}",
       locale: "en_US",
       access_token: accessToken,
@@ -107,7 +107,7 @@ export async function getPageData({ pageId, accessToken }) {
       fields:
         "name,cover,phone,category_list,about," +
         "location,single_line_address,albums{picture,link}," +
-        "posts.limit(1000){message,created_time,attachments{title,media_type,subattachments,media,target}}," +
+        "posts.limit(1000){message,created_time,updated_time,attachments{title,media_type,subattachments,media,target}}," +
         "events.limit(1000){id,name,description,place,is_canceled,end_time,start_time,cover}",
       locale: "en_US",
       access_token: accessToken,

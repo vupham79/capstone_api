@@ -672,8 +672,7 @@ export async function syncPost(req, res) {
           status: true,
         });
         //insert and update post
-        const update = 
-        await SiteService.insertAndUpdateSyncDataPost(
+        const update = await SiteService.insertAndUpdateSyncDataPost(
           pageId,
           filteredPostResult,
           dateFrom,
@@ -1037,7 +1036,7 @@ export async function autoSyncEvent(
           .select("posts events")
           .populate("posts events");
 
-          console.log(containTitle);
+        console.log(containTitle);
         //filer post and event list
         let filteredEventResult = SiteService.filterEvent(
           eventList,
@@ -1165,11 +1164,7 @@ export async function syncData(req, res) {
                 dateTo: dateTo,
               });
               let syncRecordList = SiteService.addSyncRecord(record, siteExist);
-              console.log(about,
-                address,
-                story,
-                email,
-                phone);
+              console.log(about, address, story, email, phone);
               // const update =
               await SiteService.editSite(pageId, {
                 categories: data.category_list,

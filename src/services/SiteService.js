@@ -451,6 +451,7 @@ export async function getFacebookPostData(
                 message: post.message,
                 isActive: true,
                 createdTime: post.created_time,
+                updatedTime: post.updated_time,
                 attachments: null,
                 target: null,
               });
@@ -471,6 +472,7 @@ export async function getFacebookPostData(
               message: post.message,
               isActive: true,
               createdTime: post.created_time,
+              updatedTime: post.updated_time,
               attachments: {
                 id: post.id,
                 media_type: "album",
@@ -489,6 +491,7 @@ export async function getFacebookPostData(
               title: post.attachments.data[0].title,
               isActive: true,
               createdTime: post.created_time,
+              updatedTime: post.updated_time,
               attachments: {
                 id: post.id,
                 media_type: "photo",
@@ -507,6 +510,7 @@ export async function getFacebookPostData(
               title: post.attachments.data[0].title,
               isActive: true,
               createdTime: post.created_time,
+              updatedTime: post.updated_time,
               attachments: {
                 id: post.id,
                 media_type: "video",
@@ -525,10 +529,13 @@ export async function getFacebookPostData(
               title: post.attachments.data[0].title,
               isActive: true,
               createdTime: post.created_time,
+              updatedTime: post.updated_time,
               attachments: {
                 id: post.id,
                 media_type: "photo",
-                images: post.attachments.data[0].media && [post.attachments.data[0].media.image.src],
+                images: post.attachments.data[0].media && [
+                  post.attachments.data[0].media.image.src,
+                ],
                 video: null,
               },
               target: post.attachments.data[0].target.url,
@@ -553,6 +560,7 @@ export async function getFacebookPostData(
               message: post.message,
               isActive: true,
               createdTime: post.created_time,
+              updatedTime: post.updated_time,
               attachments: null,
               target: null,
             });
@@ -573,6 +581,7 @@ export async function getFacebookPostData(
             message: post.message,
             isActive: true,
             createdTime: post.created_time,
+            updatedTime: post.updated_time,
             attachments: {
               id: post.id,
               media_type: "album",
@@ -591,6 +600,7 @@ export async function getFacebookPostData(
             title: post.attachments.data[0].title,
             isActive: true,
             createdTime: post.created_time,
+            updatedTime: post.updated_time,
             attachments: {
               id: post.id,
               media_type: "photo",
@@ -609,6 +619,7 @@ export async function getFacebookPostData(
             title: post.attachments.data[0].title,
             isActive: true,
             createdTime: post.created_time,
+            updatedTime: post.updated_time,
             attachments: {
               id: post.id,
               media_type: "video",
@@ -627,12 +638,13 @@ export async function getFacebookPostData(
             title: post.attachments.data[0].title,
             isActive: true,
             createdTime: post.created_time,
+            updatedTime: post.updated_time,
             attachments: {
               id: post.id,
               media_type: "photo",
-              images:
-                post.attachments.data[0].media &&
-                [post.attachments.data[0].media.image.src],
+              images: post.attachments.data[0].media && [
+                post.attachments.data[0].media.image.src,
+              ],
               video: null,
             },
             target: post.attachments.data[0].target.url,
@@ -737,6 +749,7 @@ export async function getFacebookPostSyncData(data) {
           message: post.message,
           isActive: true,
           createdTime: post.created_time,
+          updatedTime: post.updated_time,
           attachments: null,
           target: null,
         });
@@ -755,6 +768,7 @@ export async function getFacebookPostSyncData(data) {
           title: post.attachments.data[0].title,
           message: post.message,
           createdTime: post.created_time,
+          updatedTime: post.updated_time,
           isActive: true,
           attachments: {
             id: post.id,
@@ -772,6 +786,7 @@ export async function getFacebookPostSyncData(data) {
           id: post.id,
           title: post.attachments.data[0].title,
           createdTime: post.created_time,
+          updatedTime: post.updated_time,
           message: post.message,
           isActive: true,
           attachments: {
@@ -791,6 +806,7 @@ export async function getFacebookPostSyncData(data) {
           title: post.attachments.data[0].title,
           message: post.message,
           createdTime: post.created_time,
+          updatedTime: post.updated_time,
           isActive: true,
           attachments: {
             id: post.id,
@@ -810,10 +826,13 @@ export async function getFacebookPostSyncData(data) {
           title: post.attachments.data[0].title,
           isActive: true,
           createdTime: post.created_time,
+          updatedTime: post.updated_time,
           attachments: {
             id: post.id,
             media_type: "photo",
-            images: post.attachments.data[0].media && [post.attachments.data[0].media.image.src],
+            images: post.attachments.data[0].media && [
+              post.attachments.data[0].media.image.src,
+            ],
             video: null,
           },
           target: post.attachments.data[0].target.url,
@@ -1546,18 +1565,25 @@ export async function insertAndUpdateSyncDataPost(
   //create post
   postsList &&
     postsList.forEach(async (post) => {
-      if (!existedPostIdList.includes(post.id)) {
-        const existedPost = await Post.findOne({id: post.id});
-        if(!existedPost) {
-          const postResult = await Post.create(post);
-          existedPostObjIdList.push(new mongoose.Types.ObjectId(postResult._id));
-          await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
-        } else {
-          await Post.updateOne({id: post.id}, post);
-          existedPostObjIdList.push(new mongoose.Types.ObjectId(existedPost._id));
-          await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
+      // if (!existedPostIdList.includes(post.id)) {
+      const existedPost = await Post.findOne({ id: post.id });
+      if (!existedPost) {
+        const postResult = await Post.create(post);
+        existedPostObjIdList.push(new mongoose.Types.ObjectId(postResult._id));
+        await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
+      } else {
+        if (existedPost.updatedTime) {
+          console.log(existedPost.updatedTime);
         }
+        await Post.updateOne({ id: post.id }, post);
+        if (!existedPostIdList.includes(post.id)) {
+          existedPostObjIdList.push(
+            new mongoose.Types.ObjectId(existedPost._id)
+          );
+        }
+        await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
       }
+      // }
     });
 
   const result = await findOneSite(pageId);
@@ -1644,17 +1670,23 @@ export async function insertAndUpdateSyncDataEvents(
   eventList &&
     eventList.forEach(async (event) => {
       if (!existedEventIdList.includes(event.id)) {
-        const existedEvent = await Event.findOne({id: event.id});
-        if(!existedEvent) {
+        const existedEvent = await Event.findOne({ id: event.id });
+        if (!existedEvent) {
           const eventResult = await Event.create(event);
           existedEventObjIdList.push(
             new mongoose.Types.ObjectId(eventResult._id)
           );
-          await Site.updateOne({ id: pageId }, { events: existedEventObjIdList });
+          await Site.updateOne(
+            { id: pageId },
+            { events: existedEventObjIdList }
+          );
         } else {
-          await Event.updateOne({id: event.id}, event);
+          await Event.updateOne({ id: event.id }, event);
           existedEventIdList.push(new mongoose.Types.ObjectId(eventResult._id));
-          await Site.updateOne({ id: pageId }, { events: existedEventObjIdList });
+          await Site.updateOne(
+            { id: pageId },
+            { events: existedEventObjIdList }
+          );
         }
       }
     });
