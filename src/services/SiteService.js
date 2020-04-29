@@ -1539,7 +1539,12 @@ export async function insertAndUpdateSyncDataPost(
         const postResult = postsList.find(
           (fbPost) => fbPost.id === existedPost.id
         );
-        await Post.updateOne({ id: existedPost.id }, postResult);
+        if (
+          new Date(postResult.updatedTime).getTime() >
+          new Date(existedPost.updatedTime).getTime()
+        ) {
+          await Post.updateOne({ id: existedPost.id }, postResult);
+        }
       } else {
         // kiem tra co date range khong?
         // Co -> kiem tra created time cua existed post co trong khoang date range ko?
@@ -1565,17 +1570,12 @@ export async function insertAndUpdateSyncDataPost(
   //create post
   postsList &&
     postsList.forEach(async (post) => {
-      // if (!existedPostIdList.includes(post.id)) {
       const existedPost = await Post.findOne({ id: post.id });
       if (!existedPost) {
         const postResult = await Post.create(post);
         existedPostObjIdList.push(new mongoose.Types.ObjectId(postResult._id));
         await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
       } else {
-        if (existedPost.updatedTime) {
-          console.log(existedPost.updatedTime);
-        }
-        await Post.updateOne({ id: post.id }, post);
         if (!existedPostIdList.includes(post.id)) {
           existedPostObjIdList.push(
             new mongoose.Types.ObjectId(existedPost._id)
@@ -1583,7 +1583,6 @@ export async function insertAndUpdateSyncDataPost(
         }
         await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
       }
-      // }
     });
 
   const result = await findOneSite(pageId);
