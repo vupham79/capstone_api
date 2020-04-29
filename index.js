@@ -35,9 +35,6 @@ routes(app);
 // mongodb local
 connectDb();
 
-app.get("/", (req, res) =>
-  res.send({ version: canvas.version, cairoVersion: canvas.cairoVersion })
-);
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
