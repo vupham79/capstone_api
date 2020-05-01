@@ -1219,35 +1219,14 @@ export async function syncData(req, res) {
                   filterPostType
                 );
 
-                //get filtered Post Id List
-                let filteredPostResultIdList = [];
-                filteredPostResult.forEach((post) => {
-                  filteredPostResultIdList.push(post.id);
-                });
-
-                //get updated Post list
-                let updatedPostList = [];
-                existedSite.posts &&
-                  existedSite.posts.forEach((post) => {
-                    if (filteredPostResultIdList.includes(post.id)) {
-                      const postResult = filteredPostResult.find(
-                        (checkPost) => checkPost.id === post.id
-                      );
-                      // console.log(
-                      //   "Post Result: " + post.id + " : ",
-                      //   postResult
-                      // );
-                      updatedPostList.push(postResult);
-                    } else {
-                      updatedPostList.push(post);
-                    }
-                  });
-                postsList = updatedPostList;
-
                 //insert and update post
                 syncDataResult = await SiteService.insertAndUpdateSyncDataPost(
                   pageId,
-                  postsList
+                  filteredPostResult,
+                  dateFrom,
+                  dateTo,
+                  !!filterPostMessage,
+                  !!filterPostType
                 );
               }
               //event Id list
@@ -1258,35 +1237,13 @@ export async function syncData(req, res) {
                   filterEventTitle
                 );
 
-                //get filtered Event Id List
-                let filteredEventResultIdList = [];
-                filteredEventResult.forEach((event) => {
-                  filteredEventResultIdList.push(event.id);
-                });
-
-                //get updated Event list
-                let updatedEventList = [];
-                existedSite.events &&
-                  existedSite.events.forEach((event) => {
-                    if (filteredEventResultIdList.includes(event.id)) {
-                      const eventResult = filteredEventResult.find(
-                        (checkEvent) => checkEvent.id === event.id
-                      );
-                      // console.log(
-                      //   "eventResult " + event.id + " : ",
-                      //   eventResult
-                      // );
-                      updatedEventList.push(eventResult);
-                    } else {
-                      updatedEventList.push(event);
-                    }
-                  });
-                eventList = updatedEventList;
-
                 //insert and update event
                 syncDataResult = await SiteService.insertAndUpdateSyncDataEvents(
                   pageId,
-                  eventList
+                  filteredEventResult,
+                  dateFrom,
+                  dateTo,
+                  !!filterEventTitle
                 );
               }
               // if (update) {
@@ -1296,8 +1253,7 @@ export async function syncData(req, res) {
               if(!syncDataResult) {
                 syncDataResult = await SiteService.findOneSite(pageId);
               }
-              // const siteResult = await SiteService.findOneSite(pageId);
-              // console.log("Site result length: ", siteResult.posts.length);
+              
               return res.status(200).send(syncDataResult);
               // } else {
               // return res.status(400).send({ error: "Edit failed!" });

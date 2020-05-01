@@ -1706,7 +1706,7 @@ export async function insertAndUpdateSyncDataEvents(
     });
    
   const result = await findOneSite(pageId);
-  console.log("result: ", result.posts.length);
+  console.log("result: ", result.events.length);
   const result2 = await Site.findOne({ id: pageId })
     .populate({
       path: "theme events",
