@@ -122,15 +122,15 @@ export async function findOneSite(id) {
     .populate({
       path: "events",
       match: { isActive: true },
-      // options: {
-      //   sort: { startTime: -1 },
-      // },
+      options: {
+        sort: { startTime: -1 },
+      },
     })
     .populate({
       path: "syncRecords",
-      // options: {
-      //   sort: { createdAt: -1 },
-      // },
+      options: {
+        sort: { createdAt: -1 },
+      },
     });
   return site;
 }
@@ -628,6 +628,42 @@ export async function getFacebookPostData(
             },
             target: post.attachments.data[0].target.url,
           });
+          // if(post.attachments.data[0].media && post.attachments.data[0].media.image) {
+          //   console.log("image video");
+          //   postsList.push({
+          //     id: post.id,
+          //     message: post.message,
+          //     title: post.attachments.data[0].title,
+          //     isActive: true,
+          //     createdTime: post.created_time,
+          //     updatedTime: post.updated_time,
+          //     attachments: {
+          //       id: post.id,
+          //       media_type: "photo",
+          //       images: post.attachments.data[0].media.image.src,
+          //       video: null,
+          //     },
+          //     target: post.attachments.data[0].target.url,
+          //   });
+          // } else {
+          //   console.log("video video");
+          //   postsList.push({
+          //     id: post.id,
+          //     message: post.message,
+          //     title: post.attachments.data[0].title,
+          //     isActive: true,
+          //     createdTime: post.created_time,
+          //     updatedTime: post.updated_time,
+          //     attachments: {
+          //       id: post.id,
+          //       media_type: "video",
+          //       images: null,
+          //       video: post.attachments.data[0].media.source,
+          //     },
+          //     target: post.attachments.data[0].target.url,
+          //   });
+          // }
+          
         } else if (
           post.attachments &&
           post.attachments.data[0].media_type === "link"
@@ -803,11 +839,11 @@ export async function getFacebookPostSyncData(data) {
       ) {
         postsList.push({
           id: post.id,
-          title: post.attachments.data[0].title,
           message: post.message,
+          title: post.attachments.data[0].title,
+          isActive: true,
           createdTime: post.created_time,
           updatedTime: post.updated_time,
-          isActive: true,
           attachments: {
             id: post.id,
             media_type: "video",
@@ -816,6 +852,39 @@ export async function getFacebookPostSyncData(data) {
           },
           target: post.attachments.data[0].target.url,
         });
+        // if(post.attachments.data[0].media && post.attachments.data[0].media.image) {
+        //   postsList.push({
+        //     id: post.id,
+        //     message: post.message,
+        //     title: post.attachments.data[0].title,
+        //     isActive: true,
+        //     createdTime: post.created_time,
+        //     updatedTime: post.updated_time,
+        //     attachments: {
+        //       id: post.id,
+        //       media_type: "photo",
+        //       images: post.attachments.data[0].media.image.src,
+        //       video: null,
+        //     },
+        //     target: post.attachments.data[0].target.url,
+        //   });
+        // } else {
+        //   postsList.push({
+        //     id: post.id,
+        //     message: post.message,
+        //     title: post.attachments.data[0].title,
+        //     isActive: true,
+        //     createdTime: post.created_time,
+        //     updatedTime: post.updated_time,
+        //     attachments: {
+        //       id: post.id,
+        //       media_type: "photo",
+        //       images: null,
+        //       video: post.attachments.data[0].media.source,
+        //     },
+        //     target: post.attachments.data[0].target.url,
+        //   });
+        // }
       } else if (
         post.attachments &&
         post.attachments.data[0].media_type === "link"
@@ -1573,6 +1642,7 @@ export async function insertAndUpdateSyncDataPost(
       const existedPost = await Post.findOne({ id: post.id });
       if (!existedPost) {
         const postResult = await Post.create(post);
+        console.log("insert post: ", postResult.message);
         existedPostObjIdList.push(new mongoose.Types.ObjectId(postResult._id));
         await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
       } else {
@@ -1584,28 +1654,10 @@ export async function insertAndUpdateSyncDataPost(
         await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
       }
     });
+  console.log("after loop");
 
   const result = await findOneSite(pageId);
-  console.log("result: ", result.posts.length);
-  const result2 = await Site.findOne({ id: pageId })
-    .populate({
-      path: "theme posts",
-    })
-    .populate({
-      path: "events",
-      match: { isActive: true },
-      // options: {
-      //   sort: { startTime: -1 },
-      // },
-    })
-    .populate({
-      path: "syncRecords",
-      // options: {
-      //   sort: { createdAt: -1 },
-      // },
-    });
-  console.log("result 2: ", result2.posts.length);
-  return result2;
+  return result;
 }
 
 function formatDate(date) {
@@ -1707,25 +1759,7 @@ export async function insertAndUpdateSyncDataEvents(
    
   const result = await findOneSite(pageId);
   console.log("result: ", result.events.length);
-  const result2 = await Site.findOne({ id: pageId })
-    .populate({
-      path: "theme events",
-    })
-    .populate({
-      path: "posts",
-      match: { isActive: true },
-      // options: {
-      //   sort: { startTime: -1 },
-      // },
-    })
-    .populate({
-      path: "syncRecords",
-      // options: {
-      //   sort: { createdAt: -1 },
-      // },
-    });
-  console.log("result 2: ", result2.events.length);
-  return result2;
+  return result;
 }
 
 export async function findExistedSitePath(sitepath) {
