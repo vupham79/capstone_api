@@ -234,7 +234,8 @@ export async function saveDesign(data) {
     if (data.coverURL) {
       site.cover = data.coverURL;
     }
-    site.sitePath = data.sitePath;
+    console.log("data.sitePath: ", data.sitePath);
+    site.sitePath = data.sitePath.toLowerCase();
     if (data.homepage) {
       site.homepage = data.homepage;
     }
