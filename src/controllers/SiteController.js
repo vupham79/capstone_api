@@ -482,7 +482,7 @@ export async function createNewSite(req, res) {
       sitepath === "admin" ||
       sitepath === "edit" ||
       sitepath === "view" ||
-      sitePath.match("[$&+,:;=?@#|'<>.^*()%!-/~`_]")
+      sitePath.match("[$&+,:;=?@#|'<>.^*()%!-/~`{}_]")
     ) {
       return res.status(400).send({ error: "Invalid site path" });
     }
