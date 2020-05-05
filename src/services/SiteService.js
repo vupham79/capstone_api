@@ -234,7 +234,7 @@ export async function saveDesign(data) {
     if (data.coverURL) {
       site.cover = data.coverURL;
     }
-    console.log("data.sitePath: ", data.sitePath);
+    console.log("data site path: ", data.sitePath);
     site.sitePath = data.sitePath.toLowerCase();
     if (data.homepage) {
       site.homepage = data.homepage;
@@ -1637,26 +1637,54 @@ export async function insertAndUpdateSyncDataPost(
       }
     });
 
-  //create post
-  postsList &&
-    postsList.forEach(async (post) => {
-      const existedPost = await Post.findOne({ id: post.id });
-      if (!existedPost) {
-        const postResult = await Post.create(post);
-        console.log("insert post: ", postResult.message);
-        existedPostObjIdList.push(new mongoose.Types.ObjectId(postResult._id));
-        await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
-      } else {
-        if (!existedPostIdList.includes(post.id)) {
-          existedPostObjIdList.push(
-            new mongoose.Types.ObjectId(existedPost._id)
-          );
-        }
-        await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
+    let promiseSync = await new Promise(async (resolve, reject) => {
+      try {
+        postsList &&
+        postsList.forEach(async (post) => {
+          const existedPost = await Post.findOne({ id: post.id });
+          if (!existedPost) {
+            const postResult = await Post.create(post);
+            console.log("insert post: ", postResult.message);
+            existedPostObjIdList.push(new mongoose.Types.ObjectId(postResult._id));
+            await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
+          } else {
+            if (!existedPostIdList.includes(post.id)) {
+              existedPostObjIdList.push(
+                new mongoose.Types.ObjectId(existedPost._id)
+              );
+            }
+            await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
+          }
+        });
+        console.log("inside loop");
+        setTimeout(() => {
+          resolve()
+        }, 2000);
+      } catch (error) {
+        resolve();
       }
     });
-  console.log("after loop");
+  //create post
+  // postsList &&
+  //   postsList.forEach(async (post) => {
+  //     const existedPost = await Post.findOne({ id: post.id });
+  //     if (!existedPost) {
+  //       const postResult = await Post.create(post);
+  //       console.log("insert post: ", postResult.message);
+  //       existedPostObjIdList.push(new mongoose.Types.ObjectId(postResult._id));
+  //       await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
+  //     } else {
+  //       if (!existedPostIdList.includes(post.id)) {
+  //         existedPostObjIdList.push(
+  //           new mongoose.Types.ObjectId(existedPost._id)
+  //         );
+  //       }
+  //       await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
+  //     }
+  //   });
+  // console.log("after loop");
 
+  console.log("after loop");
   const result = await findOneSite(pageId);
   return result;
 }
@@ -1737,26 +1765,56 @@ export async function insertAndUpdateSyncDataEvents(
       }
     });
 
-  //create event
-  eventList &&
-    eventList.forEach(async (event) => {
-      const existedEvent = await Event.findOne({ id: event.id });
-      if (!existedEvent) {
-        const eventResult = await Event.create(event);
-        existedEventObjIdList.push(
-          new mongoose.Types.ObjectId(eventResult._id)
-        );
-        await Site.updateOne({ id: pageId }, { events: existedEventObjIdList });
-      } else {
-        if (!existedEventIdList.includes(event.id)) {
-          existedEventIdList.push(new mongoose.Types.ObjectId(eventResult._id));
-          await Site.updateOne(
-            { id: pageId },
-            { events: existedEventObjIdList }
-          );
-        }
+    let promiseSync = await new Promise(async (resolve, reject) => {
+      try {
+        //create event
+        eventList &&
+        eventList.forEach(async (event) => {
+          const existedEvent = await Event.findOne({ id: event.id });
+          if (!existedEvent) {
+            const eventResult = await Event.create(event);
+            existedEventObjIdList.push(
+              new mongoose.Types.ObjectId(eventResult._id)
+            );
+            await Site.updateOne({ id: pageId }, { events: existedEventObjIdList });
+          } else {
+            if (!existedEventIdList.includes(event.id)) {
+              existedEventIdList.push(new mongoose.Types.ObjectId(eventResult._id));
+              await Site.updateOne(
+                { id: pageId },
+                { events: existedEventObjIdList }
+              );
+            }
+          }
+        });
+        console.log("inside loop");
+        setTimeout(() => {
+          resolve()
+        }, 2000);
+      } catch (error) {
+        resolve();
       }
     });
+  //create event
+  // eventList &&
+  //   eventList.forEach(async (event) => {
+  //     const existedEvent = await Event.findOne({ id: event.id });
+  //     if (!existedEvent) {
+  //       const eventResult = await Event.create(event);
+  //       existedEventObjIdList.push(
+  //         new mongoose.Types.ObjectId(eventResult._id)
+  //       );
+  //       await Site.updateOne({ id: pageId }, { events: existedEventObjIdList });
+  //     } else {
+  //       if (!existedEventIdList.includes(event.id)) {
+  //         existedEventIdList.push(new mongoose.Types.ObjectId(eventResult._id));
+  //         await Site.updateOne(
+  //           { id: pageId },
+  //           { events: existedEventObjIdList }
+  //         );
+  //       }
+  //     }
+  //   });
    
   const result = await findOneSite(pageId);
   console.log("result: ", result.events.length);

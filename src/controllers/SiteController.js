@@ -357,7 +357,8 @@ export async function saveDesign(req, res) {
       sitePath.length > 35 ||
       sitePath === "admin" ||
       sitePath === "edit" ||
-      sitePath === "view"
+      sitePath === "view" ||
+      sitePath.match("[$&+,:;=?@#|'<>.^*()%!-/~`_]")
     ) {
       return res.status(400).send({ error: "Invalid site path!" });
     }
@@ -480,7 +481,8 @@ export async function createNewSite(req, res) {
       sitepath.length > 35 ||
       sitepath === "admin" ||
       sitepath === "edit" ||
-      sitepath === "view"
+      sitepath === "view" ||
+      sitePath.match("[$&+,:;=?@#|'<>.^*()%!-/~`_]")
     ) {
       return res.status(400).send({ error: "Invalid site path" });
     }
