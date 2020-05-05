@@ -358,7 +358,7 @@ export async function saveDesign(req, res) {
       sitePath === "admin" ||
       sitePath === "edit" ||
       sitePath === "view" ||
-      sitePath.match("[$&+,:;=?@#|'<>.^*()%!-/~`_]")
+      sitePath.match("[$&+,:;=?@#|'<>.^*()%!-/~`{}_]")
     ) {
       return res.status(400).send({ error: "Invalid site path!" });
     }
