@@ -36,7 +36,7 @@ export async function findAllUser() {
     .select("id displayName sites picture email isActivated")
     .populate({
       path: "sites categories",
-      select: "id title categories theme sitePath isPublish phone",
+      select: "id title categories theme sitePath isPublish phone url",
       populate: {
         path: "theme",
         select: "name",
