@@ -1,4 +1,4 @@
-import { Theme, Category } from "../models";
+import { Theme, Category, Site, mongoose } from "../models";
 
 export async function insertTheme(body) {
   const themeResult = await Theme.findOne({ name: body.name });
@@ -62,5 +62,11 @@ export async function findOneTheme(id) {
 }
 
 export async function deleteTheme(id) {
-  return await Theme.updateOne({ _id: id }, { isDeleted: true });
+  const deletedTheme = await Theme.updateOne({ _id: id }, { isDeleted: true });
+  const theme = await Theme.findOne({ isDeleted: false });
+  await Site.updateMany(
+    { theme: mongoose.Types.ObjectId(id) },
+    { theme: theme }
+  );
+  return deletedTheme;
 }

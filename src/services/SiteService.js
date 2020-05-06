@@ -664,7 +664,6 @@ export async function getFacebookPostData(
           //     target: post.attachments.data[0].target.url,
           //   });
           // }
-          
         } else if (
           post.attachments &&
           post.attachments.data[0].media_type === "link"
@@ -1638,12 +1637,11 @@ export async function insertAndUpdateSyncDataPost(
     });
 
   // create post
-  postsList &&
-    postsList.forEach(async (post) => {
+  if (postsList) {
+    for (const post of postsList) {
       const existedPost = await Post.findOne({ id: post.id });
       if (!existedPost) {
-        const postResult = await Post.create(post);
-        console.log("insert post: ", postResult.message);
+        const postResult = await createPost(post);
         existedPostObjIdList.push(new mongoose.Types.ObjectId(postResult._id));
         await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
       } else {
@@ -1654,12 +1652,36 @@ export async function insertAndUpdateSyncDataPost(
         }
         await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
       }
-    });
-  console.log("after loop");
-
-  console.log("after loop");
+    }
+  }
+  // postsList &&
+  //   postsList.forEach(async (post) => {
+  //     const existedPost = await Post.findOne({ id: post.id });
+  //     if (!existedPost) {
+  //       const postResult = await Post.create(post);
+  //       console.log("insert post: ", postResult.message);
+  //       existedPostObjIdList.push(new mongoose.Types.ObjectId(postResult._id));
+  //       await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
+  //     } else {
+  //       if (!existedPostIdList.includes(post.id)) {
+  //         existedPostObjIdList.push(
+  //           new mongoose.Types.ObjectId(existedPost._id)
+  //         );
+  //       }
+  //       await Site.updateOne({ id: pageId }, { posts: existedPostObjIdList });
+  //     }
+  //   });
   const result = await findOneSite(pageId);
   return result;
+}
+
+function createPost(post) {
+  return new Promise((resolve) => {
+    setTimeout(async () => {
+      const postResult = await Post.create(post);
+      resolve(postResult);
+    }, 500);
+  });
 }
 
 function formatDate(date) {
@@ -1739,11 +1761,11 @@ export async function insertAndUpdateSyncDataEvents(
     });
 
   //create event
-  eventList &&
-    eventList.forEach(async (event) => {
+  if (eventList) {
+    for (const event of eventList) {
       const existedEvent = await Event.findOne({ id: event.id });
       if (!existedEvent) {
-        const eventResult = await Event.create(event);
+        const eventResult = await createEvent(event);
         existedEventObjIdList.push(
           new mongoose.Types.ObjectId(eventResult._id)
         );
@@ -1757,11 +1779,41 @@ export async function insertAndUpdateSyncDataEvents(
           );
         }
       }
-    });
-   
+    }
+  }
+
+  // eventList &&
+  //   eventList.forEach(async (event) => {
+  //     const existedEvent = await Event.findOne({ id: event.id });
+  //     if (!existedEvent) {
+  //       const eventResult = await Event.create(event);
+  //       existedEventObjIdList.push(
+  //         new mongoose.Types.ObjectId(eventResult._id)
+  //       );
+  //       await Site.updateOne({ id: pageId }, { events: existedEventObjIdList });
+  //     } else {
+  //       if (!existedEventIdList.includes(event.id)) {
+  //         existedEventIdList.push(new mongoose.Types.ObjectId(eventResult._id));
+  //         await Site.updateOne(
+  //           { id: pageId },
+  //           { events: existedEventObjIdList }
+  //         );
+  //       }
+  //     }
+  //   });
+
   const result = await findOneSite(pageId);
-  console.log("result: ", result.events.length);
+  // console.log("result: ", result.events.length);
   return result;
+}
+
+function createEvent(event) {
+  return new Promise((resolve) => {
+    setTimeout(async () => {
+      const eventResult = await Event.create(event);
+      resolve(eventResult);
+    }, 500);
+  });
 }
 
 export async function findExistedSitePath(sitepath) {
@@ -1965,7 +2017,7 @@ export function filterEvent(eventList, filterEventTitle = "") {
     filterEventTitle === undefined ||
     filterEventTitle.replace(/\s/g, "") === ""
   ) {
-    filteredEventList = eventList;
+    return eventList;
   } else {
     eventList.forEach((event) => {
       if (
@@ -1975,7 +2027,6 @@ export function filterEvent(eventList, filterEventTitle = "") {
         filteredEventList.push(event);
       }
     });
+    return filteredEventList;
   }
-  // console.log("filteredEventList: ", filteredEventList);
-  return filteredEventList;
 }
