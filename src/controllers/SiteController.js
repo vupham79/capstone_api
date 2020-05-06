@@ -169,6 +169,7 @@ export async function findAll(req, res) {
               picture: user.picture,
               email: user.email,
               isActivated: user.isActivated,
+              url: site.url,
             });
           });
       });
@@ -1252,10 +1253,10 @@ export async function syncData(req, res) {
               await record.update({
                 status: true,
               });
-              if(!syncDataResult) {
+              if (!syncDataResult) {
                 syncDataResult = await SiteService.findOneSite(pageId);
               }
-              
+
               return res.status(200).send(syncDataResult);
               // } else {
               // return res.status(400).send({ error: "Edit failed!" });
