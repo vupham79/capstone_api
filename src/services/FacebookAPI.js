@@ -85,6 +85,7 @@ export async function getSyncData({ pageId, accessToken }) {
     },
     url: process.env.facebookAPI + pageId,
   });
+  data.data.page_about_story = page_about_story;
   return data.data;
 }
 
