@@ -943,7 +943,6 @@ export async function syncEvent(req, res) {
   try {
     let eventList = [];
     const { pageId, dateFrom, dateTo, eventContainTitle } = req.body;
-    console.log(eventContainTitle);
     const data = await getSyncEvent({
       pageId: pageId,
       accessToken: req.user.accessToken,

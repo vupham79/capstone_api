@@ -433,12 +433,14 @@ export async function getFacebookPostData(
     data.posts &&
       data.posts.data &&
       data.posts.data.forEach(async (post) => {
-        if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
-          console.log(
-            post.created_time,
-            moment(post.created_time).isBetween(dateFrom, dateTo),
-            dateFrom
-          );
+        if (
+          moment(formatDate(post.created_time)).isBetween(
+            formatDate(dateFrom),
+            formatDate(dateTo),
+            null,
+            "[]"
+          )
+        ) {
           if (!post.attachments || post.attachments === undefined) {
             if (
               !post.message ||
@@ -712,8 +714,14 @@ export async function getFacebookGalleryData(
     data.posts &&
       data.posts.data &&
       data.posts.data.forEach(async (post) => {
-        if (moment(post.created_time).isBetween(dateFrom, dateTo)) {
-          console.log(post.created_time);
+        if (
+          moment(formatDate(post.created_time)).isBetween(
+            formatDate(dateFrom),
+            formatDate(dateTo),
+            null,
+            "[]"
+          )
+        ) {
           if (
             post.attachments &&
             post.attachments.data[0].media_type === "album"
@@ -906,9 +914,6 @@ export async function getFacebookPostSyncData(data) {
           },
           target: post.attachments.data[0].target.url,
         });
-        console.log(post);
-        console.log(post.attachments.data);
-        console.log(post.attachments.data[0].media.image);
       }
     });
   return postsList;
@@ -923,19 +928,24 @@ export async function getFacebookEventData(
   if (!data.events) {
     return null;
   }
-  let dateFromTime = dateFrom;
-  if (dateFrom === undefined) {
-    dateFromTime = null;
-  }
-  let dateToTime = dateTo;
-  if (dateTo === undefined) {
-    dateToTime = null;
-  }
-  if (moment(dateFromTime).isValid() && moment(dateFromTime).isValid()) {
+  if (moment(dateFrom).isValid() && moment(dateTo).isValid()) {
     data.events &&
       data.events.data &&
       data.events.data.forEach((event) => {
-        if (moment(event.start_time).isBetween(dateFrom, dateTo)) {
+        if (
+          moment(formatDate(event.start_time)).isBetween(
+            formatDate(dateFrom),
+            formatDate(dateTo),
+            null,
+            "[]"
+          ) ||
+          moment(formatDate(event.end_time)).isBetween(
+            formatDate(dateFrom),
+            formatDate(dateTo),
+            null,
+            "[]"
+          )
+        ) {
           console.log("Matching start time: ", event.start_time, event.name);
           //set place
           let place = {
@@ -1625,9 +1635,11 @@ export async function insertAndUpdateSyncDataPost(
           if (
             dateFrom &&
             dateTo &&
-            moment(existedPost.createdTime).isBetween(
+            moment(formatDate(existedPost.createdTime)).isBetween(
               formatDate(dateFrom),
-              formatDate(dateTo)
+              formatDate(dateTo),
+              null,
+              "[]"
             )
           ) {
             await Post.updateOne({ id: existedPost.id }, { isActive: false });
@@ -1745,13 +1757,17 @@ export async function insertAndUpdateSyncDataEvents(
           if (
             dateFrom &&
             dateTo &&
-            (moment(existedEvent.startTime).isBetween(
+            (moment(formatDate(existedEvent.startTime)).isBetween(
               formatDate(dateFrom),
-              formatDate(dateTo)
+              formatDate(dateTo),
+              null,
+              "[]"
             ) ||
-              moment(existedEvent.endTime).isBetween(
+              moment(formatDate(existedEvent.endTime)).isBetween(
                 formatDate(dateFrom),
-                formatDate(dateTo)
+                formatDate(dateTo),
+                null,
+                "[]"
               ))
           ) {
             await Event.updateOne({ id: existedEvent.id }, { isActive: false });
