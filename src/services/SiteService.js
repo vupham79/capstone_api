@@ -162,7 +162,7 @@ export async function findAllSiteByUser(email) {
 }
 
 export async function findSiteBySitepath(sitepath) {
-  return await Site.findOne({ sitePath: sitepath.toLowerCase() })
+  let findSite = await Site.findOne({ sitePath: sitepath.toLowerCase() })
     .select(
       "id phone longitude latitude color " +
         "logo fontTitle fontBody title address " +
@@ -172,6 +172,31 @@ export async function findSiteBySitepath(sitepath) {
         " story limitNews limitGallery limitEvent"
     )
     .populate("theme");
+  let mode = findSite.showDetailSetting.showPostMode;
+  let latestNews = await Site.find({ sitePath: sitepath.toLowerCase() })
+    .select("posts")
+    .populate({
+      path: "posts",
+      match:
+        mode === 0
+          ? { isActive: true }
+          : mode === 1
+          ? {
+              isActive: true,
+              "attachments.media_type": ["photo", "album"],
+            }
+          : mode === 2
+          ? { isActive: true, "attachments.media_type": "video" }
+          : mode === 3
+          ? { isActive: true, attachments: null }
+          : { isActive: true },
+      options: { limit: 3, sort: { createdTime: -1 } },
+    });
+  findSite.latestNews = latestNews[0].posts;
+  return {
+    ...findSite._doc,
+    latestNews: latestNews[0].posts,
+  };
 }
 
 export async function checkSiteExist(id) {
