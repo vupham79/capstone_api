@@ -354,8 +354,8 @@ export async function saveDesign(req, res) {
     if (
       !sitePath ||
       sitePath === undefined ||
-      sitepath.includes(" ") ||
-      sitepath.trim().length < 3 ||
+      sitePath.includes(" ") ||
+      sitePath.trim().length < 3 ||
       sitePath.replace(/\s/g, "") === "" ||
       sitePath.length > 35 ||
       sitePath === "admin" ||
