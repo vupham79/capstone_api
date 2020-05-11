@@ -507,7 +507,7 @@ export async function getFacebookPostData(
                 images: subAttachmentList,
                 video: null,
               },
-              target: post.attachments.data[0].target.url,
+              target: post.attachments.data[0].target && post.attachments.data[0].target.url,
             });
           } else if (
             post.attachments &&
@@ -526,7 +526,7 @@ export async function getFacebookPostData(
                 images: [post.attachments.data[0].media.image.src],
                 video: null,
               },
-              target: post.attachments.data[0].target.url,
+              target: post.attachments.data[0].target && post.attachments.data[0].target.url,
             });
           } else if (
             post.attachments &&
@@ -550,29 +550,32 @@ export async function getFacebookPostData(
                 images: post.attachments.data[0].media && [post.attachments.data[0].media.image.src],
                 video: videoSource,
               },
-              target: post.attachments.data[0].target.url,
+              target: post.attachments.data[0].target && post.attachments.data[0].target.url,
             });
           } else if (
             post.attachments &&
             post.attachments.data[0].media_type === "link"
           ) {
-            postsList.push({
-              id: post.id,
-              message: post.message,
-              title: post.attachments.data[0].title,
-              isActive: true,
-              createdTime: post.created_time,
-              updatedTime: post.updated_time,
-              attachments: {
+            if(post.attachments.data[0].title === "This content isn't available right now") {
+            } else {
+              postsList.push({
                 id: post.id,
-                media_type: "photo",
-                images: post.attachments.data[0].media && [
-                  post.attachments.data[0].media.image.src,
-                ],
-                video: null,
-              },
-              target: post.attachments.data[0].target.url,
-            });
+                message: post.message,
+                title: post.attachments.data[0].title,
+                isActive: true,
+                createdTime: post.created_time,
+                updatedTime: post.updated_time,
+                attachments: {
+                  id: post.id,
+                  media_type: "photo",
+                  images: post.attachments.data[0].media && [
+                    post.attachments.data[0].media.image.src,
+                  ],
+                  video: null,
+                },
+                target: post.attachments.data[0].target && post.attachments.data[0].target.url,
+              });
+            }
           }
         }
       });
@@ -586,7 +589,9 @@ export async function getFacebookPostData(
             post.message === undefined ||
             post.message.replace(/\s/g, "") === ""
           ) {
+            console.log("post undefined: ", post.attachments);
           } else {
+            console.log("post no attachment: ", post.attachments);
             postsList.push({
               id: post.id,
               title: null,
@@ -621,7 +626,7 @@ export async function getFacebookPostData(
               images: subAttachmentList,
               video: null,
             },
-            target: post.attachments.data[0].target.url,
+            target: post.attachments.data[0].target && post.attachments.data[0].target.url,
           });
         } else if (
           post.attachments &&
@@ -640,7 +645,7 @@ export async function getFacebookPostData(
               images: [post.attachments.data[0].media.image.src],
               video: null,
             },
-            target: post.attachments.data[0].target.url,
+            target: post.attachments.data[0].target && post.attachments.data[0].target.url,
           });
         } else if (
           post.attachments &&
@@ -664,7 +669,7 @@ export async function getFacebookPostData(
               images: post.attachments.data[0].media && [post.attachments.data[0].media.image.src],
               video: videoSource,
             },
-            target: post.attachments.data[0].target.url,
+            target: post.attachments.data[0].target && post.attachments.data[0].target.url,
           });
           // if(post.attachments.data[0].media && post.attachments.data[0].media.image) {
           //   console.log("image video");
@@ -705,23 +710,26 @@ export async function getFacebookPostData(
           post.attachments &&
           post.attachments.data[0].media_type === "link"
         ) {
-          postsList.push({
-            id: post.id,
-            message: post.message,
-            title: post.attachments.data[0].title,
-            isActive: true,
-            createdTime: post.created_time,
-            updatedTime: post.updated_time,
-            attachments: {
+          if(post.attachments.data[0].title === "This content isn't available right now") {
+          } else {
+            postsList.push({
               id: post.id,
-              media_type: "photo",
-              images: post.attachments.data[0].media && [
-                post.attachments.data[0].media.image.src,
-              ],
-              video: null,
-            },
-            target: post.attachments.data[0].target.url,
-          });
+              message: post.message,
+              title: post.attachments.data[0].title,
+              isActive: true,
+              createdTime: post.created_time,
+              updatedTime: post.updated_time,
+              attachments: {
+                id: post.id,
+                media_type: "photo",
+                images: post.attachments.data[0].media && [
+                  post.attachments.data[0].media.image.src,
+                ],
+                video: null,
+              },
+              target: post.attachments.data[0].target && post.attachments.data[0].target.url,
+            });
+          }
         }
       });
   }
@@ -855,7 +863,7 @@ export async function getFacebookPostSyncData(data) {
             images: subAttachmentList,
             video: null,
           },
-          target: post.attachments.data[0].target.url,
+          target: post.attachments.data[0].target && post.attachments.data[0].target.url,
         });
       } else if (
         post.attachments &&
@@ -874,7 +882,7 @@ export async function getFacebookPostSyncData(data) {
             images: [post.attachments.data[0].media.image.src],
             video: null,
           },
-          target: post.attachments.data[0].target.url,
+          target: post.attachments.data[0].target && post.attachments.data[0].target.url,
         });
       } else if (
         post.attachments &&
@@ -898,7 +906,7 @@ export async function getFacebookPostSyncData(data) {
             images: post.attachments.data[0].media && [post.attachments.data[0].media.image.src],
             video: videoSource,
           },
-          target: post.attachments.data[0].target.url,
+          target: post.attachments.data[0].target && post.attachments.data[0].target.url,
         });   
         // if(post.attachments.data[0].media && post.attachments.data[0].media.image) {
         //   postsList.push({
@@ -937,23 +945,26 @@ export async function getFacebookPostSyncData(data) {
         post.attachments &&
         post.attachments.data[0].media_type === "link"
       ) {
-        postsList.push({
-          id: post.id,
-          message: post.message,
-          title: post.attachments.data[0].title,
-          isActive: true,
-          createdTime: post.created_time,
-          updatedTime: post.updated_time,
-          attachments: {
+        if(post.attachments.data[0].title === "This content isn't available right now") {
+        } else {
+          postsList.push({
             id: post.id,
-            media_type: "photo",
-            images: post.attachments.data[0].media && [
-              post.attachments.data[0].media.image.src,
-            ],
-            video: null,
-          },
-          target: post.attachments.data[0].target.url,
-        });
+            message: post.message,
+            title: post.attachments.data[0].title,
+            isActive: true,
+            createdTime: post.created_time,
+            updatedTime: post.updated_time,
+            attachments: {
+              id: post.id,
+              media_type: "photo",
+              images: post.attachments.data[0].media && [
+                post.attachments.data[0].media.image.src,
+              ],
+              video: null,
+            },
+            target: post.attachments.data[0].target && post.attachments.data[0].target.url,
+          });
+        }
       }
     });
   return postsList;
