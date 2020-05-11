@@ -532,6 +532,11 @@ export async function getFacebookPostData(
             post.attachments &&
             post.attachments.data[0].media_type === "video"
           ) {
+            let videoSource = post.attachments.data[0].media.source;
+            if(post.attachments && post.attachments.data[0].media && 
+              post.attachments.data[0].media.source === undefined) {
+                videoSource = null;
+                } 
             postsList.push({
               id: post.id,
               message: post.message,
@@ -542,8 +547,8 @@ export async function getFacebookPostData(
               attachments: {
                 id: post.id,
                 media_type: "video",
-                images: null,
-                video: post.attachments.data[0].media.source,
+                images: post.attachments.data[0].media && [post.attachments.data[0].media.image.src],
+                video: videoSource,
               },
               target: post.attachments.data[0].target.url,
             });
@@ -641,6 +646,11 @@ export async function getFacebookPostData(
           post.attachments &&
           post.attachments.data[0].media_type === "video"
         ) {
+          let videoSource = post.attachments.data[0].media.source;
+          if(post.attachments && post.attachments.data[0].media && 
+            post.attachments.data[0].media.source === undefined) {
+              videoSource = null;
+          } 
           postsList.push({
             id: post.id,
             message: post.message,
@@ -651,8 +661,8 @@ export async function getFacebookPostData(
             attachments: {
               id: post.id,
               media_type: "video",
-              images: null,
-              video: post.attachments.data[0].media.source,
+              images: post.attachments.data[0].media && [post.attachments.data[0].media.image.src],
+              video: videoSource,
             },
             target: post.attachments.data[0].target.url,
           });
@@ -870,6 +880,11 @@ export async function getFacebookPostSyncData(data) {
         post.attachments &&
         post.attachments.data[0].media_type === "video"
       ) {
+        let videoSource = post.attachments.data[0].media.source;
+        if(post.attachments && post.attachments.data[0].media && 
+          post.attachments.data[0].media.source === undefined) {
+            videoSource = null;
+        } 
         postsList.push({
           id: post.id,
           message: post.message,
@@ -880,11 +895,11 @@ export async function getFacebookPostSyncData(data) {
           attachments: {
             id: post.id,
             media_type: "video",
-            images: null,
-            video: post.attachments.data[0].media.source,
+            images: post.attachments.data[0].media && [post.attachments.data[0].media.image.src],
+            video: videoSource,
           },
           target: post.attachments.data[0].target.url,
-        });
+        });   
         // if(post.attachments.data[0].media && post.attachments.data[0].media.image) {
         //   postsList.push({
         //     id: post.id,
