@@ -219,6 +219,16 @@ export async function saveDesign(data) {
     id: data.pageId,
   });
   if (site) {
+    if (site.sitePath !== data.sitePath.trim()) {
+      const sitePathExisting = await Site.findOne({
+        sitePath: data.sitePath.trim(),
+      });
+      if (!sitePathExisting) {
+        site.sitePath = data.sitePath.toLowerCase();
+      } else {
+        return { msg: "Sitepath existed!" };
+      }
+    }
     site.fontTitle = data.fontTitle;
     site.fontBody = data.fontBody;
     site.title = data.name;
@@ -259,24 +269,23 @@ export async function saveDesign(data) {
     if (data.coverURL) {
       site.cover = data.coverURL;
     }
-    console.log("data site path: ", data.sitePath);
-    site.sitePath = data.sitePath.toLowerCase();
     if (data.homepage) {
       site.homepage = data.homepage;
     }
-    if (site.sitePath !== data.sitePath.trim()) {
-      const sitePathExisting = await Site.findOne({
-        sitePath: data.sitePath.trim(),
-      });
-
-      if (!sitePathExisting) {
+    // if (site.sitePath !== data.sitePath.trim()) {
+    //   const sitePathExisting = await Site.findOne({
+    //     sitePath: data.sitePath.trim(),
+    //   });
+    //   if (!sitePathExisting) {
+    //     site.sitePath = data.sitePath.toLowerCase();
         return await site.save();
-      } else {
-        return { msg: "Design saved but not sitepath because existed!" };
-      }
-    } else {
-      return await site.save();
-    }
+  
+    //   } else {
+    //     return { msg: "Design saved but not sitepath because existed!" };
+    //   }
+    // } else {
+    //   return await site.save();
+    // }
   } else {
     return { msg: "Site not existed!" };
   }
