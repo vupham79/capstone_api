@@ -21,42 +21,54 @@ export async function getUserPages(accessToken) {
 }
 
 export async function getSyncEvent({ pageId, accessToken }) {
-  const data = await axios({
-    params: {
-      fields:
-        "events.limit(1000){id,name,description,place,is_canceled,end_time,start_time,cover}",
-      locale: "en_US",
-      access_token: accessToken,
-    },
-    url: process.env.facebookAPI + pageId,
-  });
-  return data.data;
+  try {
+    const data = await axios({
+      params: {
+        fields:
+          "events.limit(1000){id,name,description,place,is_canceled,end_time,start_time,cover}",
+        locale: "en_US",
+        access_token: accessToken,
+      },
+      url: process.env.facebookAPI + pageId,
+    });
+    return data.data;
+  } catch (error) {
+    return null;
+  }
 }
 
 export async function getSyncPost({ pageId, accessToken }) {
-  const data = await axios({
-    params: {
-      fields:
-        "posts.limit(1000){message,created_time,updated_time,attachments{title,media_type,subattachments,media,target}}",
-      locale: "en_US",
-      access_token: accessToken,
-    },
-    url: process.env.facebookAPI + pageId,
-  });
-  return data.data;
+  try {
+    const data = await axios({
+      params: {
+        fields:
+          "posts.limit(1000){message,created_time,updated_time,attachments{title,media_type,subattachments,media,target}}",
+        locale: "en_US",
+        access_token: accessToken,
+      },
+      url: process.env.facebookAPI + pageId,
+    });
+    return data.data;
+  } catch (error) {
+    return null;
+  }
 }
 
 export async function getSyncGallery({ pageId, accessToken }) {
-  const data = await axios({
-    params: {
-      fields:
-        "posts.limit(1000){message,created_time,updated_time,attachments{title,media_type,subattachments,media,target}}",
-      locale: "en_US",
-      access_token: accessToken,
-    },
-    url: process.env.facebookAPI + pageId,
-  });
-  return data.data;
+  try {
+    const data = await axios({
+      params: {
+        fields:
+          "posts.limit(1000){message,created_time,updated_time,attachments{title,media_type,subattachments,media,target}}",
+        locale: "en_US",
+        access_token: accessToken,
+      },
+      url: process.env.facebookAPI + pageId,
+    });
+    return data.data;
+  } catch (error) {
+    return null;
+  }
 }
 
 export async function getSyncData({ pageId, accessToken }) {
@@ -73,20 +85,24 @@ export async function getSyncData({ pageId, accessToken }) {
       page_about_story = data.data.page_about_story;
     }
   } catch (error) {}
-  const data = await axios({
-    params: {
-      fields:
-        "category_list,location,single_line_address,phone,about," +
-        "albums{picture,link}," +
-        "posts.limit(1000){message,created_time,updated_time,attachments{title,media_type,subattachments,media,target}}," +
-        "events.limit(1000){id,name,description,place,is_canceled,end_time,start_time,cover}",
-      locale: "en_US",
-      access_token: accessToken,
-    },
-    url: process.env.facebookAPI + pageId,
-  });
-  data.data.page_about_story = page_about_story;
-  return data.data;
+  try {
+    const data = await axios({
+      params: {
+        fields:
+          "category_list,location,single_line_address,phone,about," +
+          "albums{picture,link}," +
+          "posts.limit(1000){message,created_time,updated_time,attachments{title,media_type,subattachments,media,target}}," +
+          "events.limit(1000){id,name,description,place,is_canceled,end_time,start_time,cover}",
+        locale: "en_US",
+        access_token: accessToken,
+      },
+      url: process.env.facebookAPI + pageId,
+    });
+    data.data.page_about_story = page_about_story;
+    return data.data;
+  } catch (error) {
+    return null;
+  }
 }
 
 export async function getPageData({ pageId, accessToken }) {
@@ -103,37 +119,41 @@ export async function getPageData({ pageId, accessToken }) {
       page_about_story = data.data.page_about_story;
     }
   } catch (error) {}
-  const data = await axios({
-    params: {
-      fields:
-        "name,cover,phone,category_list,about," +
-        "location,single_line_address,albums{picture,link}," +
-        "posts.limit(1000){message,created_time,updated_time,attachments{title,media_type,subattachments,media,target}}," +
-        "events.limit(1000){id,name,description,place,is_canceled,end_time,start_time,cover}",
-      locale: "en_US",
-      access_token: accessToken,
-    },
-    url: process.env.facebookAPI + pageId,
-  });
-  const logo = await axios({
-    params: {
-      access_token: accessToken,
-    },
-    url: process.env.facebookAPI + pageId + "/picture?height=9999&redirect=0",
-  });
-  let cover = null;
-  if (data.data.cover) {
-    cover = await axios({
+  try {
+    const data = await axios({
+      params: {
+        fields:
+          "name,cover,phone,category_list,about," +
+          "location,single_line_address,albums{picture,link}," +
+          "posts.limit(1000){message,created_time,updated_time,attachments{title,media_type,subattachments,media,target}}," +
+          "events.limit(1000){id,name,description,place,is_canceled,end_time,start_time,cover}",
+        locale: "en_US",
+        access_token: accessToken,
+      },
+      url: process.env.facebookAPI + pageId,
+    });
+    const logo = await axios({
       params: {
         access_token: accessToken,
-        fields: "images",
       },
-      url: process.env.facebookAPI + data.data.cover.id,
+      url: process.env.facebookAPI + pageId + "/picture?height=9999&redirect=0",
     });
+    let cover = null;
+    if (data.data.cover) {
+      cover = await axios({
+        params: {
+          access_token: accessToken,
+          fields: "images",
+        },
+        url: process.env.facebookAPI + data.data.cover.id,
+      });
+    }
+    return {
+      data: { ...data.data, page_about_story },
+      logo: logo.data.data.url,
+      cover: cover ? cover.data.images[0].source : null,
+    };
+  } catch (error) {
+    return null;
   }
-  return {
-    data: { ...data.data, page_about_story },
-    logo: logo.data.data.url,
-    cover: cover ? cover.data.images[0].source : null,
-  };
 }
