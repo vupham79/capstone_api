@@ -952,7 +952,6 @@ export async function syncEvent(req, res) {
       accessToken: req.user.accessToken,
     });
     console.log("Req Body: ", req.body);
-    console.log("Get sync event data: ", data.events.data.length);
     if (data) {
       //event list
       eventList = await SiteService.getFacebookEventData(
@@ -960,7 +959,6 @@ export async function syncEvent(req, res) {
         dateFrom,
         dateTo
       );
-      console.log("Event list length: ", eventList.length);
       if (!eventList) {
         return res
           .status(200)
@@ -1318,7 +1316,7 @@ export async function autoSyncData(
                 email,
                 phone,
               });
-              if (data.post) {
+              if (data.posts) {
                 //gallery list
                 galleryList = await SiteService.getFacebookGalleryData(data);
                 galleryList &&
@@ -1330,6 +1328,7 @@ export async function autoSyncData(
                         }
                       });
                   });
+                  //ừ chỗ này nếu đúng là n*m vì galleryList và siteExist.galleries khác nhau về số vong lặp
                 //update galleries
                 await SiteService.updateGallery(pageId, galleryList);
                 //post list
@@ -1449,18 +1448,18 @@ export async function updateCover(req, res) {
   }
 }
 
-export async function updateFavicon(req, res) {
-  const { favicon, id } = req.body;
-  try {
-    const update = await SiteService.updateFavicon(id, favicon);
-    if (update) {
-      return res.status(200).send(update);
-    }
-    return res.status(400).send({ error: "Action failed!" });
-  } catch (error) {
-    return res.status(400).send({ error });
-  }
-}
+// export async function updateFavicon(req, res) {
+//   const { favicon, id } = req.body;
+//   try {
+//     const update = await SiteService.updateFavicon(id, favicon);
+//     if (update) {
+//       return res.status(200).send(update);
+//     }
+//     return res.status(400).send({ error: "Action failed!" });
+//   } catch (error) {
+//     return res.status(400).send({ error });
+//   }
+// }
 
 export async function findSiteDataByTab(req, res) {
   const { id, page, pageNumber, sitePath } = req.query;
