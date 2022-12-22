@@ -27,7 +27,7 @@
     "express": "^4.17.1",
     "firebase": "^7.14.2",
     "firebase-admin": "^8.9.2",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "moment": "^2.24.0",
     "mongoose": "^5.8.6",
     "nodemailer": "^6.4.6",
